@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Mon profil</h2>
+    <p style="color:#888; text-transform: capitalize;">Rôle : {{ utilisateur.role }}</p>
+
+    <form method="POST">
+        <label>Nom</label>
+        <input type="text" name="nom" value="{{ utilisateur.nom }}" required>
+
+        <label>Email</label>
+        <input type="email" name="email" value="{{ utilisateur.email }}" required>
+
+        <label>Nouveau mot de passe (laisser vide pour ne pas le changer)</label>
+        <input type="password" name="nouveau_mot_de_passe" placeholder="Nouveau mot de passe">
+
+        <label>Mot de passe actuel (requis pour confirmer)</label>
+        <input type="password" name="mot_de_passe_actuel" placeholder="Ton mot de passe actuel" required>
+
+        <button type="submit">Enregistrer les modifications</button>
+    </form>
+{% endblock %}

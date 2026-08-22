@@ -172,6 +172,7 @@
         <nav>
             <a href="{{ url_for('accueil') }}">Accueil</a>
             {% if session.get('utilisateur_id') %}
+                <a href="{{ url_for('mon_profil') }}">Mon profil</a>
                 <a href="{{ url_for('deconnexion') }}">Déconnexion</a>
             {% else %}
                 <a href="{{ url_for('connexion') }}">Connexion</a>

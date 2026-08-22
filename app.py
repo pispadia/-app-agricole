@@ -114,6 +114,54 @@ def utilisateur_connecte():
     return "utilisateur_id" in session
 
 
+@app.route("/mon-profil", methods=["GET", "POST"])
+def mon_profil():
+    if not utilisateur_connecte():
+        return redirect(url_for("connexion"))
+
+    connexion_bd = get_connexion()
+    utilisateur = connexion_bd.execute(
+        "SELECT * FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)
+    ).fetchone()
+
+    if request.method == "POST":
+        nom = request.form["nom"]
+        email = request.form["email"]
+        mot_de_passe_actuel = request.form.get("mot_de_passe_actuel", "")
+        nouveau_mot_de_passe = request.form.get("nouveau_mot_de_passe", "").strip()
+
+        # Le mot de passe actuel est toujours requis pour confirmer un changement
+        if not check_password_hash(utilisateur["mot_de_passe"], mot_de_passe_actuel):
+            connexion_bd.close()
+            flash("Mot de passe actuel incorrect.")
+            return redirect(url_for("mon_profil"))
+
+        if nouveau_mot_de_passe:
+            mot_de_passe_a_enregistrer = generate_password_hash(nouveau_mot_de_passe)
+        else:
+            mot_de_passe_a_enregistrer = utilisateur["mot_de_passe"]
+
+        try:
+            connexion_bd.execute(
+                "UPDATE utilisateurs SET nom = ?, email = ?, mot_de_passe = ? WHERE id = ?",
+                (nom, email, mot_de_passe_a_enregistrer, session["utilisateur_id"])
+            )
+            connexion_bd.commit()
+        except Exception:
+            connexion_bd.rollback()
+            connexion_bd.close()
+            flash("Cet email est déjà utilisé par un autre compte.")
+            return redirect(url_for("mon_profil"))
+
+        connexion_bd.close()
+        session["nom"] = nom
+        flash("Profil mis à jour avec succès.")
+        return redirect(url_for("mon_profil"))
+
+    connexion_bd.close()
+    return render_template("mon_profil.html", utilisateur=utilisateur)
+
+
 @app.route("/espace-client")
 def espace_client():
     if not utilisateur_connecte() or session["role"] != "client":
