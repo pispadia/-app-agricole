@@ -25,7 +25,7 @@
         {% for produit in produits %}
             <div class="carte-recolte">
                 {% if produit.photo %}
-                    <img src="{{ url_for('static', filename='uploads/' + produit.photo) }}" alt="{{ produit.nom }}">
+                    <img src="{{ produit.photo }}" alt="{{ produit.nom }}">
                 {% endif %}
                 <div>
                     <strong>{{ produit.nom }}</strong>

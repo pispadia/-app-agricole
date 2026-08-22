@@ -27,7 +27,7 @@
 
         <label>Remplacer la photo (optionnel)</label>
         {% if produit.photo %}
-            <img src="{{ url_for('static', filename='uploads/' + produit.photo) }}" style="max-width:100px; display:block; margin-bottom:8px; border-radius:5px;">
+            <img src="{{ produit.photo }}" style="max-width:100px; display:block; margin-bottom:8px; border-radius:5px;">
         {% endif %}
         <input type="file" name="photo" accept="image/*">
 

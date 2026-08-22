@@ -22,7 +22,7 @@
         {% for recolte in recoltes %}
             <div class="carte-recolte">
                 {% if recolte.photo %}
-                    <img src="{{ url_for('static', filename='uploads/' + recolte.photo) }}" alt="{{ recolte.nom }}">
+                    <img src="{{ recolte.photo }}" alt="{{ recolte.nom }}">
                 {% endif %}
                 <div>
                     <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}<br>

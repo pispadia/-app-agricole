@@ -1,21 +1,41 @@
 import os
+import base64
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from database import get_connexion, init_db
 
 app = Flask(__name__)
 app.secret_key = "change-cette-cle-plus-tard"  # nécessaire pour utiliser les sessions
 
-DOSSIER_UPLOADS = os.path.join("static", "uploads")
-os.makedirs(DOSSIER_UPLOADS, exist_ok=True)
 EXTENSIONS_AUTORISEES = {"png", "jpg", "jpeg", "webp"}
+TAILLE_MAX_PHOTO = 2 * 1024 * 1024  # 2 Mo, pour garder la base de données légère
 
 init_db()
 
 
 def extension_autorisee(nom_fichier):
     return "." in nom_fichier and nom_fichier.rsplit(".", 1)[1].lower() in EXTENSIONS_AUTORISEES
+
+
+def encoder_photo(fichier):
+    """
+    Encode une photo envoyée en formulaire directement en base64 pour la stocker
+    dans la base de données (au lieu du disque, qui n'est pas permanent en ligne).
+    Retourne une chaîne "data:image/...;base64,...." prête à être utilisée dans un
+    attribut src d'image, ou None si aucune photo valide n'a été envoyée.
+    """
+    if not fichier or not fichier.filename or not extension_autorisee(fichier.filename):
+        return None
+
+    contenu = fichier.read()
+    if len(contenu) > TAILLE_MAX_PHOTO:
+        flash("La photo est trop volumineuse (2 Mo maximum) et n'a pas été enregistrée.")
+        return None
+
+    extension = fichier.filename.rsplit(".", 1)[1].lower()
+    type_mime = "image/jpeg" if extension in ("jpg", "jpeg") else f"image/{extension}"
+    photo_base64 = base64.b64encode(contenu).decode("utf-8")
+    return f"data:{type_mime};base64,{photo_base64}"
 
 
 @app.route("/")
@@ -299,11 +319,8 @@ def nouvelle_recolte():
         localite = request.form["localite"]
         description = request.form.get("description", "")
 
-        nom_photo = None
         fichier = request.files.get("photo")
-        if fichier and fichier.filename and extension_autorisee(fichier.filename):
-            nom_photo = secure_filename(f"{session['utilisateur_id']}_{fichier.filename}")
-            fichier.save(os.path.join(DOSSIER_UPLOADS, nom_photo))
+        nom_photo = encoder_photo(fichier)
 
         connexion_bd = get_connexion()
         connexion_bd.execute(
@@ -350,11 +367,8 @@ def modifier_recolte(recolte_id):
         description = request.form.get("description", "")
         statut = request.form.get("statut", "disponible")
 
-        nom_photo = recolte["photo"]
         fichier = request.files.get("photo")
-        if fichier and fichier.filename and extension_autorisee(fichier.filename):
-            nom_photo = secure_filename(f"{session['utilisateur_id']}_{fichier.filename}")
-            fichier.save(os.path.join(DOSSIER_UPLOADS, nom_photo))
+        nom_photo = encoder_photo(fichier) or recolte["photo"]
 
         connexion_bd.execute(
             """UPDATE recoltes SET
@@ -427,11 +441,8 @@ def nouveau_produit():
         localite = request.form["localite"]
         description = request.form.get("description", "")
 
-        nom_photo = None
         fichier = request.files.get("photo")
-        if fichier and fichier.filename and extension_autorisee(fichier.filename):
-            nom_photo = secure_filename(f"{session['utilisateur_id']}_{fichier.filename}")
-            fichier.save(os.path.join(DOSSIER_UPLOADS, nom_photo))
+        nom_photo = encoder_photo(fichier)
 
         connexion_bd = get_connexion()
         connexion_bd.execute(
@@ -477,11 +488,8 @@ def modifier_produit(produit_id):
         description = request.form.get("description", "")
         statut = request.form.get("statut", "disponible")
 
-        nom_photo = produit["photo"]
         fichier = request.files.get("photo")
-        if fichier and fichier.filename and extension_autorisee(fichier.filename):
-            nom_photo = secure_filename(f"{session['utilisateur_id']}_{fichier.filename}")
-            fichier.save(os.path.join(DOSSIER_UPLOADS, nom_photo))
+        nom_photo = encoder_photo(fichier) or produit["photo"]
 
         connexion_bd.execute(
             """UPDATE produits_fournisseur SET

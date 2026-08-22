@@ -6,7 +6,7 @@
         {% for article in articles %}
             <div class="carte-recolte">
                 {% if article.recolte.photo %}
-                    <img src="{{ url_for('static', filename='uploads/' + article.recolte.photo) }}" alt="{{ article.recolte.nom }}">
+                    <img src="{{ article.recolte.photo }}" alt="{{ article.recolte.nom }}">
                 {% endif %}
                 <div>
                     <strong>{{ article.recolte.nom }}</strong> — {{ article.quantite }}<br>
