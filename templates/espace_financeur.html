@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Espace Financement</h2>
+    <p>Bienvenue {{ nom }} 👋</p>
+
+    <a href="{{ url_for('nouvelle_offre') }}"><button>+ Publier une offre</button></a>
+    <a href="{{ url_for('interets_recus') }}"><button>📨 Intérêts & demandes des agriculteurs</button></a>
+
+    <h3 style="margin-top: 30px;">Mes offres publiées</h3>
+
+    {% if offres %}
+        {% for offre in offres %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ offre.nom }}</strong>
+                    ({{ {'pret': 'Prêt', 'subvention': 'Subvention', 'investissement': 'Investissement'}[offre.type_financement] }})
+                    {% if offre.statut == 'active' %}
+                        <span class="badge badge-dispo">Active</span>
+                    {% else %}
+                        <span class="badge badge-epuise">Fermée</span>
+                    {% endif %}
+                    <br>
+                    Montant : {{ offre.montant }}<br>
+                    {% if offre.taux_conditions %}Conditions : {{ offre.taux_conditions }}<br>{% endif %}
+                    {% if offre.duree %}Durée : {{ offre.duree }}<br>{% endif %}
+                    {% if offre.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ offre.description }}</p>
+                    {% endif %}
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('modifier_offre', offre_id=offre.id) }}"><button type="button">Modifier</button></a>
+                        <form method="POST" action="{{ url_for('basculer_statut_offre', offre_id=offre.id) }}" style="display:inline;">
+                            <button type="submit">
+                                {% if offre.statut == 'active' %}Fermer l'offre{% else %}Réactiver{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Tu n'as encore publié aucune offre.</p>
+    {% endif %}
+{% endblock %}

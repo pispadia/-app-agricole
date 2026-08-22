@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Modifier l'offre</h2>
+    <form method="POST">
+        <input type="text" name="nom" value="{{ offre.nom }}" required>
+
+        <label>Type de financement</label>
+        <select name="type_financement" required>
+            <option value="pret" {% if offre.type_financement == 'pret' %}selected{% endif %}>Prêt</option>
+            <option value="subvention" {% if offre.type_financement == 'subvention' %}selected{% endif %}>Subvention</option>
+            <option value="investissement" {% if offre.type_financement == 'investissement' %}selected{% endif %}>Investissement</option>
+        </select>
+
+        <input type="text" name="montant" value="{{ offre.montant }}" required>
+        <input type="text" name="taux_conditions" value="{{ offre.taux_conditions or '' }}" placeholder="Taux / conditions (optionnel)">
+        <input type="text" name="duree" value="{{ offre.duree or '' }}" placeholder="Durée (optionnel)">
+
+        <textarea name="description" rows="4">{{ offre.description or '' }}</textarea>
+
+        <button type="submit">Enregistrer les modifications</button>
+    </form>
+    <p><a href="{{ url_for('espace_financeur') }}">← Retour à mon espace</a></p>
+{% endblock %}

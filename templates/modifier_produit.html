@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Modifier le produit</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="nom" value="{{ produit.nom }}" required>
+
+        <label>Type de produit</label>
+        <select name="type_produit" required>
+            <option value="semence" {% if produit.type_produit == 'semence' %}selected{% endif %}>Semence</option>
+            <option value="pepiniere" {% if produit.type_produit == 'pepiniere' %}selected{% endif %}>Pépinière / plant</option>
+        </select>
+
+        <input type="text" name="variete" value="{{ produit.variete or '' }}" placeholder="Variété (optionnel)">
+        <input type="text" name="duree_croissance" value="{{ produit.duree_croissance or '' }}" placeholder="Durée de croissance (optionnel)">
+
+        <input type="text" name="quantite" value="{{ produit.quantite }}" required>
+        <input type="text" name="prix" value="{{ produit.prix }}" required>
+        <input type="text" name="localite" value="{{ produit.localite }}" required>
+
+        <textarea name="description" rows="4">{{ produit.description or '' }}</textarea>
+
+        <label>Statut</label>
+        <select name="statut">
+            <option value="disponible" {% if produit.statut == 'disponible' %}selected{% endif %}>Disponible</option>
+            <option value="epuise" {% if produit.statut == 'epuise' %}selected{% endif %}>Épuisé</option>
+        </select>
+
+        <label>Remplacer la photo (optionnel)</label>
+        {% if produit.photo %}
+            <img src="{{ url_for('static', filename='uploads/' + produit.photo) }}" style="max-width:100px; display:block; margin-bottom:8px; border-radius:5px;">
+        {% endif %}
+        <input type="file" name="photo" accept="image/*">
+
+        <button type="submit">Enregistrer les modifications</button>
+    </form>
+    <p><a href="{{ url_for('espace_fournisseur') }}">← Retour à mon espace</a></p>
+{% endblock %}

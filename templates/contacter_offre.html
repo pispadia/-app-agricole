@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Contacter : {{ offre.nom_financeur }}</h2>
+    <p style="color:#666;">À propos de : {{ offre.nom }} — {{ offre.montant }}</p>
+
+    <form method="POST">
+        <label>Ton message</label>
+        <textarea name="message" rows="4" placeholder="Précise ton projet, le montant souhaité..." required></textarea>
+        <button type="submit">Envoyer le message</button>
+    </form>
+    <p><a href="{{ url_for('espace_financement_agriculteur') }}">← Retour</a></p>
+{% endblock %}

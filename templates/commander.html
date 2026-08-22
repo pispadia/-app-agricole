@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Commander : {{ recolte.nom }}</h2>
+    <p style="color:#666;">Vendu par {{ recolte.nom_agriculteur }} — {{ recolte.localite }}</p>
+    <p>Détail : {{ recolte.prix }}
+        {% if recolte.prix_gros %}
+            <br>Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}
+        {% endif %}
+    </p>
+
+    <form method="POST">
+        <label>Quantité souhaitée</label>
+        <input type="text" name="quantite_demandee" placeholder="ex: 20 kg" required>
+
+        <label>Message pour l'agriculteur (optionnel)</label>
+        <textarea name="message" rows="3" placeholder="Précisions, date de livraison souhaitée..."></textarea>
+
+        <button type="submit">Envoyer la commande</button>
+    </form>
+    <p><a href="{{ url_for('espace_client') }}">← Retour</a></p>
+{% endblock %}

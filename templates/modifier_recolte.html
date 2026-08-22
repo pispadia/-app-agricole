@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Modifier la récolte</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="nom" value="{{ recolte.nom }}" required>
+        <input type="text" name="quantite" value="{{ recolte.quantite }}" required>
+        <input type="text" name="prix" value="{{ recolte.prix }}" required>
+
+        <label>Prix en gros (optionnel)</label>
+        <input type="text" name="prix_gros" value="{{ recolte.prix_gros or '' }}" placeholder="Prix en gros (ex: 400 FCFA / kg)">
+        <input type="text" name="quantite_gros_min" value="{{ recolte.quantite_gros_min or '' }}" placeholder="Quantité minimum pour le prix en gros">
+
+        <label>Date de disponibilité</label>
+        <input type="date" name="date_disponibilite" value="{{ recolte.date_disponibilite }}" required>
+
+        <input type="text" name="localite" value="{{ recolte.localite }}" required>
+
+        <textarea name="description" rows="4">{{ recolte.description or '' }}</textarea>
+
+        <label>Statut</label>
+        <select name="statut">
+            <option value="disponible" {% if recolte.statut == 'disponible' %}selected{% endif %}>Disponible</option>
+            <option value="epuise" {% if recolte.statut == 'epuise' %}selected{% endif %}>Épuisé</option>
+        </select>
+
+        <label>Remplacer la photo (optionnel)</label>
+        {% if recolte.photo %}
+            <img src="{{ url_for('static', filename='uploads/' + recolte.photo) }}" style="max-width:100px; display:block; margin-bottom:8px; border-radius:5px;">
+        {% endif %}
+        <input type="file" name="photo" accept="image/*">
+
+        <button type="submit">Enregistrer les modifications</button>
+    </form>
+    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+{% endblock %}

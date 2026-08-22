@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Espace Fournisseur</h2>
+    <p>Bienvenue {{ nom }} 👋</p>
+
+    <a href="{{ url_for('nouveau_produit') }}"><button>+ Publier un produit</button></a>
+    <a href="{{ url_for('messages_recus') }}"><button>✉️ Voir mes messages reçus</button></a>
+
+    <h3 style="margin-top: 30px;">Mes produits publiés</h3>
+
+    {% if produits %}
+        {% for produit in produits %}
+            <div class="carte-recolte">
+                {% if produit.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + produit.photo) }}" alt="{{ produit.nom }}">
+                {% endif %}
+                <div>
+                    <strong>{{ produit.nom }}</strong>
+                    ({{ 'Semence' if produit.type_produit == 'semence' else 'Pépinière' }})
+                    {% if produit.statut == 'disponible' %}
+                        <span class="badge badge-dispo">Disponible</span>
+                    {% else %}
+                        <span class="badge badge-epuise">Épuisé</span>
+                    {% endif %}
+                    <br>
+                    {% if produit.variete %}Variété : {{ produit.variete }}<br>{% endif %}
+                    {% if produit.duree_croissance %}Durée de croissance : {{ produit.duree_croissance }}<br>{% endif %}
+                    Quantité : {{ produit.quantite }} — Prix : {{ produit.prix }}<br>
+                    📍 {{ produit.localite }}
+                    {% if produit.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ produit.description }}</p>
+                    {% endif %}
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('modifier_produit', produit_id=produit.id) }}"><button type="button">Modifier</button></a>
+                        <form method="POST" action="{{ url_for('basculer_statut_produit', produit_id=produit.id) }}" style="display:inline;">
+                            <button type="submit">
+                                {% if produit.statut == 'disponible' %}Marquer épuisé{% else %}Marquer disponible{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Tu n'as encore publié aucun produit.</p>
+    {% endif %}
+{% endblock %}

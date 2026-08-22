@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Publier une récolte</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="nom" placeholder="Nom du produit (ex: Tomates)" required>
+        <input type="text" name="quantite" placeholder="Quantité (ex: 200 kg)" required>
+        <input type="text" name="prix" placeholder="Prix au détail (ex: 500 FCFA / kg)" required>
+
+        <label>Prix en gros (optionnel)</label>
+        <input type="text" name="prix_gros" placeholder="Prix en gros (ex: 400 FCFA / kg)">
+        <input type="text" name="quantite_gros_min" placeholder="Quantité minimum pour le prix en gros (ex: à partir de 50 kg)">
+
+        <label>Date de disponibilité</label>
+        <input type="date" name="date_disponibilite" required>
+
+        <input type="text" name="localite" placeholder="Localité de production (ex: Thiès)" required>
+
+        <textarea name="description" placeholder="Description (optionnel)" rows="4"></textarea>
+
+        <label>Photo du produit (optionnel)</label>
+        <input type="file" name="photo" accept="image/*">
+
+        <button type="submit">Publier</button>
+    </form>
+    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+{% endblock %}

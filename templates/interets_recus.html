@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Intérêts & demandes des agriculteurs</h2>
+
+    <h3>Agriculteurs intéressés par tes offres</h3>
+    {% if interets %}
+        {% for i in interets %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ i.nom_offre }}</strong><br>
+                    Agriculteur : {{ i.nom_agriculteur }} ({{ i.email_agriculteur }})
+                    {% if i.message %}
+                        <p style="margin: 5px 0 0; color: #666;">« {{ i.message }} »</p>
+                    {% endif %}
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçu le {{ i.date_creation }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun intérêt reçu pour le moment.</p>
+    {% endif %}
+
+    <h3 style="margin-top: 30px;">Demandes de financement des agriculteurs</h3>
+    {% if demandes %}
+        {% for d in demandes %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ d.objet }}</strong> — {{ d.montant_souhaite }}<br>
+                    Agriculteur : {{ d.nom_agriculteur }} ({{ d.email_agriculteur }})
+                    {% if d.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ d.description }}</p>
+                    {% endif %}
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('contacter_agriculteur_demande', demande_id=d.id) }}"><button type="button">Contacter</button></a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucune demande ouverte pour le moment.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_financeur') }}">← Retour à mon espace</a></p>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Contacter : {{ produit.nom_fournisseur }}</h2>
+    <p style="color:#666;">À propos de : {{ produit.nom }} — {{ produit.localite }}</p>
+    <p>Prix : {{ produit.prix }} · Quantité : {{ produit.quantite }}</p>
+
+    <form method="POST">
+        <label>Ton message</label>
+        <textarea name="message" rows="4" placeholder="Précise la quantité souhaitée, tes disponibilités..." required></textarea>
+        <button type="submit">Envoyer le message</button>
+    </form>
+    <p><a href="{{ url_for('semences_pepinieres') }}">← Retour</a></p>
+{% endblock %}

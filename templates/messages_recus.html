@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Messages reçus</h2>
+
+    {% if messages %}
+        {% for m in messages %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ m.nom_produit }}</strong><br>
+                    Agriculteur : {{ m.nom_agriculteur }} ({{ m.email_agriculteur }})
+                    {% if m.message %}
+                        <p style="margin: 5px 0 0; color: #666;">« {{ m.message }} »</p>
+                    {% endif %}
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçu le {{ m.date_creation }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun message reçu pour le moment.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_fournisseur') }}">← Retour à mon espace</a></p>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Mon panier</h2>
+
+    {% if articles %}
+        {% for article in articles %}
+            <div class="carte-recolte">
+                {% if article.recolte.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + article.recolte.photo) }}" alt="{{ article.recolte.nom }}">
+                {% endif %}
+                <div>
+                    <strong>{{ article.recolte.nom }}</strong> — {{ article.quantite }}<br>
+                    Par {{ article.recolte.nom_agriculteur }} · {{ article.recolte.localite }}<br>
+                    {{ article.recolte.prix }}
+                    <div style="margin-top: 8px;">
+                        <form method="POST" action="{{ url_for('supprimer_du_panier', index=article.index) }}">
+                            <button type="submit">Retirer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('valider_panier') }}" style="margin-top: 20px;">
+            <button type="submit">Valider et envoyer les commandes</button>
+        </form>
+    {% else %}
+        <p>Ton panier est vide.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_client') }}">← Continuer mes achats</a></p>
+{% endblock %}

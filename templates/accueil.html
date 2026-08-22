@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h1>Bienvenue sur l'App Agricole</h1>
+    <p>La plateforme qui connecte agriculteurs, clients et fournisseurs.</p>
+    <a href="{{ url_for('inscription') }}"><button>Créer un compte</button></a>
+    <a href="{{ url_for('connexion') }}"><button>Se connecter</button></a>
+{% endblock %}

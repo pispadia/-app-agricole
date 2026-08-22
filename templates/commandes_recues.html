@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Commandes reçues</h2>
+
+    {% if commandes %}
+        {% for commande in commandes %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}<br>
+                    Client : {{ commande.nom_client }} ({{ commande.email_client }})
+                    {% if commande.message %}
+                        <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
+                    {% endif %}
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçue le {{ commande.date_creation }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucune commande reçue pour le moment.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+{% endblock %}

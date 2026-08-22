@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Contacter : {{ demande.nom_agriculteur }}</h2>
+    <p style="color:#666;">À propos de : {{ demande.objet }} — {{ demande.montant_souhaite }}</p>
+
+    <form method="POST">
+        <label>Ton message</label>
+        <textarea name="message" rows="4" placeholder="Précise les conditions, les documents nécessaires..." required></textarea>
+        <button type="submit">Envoyer le message</button>
+    </form>
+    <p><a href="{{ url_for('interets_recus') }}">← Retour</a></p>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Publier une demande de financement</h2>
+    <form method="POST">
+        <input type="text" name="objet" placeholder="Objet (ex: Achat de matériel d'irrigation)" required>
+        <input type="text" name="montant_souhaite" placeholder="Montant souhaité (ex: 500 000 FCFA)" required>
+        <textarea name="description" placeholder="Description du projet (optionnel)" rows="4"></textarea>
+        <button type="submit">Publier la demande</button>
+    </form>
+    <p><a href="{{ url_for('espace_financement_agriculteur') }}">← Retour</a></p>
+{% endblock %}

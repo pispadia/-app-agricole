@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Espace Client</h2>
+    <p>Bienvenue {{ nom }} 👋</p>
+
+    <p><a href="{{ url_for('voir_panier') }}"><button type="button">🛒 Mon panier ({{ taille_panier }})</button></a></p>
+
+    <form method="GET">
+        <input type="text" name="recherche" placeholder="Rechercher un produit (ex: Tomates)" value="{{ recherche }}">
+        <select name="localite">
+            <option value="">Toutes les localités</option>
+            {% for l in localites %}
+                <option value="{{ l.localite }}" {% if l.localite == localite_choisie %}selected{% endif %}>{{ l.localite }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Filtrer</button>
+    </form>
+
+    <h3 style="margin-top: 30px;">Récoltes disponibles</h3>
+
+    {% if recoltes %}
+        {% for recolte in recoltes %}
+            <div class="carte-recolte">
+                {% if recolte.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + recolte.photo) }}" alt="{{ recolte.nom }}">
+                {% endif %}
+                <div>
+                    <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}<br>
+                    Par {{ recolte.nom_agriculteur }}<br>
+                    Détail : {{ recolte.prix }}<br>
+                    {% if recolte.prix_gros %}
+                        Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>
+                    {% endif %}
+                    📍 {{ recolte.localite }} · Disponible le {{ recolte.date_disponibilite }}
+                    {% if recolte.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ recolte.description }}</p>
+                    {% endif %}
+
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('commander', recolte_id=recolte.id) }}"><button type="button">Commander directement</button></a>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('ajouter_au_panier', recolte_id=recolte.id) }}" style="display:flex; gap:6px; margin-top:8px; align-items:center;">
+                        <input type="text" name="quantite" placeholder="Quantité (ex: 10 kg)" required style="width:auto; flex:1; margin:0;">
+                        <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Ajouter au panier</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucune récolte ne correspond à ta recherche.</p>
+    {% endif %}
+{% endblock %}

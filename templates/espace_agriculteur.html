@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Espace Agriculteur</h2>
+    <p>Bienvenue {{ nom }} 👋</p>
+
+    <a href="{{ url_for('nouvelle_recolte') }}"><button>+ Publier une récolte</button></a>
+    <a href="{{ url_for('commandes_recues') }}"><button>📦 Voir mes commandes reçues</button></a>
+    <a href="{{ url_for('semences_pepinieres') }}"><button>🌱 Acheter semences / pépinières</button></a>
+    <a href="{{ url_for('espace_financement_agriculteur') }}"><button>💰 Financement</button></a>
+
+    <h3 style="margin-top: 30px;">Mes récoltes publiées</h3>
+
+    {% if recoltes %}
+        {% for recolte in recoltes %}
+            <div class="carte-recolte">
+                {% if recolte.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + recolte.photo) }}" alt="{{ recolte.nom }}">
+                {% endif %}
+                <div>
+                    <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
+                    {% if recolte.statut == 'disponible' %}
+                        <span class="badge badge-dispo">Disponible</span>
+                    {% else %}
+                        <span class="badge badge-epuise">Épuisé</span>
+                    {% endif %}
+                    <br>
+                    Détail : {{ recolte.prix }}<br>
+                    {% if recolte.prix_gros %}
+                        Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>
+                    {% endif %}
+                    📍 {{ recolte.localite }} · Disponible le {{ recolte.date_disponibilite }}
+                    {% if recolte.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ recolte.description }}</p>
+                    {% endif %}
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}"><button type="button">Modifier</button></a>
+                        <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}" style="display:inline;">
+                            <button type="submit">
+                                {% if recolte.statut == 'disponible' %}Marquer épuisé{% else %}Marquer disponible{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Tu n'as encore publié aucune récolte.</p>
+    {% endif %}
+{% endblock %}

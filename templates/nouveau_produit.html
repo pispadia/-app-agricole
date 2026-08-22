@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Publier un produit</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="nom" placeholder="Nom du produit (ex: Maïs hybride)" required>
+
+        <label>Type de produit</label>
+        <select name="type_produit" required>
+            <option value="" disabled selected>Choisir...</option>
+            <option value="semence">Semence</option>
+            <option value="pepiniere">Pépinière / plant</option>
+        </select>
+
+        <input type="text" name="variete" placeholder="Variété (optionnel, ex: NERICA 4)">
+        <input type="text" name="duree_croissance" placeholder="Durée de croissance (optionnel, ex: 90 jours)">
+
+        <input type="text" name="quantite" placeholder="Quantité disponible (ex: 100 sachets)" required>
+        <input type="text" name="prix" placeholder="Prix (ex: 2000 FCFA / sachet)" required>
+        <input type="text" name="localite" placeholder="Localité" required>
+
+        <textarea name="description" placeholder="Description (optionnel)" rows="4"></textarea>
+
+        <label>Photo du produit (optionnel)</label>
+        <input type="file" name="photo" accept="image/*">
+
+        <button type="submit">Publier</button>
+    </form>
+    <p><a href="{{ url_for('espace_fournisseur') }}">← Retour à mon espace</a></p>
+{% endblock %}

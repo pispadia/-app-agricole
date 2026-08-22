@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Publier une offre de financement</h2>
+    <form method="POST">
+        <input type="text" name="nom" placeholder="Nom de l'offre (ex: Crédit agricole saisonnier)" required>
+
+        <label>Type de financement</label>
+        <select name="type_financement" required>
+            <option value="" disabled selected>Choisir...</option>
+            <option value="pret">Prêt</option>
+            <option value="subvention">Subvention</option>
+            <option value="investissement">Investissement</option>
+        </select>
+
+        <input type="text" name="montant" placeholder="Montant (ex: jusqu'à 2 000 000 FCFA)" required>
+        <input type="text" name="taux_conditions" placeholder="Taux / conditions (optionnel)">
+        <input type="text" name="duree" placeholder="Durée (optionnel, ex: 12 mois)">
+
+        <textarea name="description" placeholder="Description / critères d'éligibilité (optionnel)" rows="4"></textarea>
+
+        <button type="submit">Publier</button>
+    </form>
+    <p><a href="{{ url_for('espace_financeur') }}">← Retour à mon espace</a></p>
+{% endblock %}

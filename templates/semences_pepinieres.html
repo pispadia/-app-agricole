@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Semences & Pépinières</h2>
+    <p>Bienvenue {{ nom }} 👋</p>
+
+    <form method="GET">
+        <input type="text" name="recherche" placeholder="Rechercher un produit" value="{{ recherche }}">
+        <select name="type_produit">
+            <option value="">Tous les types</option>
+            <option value="semence" {% if type_choisi == 'semence' %}selected{% endif %}>Semence</option>
+            <option value="pepiniere" {% if type_choisi == 'pepiniere' %}selected{% endif %}>Pépinière / plant</option>
+        </select>
+        <select name="localite">
+            <option value="">Toutes les localités</option>
+            {% for l in localites %}
+                <option value="{{ l.localite }}" {% if l.localite == localite_choisie %}selected{% endif %}>{{ l.localite }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Filtrer</button>
+    </form>
+
+    <h3 style="margin-top: 30px;">Produits disponibles</h3>
+
+    {% if produits %}
+        {% for produit in produits %}
+            <div class="carte-recolte">
+                {% if produit.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + produit.photo) }}" alt="{{ produit.nom }}">
+                {% endif %}
+                <div>
+                    <strong>{{ produit.nom }}</strong>
+                    ({{ 'Semence' if produit.type_produit == 'semence' else 'Pépinière' }})<br>
+                    Par {{ produit.nom_fournisseur }}<br>
+                    {% if produit.variete %}Variété : {{ produit.variete }}<br>{% endif %}
+                    {% if produit.duree_croissance %}Durée de croissance : {{ produit.duree_croissance }}<br>{% endif %}
+                    Quantité : {{ produit.quantite }} — Prix : {{ produit.prix }}<br>
+                    📍 {{ produit.localite }}
+                    {% if produit.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ produit.description }}</p>
+                    {% endif %}
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('contacter_fournisseur', produit_id=produit.id) }}"><button type="button">Contacter le fournisseur</button></a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun produit ne correspond à ta recherche.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+{% endblock %}

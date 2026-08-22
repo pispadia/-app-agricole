@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Financement</h2>
+    <p>Bienvenue {{ nom }} 👋</p>
+
+    <a href="{{ url_for('nouvelle_demande_financement') }}"><button>+ Publier une demande de financement</button></a>
+
+    <h3 style="margin-top: 30px;">Mes demandes publiées</h3>
+    {% if mes_demandes %}
+        {% for d in mes_demandes %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ d.objet }}</strong> — {{ d.montant_souhaite }}
+                    {% if d.statut == 'ouverte' %}
+                        <span class="badge badge-dispo">Ouverte</span>
+                    {% else %}
+                        <span class="badge badge-epuise">Traitée</span>
+                    {% endif %}
+                    {% if d.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ d.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Tu n'as encore publié aucune demande.</p>
+    {% endif %}
+
+    <h3 style="margin-top: 30px;">Offres de financement disponibles</h3>
+    {% if offres %}
+        {% for offre in offres %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ offre.nom }}</strong>
+                    ({{ {'pret': 'Prêt', 'subvention': 'Subvention', 'investissement': 'Investissement'}[offre.type_financement] }})<br>
+                    Par {{ offre.nom_financeur }}<br>
+                    Montant : {{ offre.montant }}<br>
+                    {% if offre.taux_conditions %}Conditions : {{ offre.taux_conditions }}<br>{% endif %}
+                    {% if offre.duree %}Durée : {{ offre.duree }}<br>{% endif %}
+                    {% if offre.description %}
+                        <p style="margin: 5px 0 0; color: #666;">{{ offre.description }}</p>
+                    {% endif %}
+                    <div style="margin-top: 8px;">
+                        <a href="{{ url_for('contacter_offre', offre_id=offre.id) }}"><button type="button">Contacter</button></a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucune offre disponible pour le moment.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+{% endblock %}
