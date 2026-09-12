@@ -16,6 +16,11 @@
                 <option value="{{ l.localite }}" {% if l.localite == localite_choisie %}selected{% endif %}>{{ l.localite }}</option>
             {% endfor %}
         </select>
+        <select name="tri">
+            <option value="recent" {% if tri_choisi == 'recent' %}selected{% endif %}>Plus récent</option>
+            <option value="nom" {% if tri_choisi == 'nom' %}selected{% endif %}>Nom (A-Z)</option>
+            <option value="localite" {% if tri_choisi == 'localite' %}selected{% endif %}>Localité (A-Z)</option>
+        </select>
         <button type="submit">Filtrer</button>
     </form>
 

@@ -172,6 +172,8 @@
         <nav>
             <a href="{{ url_for('accueil') }}">Accueil</a>
             {% if session.get('utilisateur_id') %}
+                <a href="{{ url_for('tableau_de_bord') }}">Tableau de bord</a>
+                <a href="{{ url_for('notifications') }}">🔔 Notifications{% if nb_notifications %} <span class="badge badge-epuise" style="margin-left:2px;">{{ nb_notifications }}</span>{% endif %}</a>
                 <a href="{{ url_for('mon_profil') }}">Mon profil</a>
                 <a href="{{ url_for('deconnexion') }}">Déconnexion</a>
             {% else %}

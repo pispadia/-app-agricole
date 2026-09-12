@@ -6,12 +6,17 @@
     <p><a href="{{ url_for('voir_panier') }}"><button type="button">🛒 Mon panier ({{ taille_panier }})</button></a></p>
 
     <form method="GET">
-        <input type="text" name="recherche" placeholder="Rechercher un produit (ex: Tomates)" value="{{ recherche }}">
+        <input type="text" name="recherche" placeholder="Rechercher un produit ou mot-clé" value="{{ recherche }}">
         <select name="localite">
             <option value="">Toutes les localités</option>
             {% for l in localites %}
                 <option value="{{ l.localite }}" {% if l.localite == localite_choisie %}selected{% endif %}>{{ l.localite }}</option>
             {% endfor %}
+        </select>
+        <select name="tri">
+            <option value="recent" {% if tri_choisi == 'recent' %}selected{% endif %}>Plus récent</option>
+            <option value="nom" {% if tri_choisi == 'nom' %}selected{% endif %}>Nom (A-Z)</option>
+            <option value="localite" {% if tri_choisi == 'localite' %}selected{% endif %}>Localité (A-Z)</option>
         </select>
         <button type="submit">Filtrer</button>
     </form>

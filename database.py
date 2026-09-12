@@ -142,7 +142,7 @@ def init_db():
                 curseur.execute(f"ALTER TABLE recoltes ADD COLUMN {colonne} {type_sql}")
         connexion.commit()
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS commandes (
             id {ID_AUTO},
             recolte_id INTEGER NOT NULL,
@@ -150,13 +150,15 @@ def init_db():
             quantite_demandee TEXT NOT NULL,
             message TEXT,
             statut TEXT NOT NULL DEFAULT 'en_attente' CHECK(statut IN ('en_attente', 'confirmee', 'livree', 'annulee')),
+            lu INTEGER NOT NULL DEFAULT 0,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (recolte_id) REFERENCES recoltes (id),
             FOREIGN KEY (client_id) REFERENCES utilisateurs (id)
         )
     """)
+    connexion.commit()
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS produits_fournisseur (
             id {ID_AUTO},
             fournisseur_id INTEGER NOT NULL,
@@ -175,19 +177,20 @@ def init_db():
         )
     """)
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS contacts_fournisseur (
             id {ID_AUTO},
             produit_id INTEGER NOT NULL,
             agriculteur_id INTEGER NOT NULL,
             message TEXT,
+            lu INTEGER NOT NULL DEFAULT 0,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (produit_id) REFERENCES produits_fournisseur (id),
             FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id)
         )
     """)
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS offres_financement (
             id {ID_AUTO},
             financeur_id INTEGER NOT NULL,
@@ -203,7 +206,7 @@ def init_db():
         )
     """)
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS demandes_financement (
             id {ID_AUTO},
             agriculteur_id INTEGER NOT NULL,
@@ -216,31 +219,41 @@ def init_db():
         )
     """)
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS contacts_offre (
             id {ID_AUTO},
             offre_id INTEGER NOT NULL,
             agriculteur_id INTEGER NOT NULL,
             message TEXT,
+            lu INTEGER NOT NULL DEFAULT 0,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (offre_id) REFERENCES offres_financement (id),
             FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id)
         )
     """)
 
-    connexion.execute(f"""
+    curseur = connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS contacts_demande (
             id {ID_AUTO},
             demande_id INTEGER NOT NULL,
             financeur_id INTEGER NOT NULL,
             message TEXT,
+            lu INTEGER NOT NULL DEFAULT 0,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (demande_id) REFERENCES demandes_financement (id),
             FOREIGN KEY (financeur_id) REFERENCES utilisateurs (id)
         )
     """)
-
     connexion.commit()
+
+    # Ajoute la colonne "lu" aux bases SQLite locales déjà existantes
+    if not UTILISE_POSTGRES:
+        for nom_table in ("commandes", "contacts_fournisseur", "contacts_offre", "contacts_demande"):
+            colonnes_existantes = colonnes_de_table(curseur, nom_table)
+            if "lu" not in colonnes_existantes:
+                curseur.execute(f"ALTER TABLE {nom_table} ADD COLUMN lu INTEGER NOT NULL DEFAULT 0")
+        connexion.commit()
+
     connexion.close()
     print(f"Base de données initialisée ({'PostgreSQL' if UTILISE_POSTGRES else 'SQLite'}).")
 

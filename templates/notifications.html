@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Notifications</h2>
+
+    {% if role == 'agriculteur' %}
+        <h3>Commandes reçues</h3>
+        {% if commandes %}
+            {% for c in commandes %}
+                <div class="carte-recolte">
+                    <div>
+                        <strong>{{ c.nom_recolte }}</strong> — {{ c.quantite_demandee }}
+                        {% if not c.lu %}<span class="badge badge-epuise">Nouveau</span>{% endif %}<br>
+                        Client : {{ c.nom_client }} ({{ c.email_client }})
+                        {% if c.message %}<p style="margin: 5px 0 0; color: #666;">« {{ c.message }} »</p>{% endif %}
+                        <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ c.date_creation }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucune commande pour le moment.</p>
+        {% endif %}
+
+        <h3 style="margin-top: 25px;">Messages des organismes de financement</h3>
+        {% if messages_financement %}
+            {% for m in messages_financement %}
+                <div class="carte-recolte">
+                    <div>
+                        <strong>{{ m.objet }}</strong>
+                        {% if not m.lu %}<span class="badge badge-epuise">Nouveau</span>{% endif %}<br>
+                        De : {{ m.nom_financeur }}
+                        {% if m.message %}<p style="margin: 5px 0 0; color: #666;">« {{ m.message }} »</p>{% endif %}
+                        <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ m.date_creation }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucun message pour le moment.</p>
+        {% endif %}
+
+    {% elif role == 'fournisseur' %}
+        <h3>Messages des agriculteurs</h3>
+        {% if messages_fournisseur %}
+            {% for m in messages_fournisseur %}
+                <div class="carte-recolte">
+                    <div>
+                        <strong>{{ m.nom_produit }}</strong>
+                        {% if not m.lu %}<span class="badge badge-epuise">Nouveau</span>{% endif %}<br>
+                        Agriculteur : {{ m.nom_agriculteur }} ({{ m.email_agriculteur }})
+                        {% if m.message %}<p style="margin: 5px 0 0; color: #666;">« {{ m.message }} »</p>{% endif %}
+                        <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ m.date_creation }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucun message pour le moment.</p>
+        {% endif %}
+
+    {% elif role == 'financeur' %}
+        <h3>Agriculteurs intéressés par tes offres</h3>
+        {% if interets_offre %}
+            {% for i in interets_offre %}
+                <div class="carte-recolte">
+                    <div>
+                        <strong>{{ i.nom_offre }}</strong>
+                        {% if not i.lu %}<span class="badge badge-epuise">Nouveau</span>{% endif %}<br>
+                        Agriculteur : {{ i.nom_agriculteur }} ({{ i.email_agriculteur }})
+                        {% if i.message %}<p style="margin: 5px 0 0; color: #666;">« {{ i.message }} »</p>{% endif %}
+                        <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ i.date_creation }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucun intérêt reçu pour le moment.</p>
+        {% endif %}
+
+    {% else %}
+        <p>Tu seras notifié ici dès qu'un agriculteur répondra à l'une de tes commandes.</p>
+    {% endif %}
+{% endblock %}
