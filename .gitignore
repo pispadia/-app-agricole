@@ -1,1 +1,5 @@
-PLACEHOLDER
+__pycache__/
+.python-packages/
+.env
+*.py[cod]
+*.db
