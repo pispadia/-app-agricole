@@ -5,7 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_connexion, init_db
 
 app = Flask(__name__)
-app.secret_key = "change-cette-cle-plus-tard"  # nécessaire pour utiliser les sessions
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set in the environment")
+app.secret_key = SECRET_KEY  # nécessaire pour utiliser les sessions
 
 EXTENSIONS_AUTORISEES = {"png", "jpg", "jpeg", "webp"}
 TAILLE_MAX_PHOTO = 2 * 1024 * 1024  # 2 Mo, pour garder la base de données légère
@@ -1164,4 +1167,6 @@ def tableau_de_bord():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    debug = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"}
+    port = int(os.environ.get("PORT", "5000"))
+    app.run(debug=debug, port=port)
