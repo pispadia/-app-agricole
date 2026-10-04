@@ -1,4 +1,5 @@
 import os
+import re
 import base64
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,10 +33,41 @@ def encoder_photo(fichier):
         flash("La photo est trop volumineuse (2 Mo maximum) et n'a pas été enregistrée.")
         return None
 
-    extension = fichier.filename.rsplit(".", 1)[1].lower()
-    type_mime = "image/jpeg" if extension in ("jpg", "jpeg") else f"image/{extension}"
+    # On se fie au contenu réel du fichier, pas à son nom
+    if contenu.startswith(b"\xff\xd8\xff"):
+        type_mime = "image/jpeg"
+    elif contenu.startswith(b"\x89PNG\r\n\x1a\n"):
+        type_mime = "image/png"
+    elif contenu[:4] == b"RIFF" and contenu[8:12] == b"WEBP":
+        type_mime = "image/webp"
+    else:
+        flash("Le fichier envoyé n'est pas une image valide (JPG, PNG ou WEBP).")
+        return None
+
     photo_base64 = base64.b64encode(contenu).decode("utf-8")
     return f"data:{type_mime};base64,{photo_base64}"
+
+
+# Un nombre positif suivi d'une unité facultative : "20 kg", "100 sachets", "1,5 tonne"
+MOTIF_QUANTITE = re.compile(r"^\d+(?:[.,]\d+)?(?:\s*[^\W\d_]+\.?)*$")
+# Un prix en chiffres, FCFA facultatif, unité facultative : "500 FCFA / kg", "1 500 F", "2000"
+MOTIF_PRIX = re.compile(r"^\d[\d ]*(?:[.,]\d+)?\s*(?:F\s*CFA|FCFA|CFA|F)?\s*(?:/\s*[^\W\d_]+)?$", re.IGNORECASE)
+
+
+def quantite_valide(texte):
+    """Retourne la quantité nettoyée, ou lève ValueError si elle n'est pas chiffrée."""
+    texte = " ".join((texte or "").split())
+    if not MOTIF_QUANTITE.match(texte) or float(re.match(r"[\d.,]+", texte).group().replace(",", ".")) <= 0:
+        raise ValueError("La quantité doit être un nombre positif suivi d'une unité (ex: 20 kg).")
+    return texte
+
+
+def prix_valide(texte):
+    """Retourne le prix nettoyé, ou lève ValueError s'il n'est pas chiffré."""
+    texte = " ".join((texte or "").split())
+    if not MOTIF_PRIX.match(texte) or not any(c in "123456789" for c in re.match(r"[\d ]+", texte).group()):
+        raise ValueError("Le prix doit être un montant positif (ex: 500 FCFA / kg).")
+    return texte
 
 
 @app.route("/")
@@ -366,9 +398,15 @@ def nouvelle_recolte():
 
     if request.method == "POST":
         nom = request.form["nom"]
-        quantite = request.form["quantite"]
-        prix = request.form["prix"]
-        prix_gros = request.form.get("prix_gros", "").strip() or None
+        try:
+            quantite = quantite_valide(request.form["quantite"])
+            prix = prix_valide(request.form["prix"])
+            prix_gros = request.form.get("prix_gros", "").strip() or None
+            if prix_gros:
+                prix_gros = prix_valide(prix_gros)
+        except ValueError as erreur:
+            flash(str(erreur))
+            return redirect(request.url)
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
@@ -413,9 +451,16 @@ def modifier_recolte(recolte_id):
 
     if request.method == "POST":
         nom = request.form["nom"]
-        quantite = request.form["quantite"]
-        prix = request.form["prix"]
-        prix_gros = request.form.get("prix_gros", "").strip() or None
+        try:
+            quantite = quantite_valide(request.form["quantite"])
+            prix = prix_valide(request.form["prix"])
+            prix_gros = request.form.get("prix_gros", "").strip() or None
+            if prix_gros:
+                prix_gros = prix_valide(prix_gros)
+        except ValueError as erreur:
+            flash(str(erreur))
+            connexion_bd.close()
+            return redirect(request.url)
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
@@ -491,8 +536,12 @@ def nouveau_produit():
         type_produit = request.form["type_produit"]
         variete = request.form.get("variete", "").strip() or None
         duree_croissance = request.form.get("duree_croissance", "").strip() or None
-        quantite = request.form["quantite"]
-        prix = request.form["prix"]
+        try:
+            quantite = quantite_valide(request.form["quantite"])
+            prix = prix_valide(request.form["prix"])
+        except ValueError as erreur:
+            flash(str(erreur))
+            return redirect(request.url)
         localite = request.form["localite"]
         description = request.form.get("description", "")
 
@@ -537,8 +586,13 @@ def modifier_produit(produit_id):
         type_produit = request.form["type_produit"]
         variete = request.form.get("variete", "").strip() or None
         duree_croissance = request.form.get("duree_croissance", "").strip() or None
-        quantite = request.form["quantite"]
-        prix = request.form["prix"]
+        try:
+            quantite = quantite_valide(request.form["quantite"])
+            prix = prix_valide(request.form["prix"])
+        except ValueError as erreur:
+            flash(str(erreur))
+            connexion_bd.close()
+            return redirect(request.url)
         localite = request.form["localite"]
         description = request.form.get("description", "")
         statut = request.form.get("statut", "disponible")
