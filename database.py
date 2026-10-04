@@ -246,13 +246,22 @@ def init_db():
     """)
     connexion.commit()
 
-    # Ajoute la colonne "lu" aux bases SQLite locales déjà existantes
-    if not UTILISE_POSTGRES:
-        for nom_table in ("commandes", "contacts_fournisseur", "contacts_offre", "contacts_demande"):
+    # Ajoute la colonne "lu" aux tables déjà existantes (SQLite comme PostgreSQL) créées
+    # avant l'introduction des notifications
+    for nom_table in ("commandes", "contacts_fournisseur", "contacts_offre", "contacts_demande"):
+        try:
             colonnes_existantes = colonnes_de_table(curseur, nom_table)
+            print(f"[migration] {nom_table} -> colonnes actuelles : {colonnes_existantes}")
             if "lu" not in colonnes_existantes:
+                print(f"[migration] {nom_table} : ajout de la colonne lu...")
                 curseur.execute(f"ALTER TABLE {nom_table} ADD COLUMN lu INTEGER NOT NULL DEFAULT 0")
-        connexion.commit()
+                connexion.commit()
+                print(f"[migration] {nom_table} : colonne lu ajoutée avec succès.")
+            else:
+                print(f"[migration] {nom_table} : colonne lu déjà présente, rien à faire.")
+        except Exception as erreur:
+            connexion.rollback()
+            print(f"[migration] ERREUR sur {nom_table} : {erreur}")
 
     connexion.close()
     print(f"Base de données initialisée ({'PostgreSQL' if UTILISE_POSTGRES else 'SQLite'}).")
