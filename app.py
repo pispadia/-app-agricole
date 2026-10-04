@@ -1,12 +1,20 @@
 import os
 import re
 import base64
+import secrets
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import get_connexion, init_db
+from database import UTILISE_POSTGRES, get_connexion, init_db
 
 app = Flask(__name__)
-app.secret_key = "change-cette-cle-plus-tard"  # nécessaire pour utiliser les sessions
+# Clé secrète des sessions : lue dans la variable d'environnement SECRET_KEY.
+# En ligne (PostgreSQL), elle est obligatoire ; en local, une clé aléatoire est générée
+# à chaque démarrage (il faudra simplement se reconnecter après un redémarrage).
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    if UTILISE_POSTGRES:
+        raise RuntimeError("La variable d'environnement SECRET_KEY doit être définie en production.")
+    app.secret_key = secrets.token_hex(32)
 
 EXTENSIONS_AUTORISEES = {"png", "jpg", "jpeg", "webp"}
 TAILLE_MAX_PHOTO = 2 * 1024 * 1024  # 2 Mo, pour garder la base de données légère
