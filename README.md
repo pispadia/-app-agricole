@@ -13,7 +13,7 @@ Ouvre ensuite `http://127.0.0.1:5000`.
 
 ## Configuration de production
 
-Copie `.env.example` dans les variables d'environnement de l'hébergeur, puis définis une valeur `SECRET_KEY` longue et aléatoire. Ne lance jamais l'application avec le débogage Flask activé en production. Une URL PostgreSQL peut être fournie avec `DATABASE_URL`; SQLite reste utilisé localement.
+Copie `.env.example` dans les variables d'environnement de l'hébergeur, puis définis une valeur `SECRET_KEY` longue et aléatoire (par exemple avec `python -c "import secrets; print(secrets.token_hex(32))"`). Sans elle, l'application refuse de démarrer en production. Ne lance jamais l'application avec le débogage Flask activé en production. Une URL PostgreSQL peut être fournie avec `DATABASE_URL`; SQLite reste utilisé localement.
 
 ## Vérifications
 
