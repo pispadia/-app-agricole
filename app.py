@@ -414,7 +414,7 @@ def nouvelle_recolte():
                 prix_gros = prix_valide(prix_gros)
         except ValueError as erreur:
             flash(str(erreur))
-            return redirect(request.url)
+            return render_template("nouvelle_recolte.html", saisie=request.form)
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
@@ -468,7 +468,7 @@ def modifier_recolte(recolte_id):
         except ValueError as erreur:
             flash(str(erreur))
             connexion_bd.close()
-            return redirect(request.url)
+            return render_template("modifier_recolte.html", recolte={**dict(recolte), **request.form.to_dict()})
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
@@ -549,7 +549,7 @@ def nouveau_produit():
             prix = prix_valide(request.form["prix"])
         except ValueError as erreur:
             flash(str(erreur))
-            return redirect(request.url)
+            return render_template("nouveau_produit.html", saisie=request.form)
         localite = request.form["localite"]
         description = request.form.get("description", "")
 
@@ -600,7 +600,7 @@ def modifier_produit(produit_id):
         except ValueError as erreur:
             flash(str(erreur))
             connexion_bd.close()
-            return redirect(request.url)
+            return render_template("modifier_produit.html", produit={**dict(produit), **request.form.to_dict()})
         localite = request.form["localite"]
         description = request.form.get("description", "")
         statut = request.form.get("statut", "disponible")
