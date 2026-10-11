@@ -74,6 +74,13 @@ def colonnes_de_table(curseur, nom_table):
         return [row[1] for row in curseur.fetchall()]
 
 
+TABLES = (
+    "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
+    "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
+    "echecs_connexion",
+)
+
+
 def init_db():
     """Crée les tables si elles n'existent pas encore."""
     connexion = get_connexion()
@@ -245,6 +252,25 @@ def init_db():
         )
     """)
     connexion.commit()
+
+    # Échecs de connexion récents, pour bloquer temporairement un compte après
+    # trop de mots de passe faux (instant = horodatage Unix en secondes)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS echecs_connexion (
+            id {ID_AUTO},
+            email TEXT NOT NULL,
+            instant BIGINT NOT NULL
+        )
+    """)
+    connexion.commit()
+
+    # En ligne (Supabase), active la protection RLS sur toutes les tables : l'API
+    # publique de Supabase n'y a alors plus accès, l'application (propriétaire des
+    # tables) continue de les utiliser normalement. Sans effet si déjà activée.
+    if UTILISE_POSTGRES:
+        for nom_table in TABLES:
+            connexion.execute(f"ALTER TABLE {nom_table} ENABLE ROW LEVEL SECURITY")
+        connexion.commit()
 
     # Ajoute la colonne "lu" aux tables déjà existantes (SQLite comme PostgreSQL) créées
     # avant l'introduction des notifications
