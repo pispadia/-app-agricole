@@ -1,0 +1,11 @@
+{# Badge affichant le statut d'une commande #}
+{% macro badge_statut(statut) %}
+    {% set libelles = {
+        "en_attente": ("En attente", "badge-attente"),
+        "confirmee": ("Confirmée", "badge-dispo"),
+        "livree": ("Livrée", "badge-livree"),
+        "annulee": ("Annulée", "badge-epuise"),
+    } %}
+    {% set libelle, classe = libelles.get(statut, (statut, "")) %}
+    <span class="badge {{ classe }}">{{ libelle }}</span>
+{% endmacro %}
