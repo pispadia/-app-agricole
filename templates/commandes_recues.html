@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_statut_commande.html" import badge_statut %}
 {% block contenu %}
     <h2>Commandes reçues</h2>
 
@@ -6,12 +7,22 @@
         {% for commande in commandes %}
             <div class="carte-recolte">
                 <div>
-                    <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}<br>
+                    <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
+                    {{ badge_statut(commande.statut) }}<br>
                     Client : {{ commande.nom_client }} ({{ commande.email_client }})
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
                     <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçue le {{ commande.date_creation }}</p>
+
+                    {% set actions = {"confirmee": "Confirmer", "livree": "Marquer livrée", "annulee": "Refuser / annuler"} %}
+                    {% for statut_suivant in transitions.get(commande.statut, ()) %}
+                        <form method="POST" action="{{ url_for('changer_statut_commande', commande_id=commande.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="statut" value="{{ statut_suivant }}">
+                            <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px;{% if statut_suivant == 'annulee' %} background-color:#a94442;{% endif %}">{{ actions[statut_suivant] }}</button>
+                        </form>
+                    {% endfor %}
                 </div>
             </div>
         {% endfor %}

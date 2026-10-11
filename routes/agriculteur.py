@@ -22,7 +22,43 @@ def commandes_recues():
     ).fetchall()
     connexion_bd.close()
 
-    return render_template("commandes_recues.html", nom=session["nom"], commandes=commandes)
+    return render_template("commandes_recues.html", nom=session["nom"], commandes=commandes,
+                           transitions=TRANSITIONS_COMMANDE)
+
+
+# Changements de statut autorisés pour l'agriculteur : statut actuel -> statuts possibles
+TRANSITIONS_COMMANDE = {
+    "en_attente": ("confirmee", "annulee"),
+    "confirmee": ("livree", "annulee"),
+}
+
+
+@app.route("/espace-agriculteur/commandes/<int:commande_id>/statut", methods=["POST"])
+def changer_statut_commande(commande_id):
+    if not utilisateur_connecte() or session["role"] != "agriculteur":
+        return redirect(url_for("connexion"))
+
+    nouveau_statut = request.form.get("statut", "")
+    connexion_bd = get_connexion()
+    # Seulement les commandes portant sur une récolte de cet agriculteur
+    commande = connexion_bd.execute(
+        """SELECT commandes.statut FROM commandes
+           JOIN recoltes ON commandes.recolte_id = recoltes.id
+           WHERE commandes.id = ? AND recoltes.agriculteur_id = ?""",
+        (commande_id, session["utilisateur_id"])
+    ).fetchone()
+
+    if commande and nouveau_statut in TRANSITIONS_COMMANDE.get(commande["statut"], ()):
+        connexion_bd.execute(
+            "UPDATE commandes SET statut = ? WHERE id = ?", (nouveau_statut, commande_id)
+        )
+        connexion_bd.commit()
+        flash("Statut de la commande mis à jour.")
+    else:
+        flash("Ce changement de statut n'est pas possible.")
+
+    connexion_bd.close()
+    return redirect(url_for("commandes_recues"))
 
 
 @app.route("/espace-agriculteur")

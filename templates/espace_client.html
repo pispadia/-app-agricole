@@ -3,7 +3,10 @@
     <h2>Espace Client</h2>
     <p>Bienvenue {{ nom }} 👋</p>
 
-    <p><a href="{{ url_for('voir_panier') }}"><button type="button">🛒 Mon panier ({{ taille_panier }})</button></a></p>
+    <p>
+        <a href="{{ url_for('voir_panier') }}"><button type="button">🛒 Mon panier ({{ taille_panier }})</button></a>
+        <a href="{{ url_for('mes_commandes') }}"><button type="button">📦 Mes commandes</button></a>
+    </p>
 
     <form method="GET">
         <input type="text" name="recherche" placeholder="Rechercher un produit ou mot-clé" value="{{ recherche }}">
