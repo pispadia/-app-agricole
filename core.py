@@ -5,9 +5,13 @@ import base64
 import secrets
 from flask import Flask, session, flash, redirect, request, url_for
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from werkzeug.middleware.proxy_fix import ProxyFix
 from database import UTILISE_POSTGRES, init_db
 
 app = Flask(__name__)
+# Derrière le proxy de Render : utilise https et le vrai nom de domaine dans les
+# liens absolus (ex. lien de réinitialisation du mot de passe envoyé par e-mail)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # Clé secrète des sessions : lue dans la variable d'environnement SECRET_KEY.
 # En ligne (PostgreSQL), elle est obligatoire ; en local, une clé aléatoire est générée
 # à chaque démarrage (il faudra simplement se reconnecter après un redémarrage).
