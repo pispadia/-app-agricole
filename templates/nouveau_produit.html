@@ -3,6 +3,7 @@
     {% set saisie = saisie or {} %}
     <h2>Publier un produit</h2>
     <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom du produit (ex: Maïs hybride)" required>
 
         <label>Type de produit</label>

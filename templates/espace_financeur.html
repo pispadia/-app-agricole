@@ -29,6 +29,7 @@
                     <div style="margin-top: 8px;">
                         <a href="{{ url_for('modifier_offre', offre_id=offre.id) }}"><button type="button">Modifier</button></a>
                         <form method="POST" action="{{ url_for('basculer_statut_offre', offre_id=offre.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit">
                                 {% if offre.statut == 'active' %}Fermer l'offre{% else %}Réactiver{% endif %}
                             </button>

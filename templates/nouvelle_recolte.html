@@ -3,6 +3,7 @@
     {% set saisie = saisie or {} %}
     <h2>Publier une récolte</h2>
     <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom du produit (ex: Tomates)" required>
         <input type="text" name="quantite" value="{{ saisie.get('quantite', '') }}" placeholder="Quantité (ex: 200 kg)" required>
         <input type="text" name="prix" value="{{ saisie.get('prix', '') }}" placeholder="Prix au détail (ex: 500 FCFA / kg)" required>

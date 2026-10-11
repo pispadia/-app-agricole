@@ -2,6 +2,7 @@
 {% block contenu %}
     <h2>Créer un compte</h2>
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" placeholder="Nom complet" required>
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="mot_de_passe" placeholder="Mot de passe" required>

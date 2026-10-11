@@ -2,6 +2,7 @@
 {% block contenu %}
     <h2>Publier une offre de financement</h2>
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" placeholder="Nom de l'offre (ex: Crédit agricole saisonnier)" required>
 
         <label>Type de financement</label>

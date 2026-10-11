@@ -2,6 +2,7 @@
 {% block contenu %}
     <h2>Modifier la récolte</h2>
     <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" value="{{ recolte.nom }}" required>
         <input type="text" name="quantite" value="{{ recolte.quantite }}" required>
         <input type="text" name="prix" value="{{ recolte.prix }}" required>

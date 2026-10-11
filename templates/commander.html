@@ -9,6 +9,7 @@
     </p>
 
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Quantité souhaitée</label>
         <input type="text" name="quantite_demandee" placeholder="ex: 20 kg" required>
 

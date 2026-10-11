@@ -4,6 +4,7 @@
     <p style="color:#666;">À propos de : {{ offre.nom }} — {{ offre.montant }}</p>
 
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Ton message</label>
         <textarea name="message" rows="4" placeholder="Précise ton projet, le montant souhaité..." required></textarea>
         <button type="submit">Envoyer le message</button>
