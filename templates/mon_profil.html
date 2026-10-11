@@ -4,6 +4,7 @@
     <p style="color:#888; text-transform: capitalize;">Rôle : {{ utilisateur.role }}</p>
 
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Nom</label>
         <input type="text" name="nom" value="{{ utilisateur.nom }}" required>
 

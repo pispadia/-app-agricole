@@ -3,7 +3,8 @@ import os
 import re
 import base64
 import secrets
-from flask import Flask, session, flash
+from flask import Flask, session, flash, redirect, request, url_for
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from database import UTILISE_POSTGRES, init_db
 
 app = Flask(__name__)
@@ -15,6 +16,23 @@ if not app.secret_key:
     if UTILISE_POSTGRES:
         raise RuntimeError("La variable d'environnement SECRET_KEY doit être définie en production.")
     app.secret_key = secrets.token_hex(32)
+
+# Protection CSRF : chaque formulaire POST doit renvoyer le jeton csrf_token()
+# généré pour la session, ce qui empêche un autre site d'agir à la place d'un
+# utilisateur connecté. Le jeton reste valable tant que la session est ouverte.
+app.config["WTF_CSRF_TIME_LIMIT"] = None
+csrf = CSRFProtect(app)
+
+
+@app.errorhandler(CSRFError)
+def jeton_csrf_invalide(erreur):
+    flash("Votre session a expiré ou le formulaire n'est plus valide. Merci de réessayer.")
+    # On ne renvoie vers la page précédente que si elle appartient à ce site
+    page_precedente = request.referrer or ""
+    if not page_precedente.startswith(request.host_url):
+        page_precedente = url_for("accueil")
+    return redirect(page_precedente)
+
 
 EXTENSIONS_AUTORISEES = {"png", "jpg", "jpeg", "webp"}
 TAILLE_MAX_PHOTO = 2 * 1024 * 1024  # 2 Mo, pour garder la base de données légère

@@ -33,6 +33,7 @@
                     <div style="margin-top: 8px;">
                         <a href="{{ url_for('modifier_produit', produit_id=produit.id) }}"><button type="button">Modifier</button></a>
                         <form method="POST" action="{{ url_for('basculer_statut_produit', produit_id=produit.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit">
                                 {% if produit.statut == 'disponible' %}Marquer épuisé{% else %}Marquer disponible{% endif %}
                             </button>

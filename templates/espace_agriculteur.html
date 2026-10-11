@@ -35,6 +35,7 @@
                     <div style="margin-top: 8px;">
                         <a href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}"><button type="button">Modifier</button></a>
                         <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit">
                                 {% if recolte.statut == 'disponible' %}Marquer épuisé{% else %}Marquer disponible{% endif %}
                             </button>

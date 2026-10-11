@@ -9,6 +9,8 @@ def client(tmp_path, monkeypatch):
     # Base SQLite temporaire, pour ne pas toucher à app_agricole.db
     monkeypatch.setattr(database, "DB_NAME", str(tmp_path / "test.db"))
     database.init_db()
+    # Ces tests portent sur la validation ; le jeton CSRF est testé dans test_csrf.py
+    monkeypatch.setitem(app.config, "WTF_CSRF_ENABLED", False)
     return app.test_client()
 
 

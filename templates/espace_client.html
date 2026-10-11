@@ -46,6 +46,7 @@
                     </div>
 
                     <form method="POST" action="{{ url_for('ajouter_au_panier', recolte_id=recolte.id) }}" style="display:flex; gap:6px; margin-top:8px; align-items:center;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="text" name="quantite" placeholder="Quantité (ex: 10 kg)" required style="width:auto; flex:1; margin:0;">
                         <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Ajouter au panier</button>
                     </form>
