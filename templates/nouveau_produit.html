@@ -1,24 +1,25 @@
 {% extends "base.html" %}
 {% block contenu %}
+    {% set saisie = saisie or {} %}
     <h2>Publier un produit</h2>
     <form method="POST" enctype="multipart/form-data">
-        <input type="text" name="nom" placeholder="Nom du produit (ex: Maïs hybride)" required>
+        <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom du produit (ex: Maïs hybride)" required>
 
         <label>Type de produit</label>
         <select name="type_produit" required>
-            <option value="" disabled selected>Choisir...</option>
-            <option value="semence">Semence</option>
-            <option value="pepiniere">Pépinière / plant</option>
+            <option value="" disabled {% if not saisie.get('type_produit') %}selected{% endif %}>Choisir...</option>
+            <option value="semence" {% if saisie.get('type_produit') == 'semence' %}selected{% endif %}>Semence</option>
+            <option value="pepiniere" {% if saisie.get('type_produit') == 'pepiniere' %}selected{% endif %}>Pépinière / plant</option>
         </select>
 
-        <input type="text" name="variete" placeholder="Variété (optionnel, ex: NERICA 4)">
-        <input type="text" name="duree_croissance" placeholder="Durée de croissance (optionnel, ex: 90 jours)">
+        <input type="text" name="variete" value="{{ saisie.get('variete', '') }}" placeholder="Variété (optionnel, ex: NERICA 4)">
+        <input type="text" name="duree_croissance" value="{{ saisie.get('duree_croissance', '') }}" placeholder="Durée de croissance (optionnel, ex: 90 jours)">
 
-        <input type="text" name="quantite" placeholder="Quantité disponible (ex: 100 sachets)" required>
-        <input type="text" name="prix" placeholder="Prix (ex: 2000 FCFA / sachet)" required>
-        <input type="text" name="localite" placeholder="Localité" required>
+        <input type="text" name="quantite" value="{{ saisie.get('quantite', '') }}" placeholder="Quantité disponible (ex: 100 sachets)" required>
+        <input type="text" name="prix" value="{{ saisie.get('prix', '') }}" placeholder="Prix (ex: 2000 FCFA / sachet)" required>
+        <input type="text" name="localite" value="{{ saisie.get('localite', '') }}" placeholder="Localité" required>
 
-        <textarea name="description" placeholder="Description (optionnel)" rows="4"></textarea>
+        <textarea name="description" placeholder="Description (optionnel)" rows="4">{{ saisie.get('description', '') }}</textarea>
 
         <label>Photo du produit (optionnel)</label>
         <input type="file" name="photo" accept="image/*">
