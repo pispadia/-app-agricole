@@ -7,7 +7,7 @@ from markupsafe import escape
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_connexion
 from emails import envoyer_email
-from core import app, utilisateur_connecte
+from core import app, utilisateur_connecte, mot_de_passe_valide, telephone_valide, ROLES
 
 
 @app.route("/")
@@ -21,20 +21,29 @@ def inscription():
         nom = request.form["nom"]
         email = request.form["email"]
         mot_de_passe = request.form["mot_de_passe"]
-        role = request.form["role"]
+        role = request.form.get("role", "")
+
+        try:
+            if role not in ROLES:
+                raise ValueError("Choisis un type de compte dans la liste.")
+            mot_de_passe_valide(mot_de_passe)
+            telephone = telephone_valide(request.form.get("telephone", ""))
+        except ValueError as erreur:
+            flash(str(erreur))
+            return render_template("inscription.html", saisie=request.form)
 
         mot_de_passe_hache = generate_password_hash(mot_de_passe)
 
         connexion = get_connexion()
         try:
             connexion.execute(
-                "INSERT INTO utilisateurs (nom, email, mot_de_passe, role) VALUES (?, ?, ?, ?)",
-                (nom, email, mot_de_passe_hache, role)
+                "INSERT INTO utilisateurs (nom, email, mot_de_passe, role, telephone) VALUES (?, ?, ?, ?, ?)",
+                (nom, email, mot_de_passe_hache, role, telephone)
             )
             connexion.commit()
         except Exception:
             flash("Cet email est déjà utilisé.")
-            return redirect(url_for("inscription"))
+            return render_template("inscription.html", saisie=request.form)
         finally:
             connexion.close()
 
@@ -182,9 +191,13 @@ def reinitialiser_mot_de_passe(jeton):
 
     if request.method == "POST":
         mot_de_passe = request.form["mot_de_passe"]
-        if not mot_de_passe or mot_de_passe != request.form["confirmation"]:
+        try:
+            mot_de_passe_valide(mot_de_passe)
+            if mot_de_passe != request.form["confirmation"]:
+                raise ValueError("Les deux mots de passe doivent être identiques.")
+        except ValueError as erreur:
             connexion_bd.close()
-            flash("Les deux mots de passe doivent être identiques.")
+            flash(str(erreur))
             return redirect(url_for("reinitialiser_mot_de_passe", jeton=jeton))
 
         connexion_bd.execute(
@@ -232,6 +245,15 @@ def mon_profil():
             flash("Mot de passe actuel incorrect.")
             return redirect(url_for("mon_profil"))
 
+        try:
+            if nouveau_mot_de_passe:
+                mot_de_passe_valide(nouveau_mot_de_passe)
+            telephone = telephone_valide(request.form.get("telephone", ""))
+        except ValueError as erreur:
+            connexion_bd.close()
+            flash(str(erreur))
+            return redirect(url_for("mon_profil"))
+
         if nouveau_mot_de_passe:
             mot_de_passe_a_enregistrer = generate_password_hash(nouveau_mot_de_passe)
         else:
@@ -239,8 +261,8 @@ def mon_profil():
 
         try:
             connexion_bd.execute(
-                "UPDATE utilisateurs SET nom = ?, email = ?, mot_de_passe = ? WHERE id = ?",
-                (nom, email, mot_de_passe_a_enregistrer, session["utilisateur_id"])
+                "UPDATE utilisateurs SET nom = ?, email = ?, mot_de_passe = ?, telephone = ? WHERE id = ?",
+                (nom, email, mot_de_passe_a_enregistrer, telephone, session["utilisateur_id"])
             )
             connexion_bd.commit()
         except Exception:

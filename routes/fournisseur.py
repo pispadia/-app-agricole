@@ -166,7 +166,8 @@ def semences_pepinieres():
     tri = request.args.get("tri", "recent")
 
     requete = """
-        SELECT produits_fournisseur.*, utilisateurs.nom AS nom_fournisseur
+        SELECT produits_fournisseur.*, utilisateurs.nom AS nom_fournisseur,
+               utilisateurs.telephone AS telephone_fournisseur
         FROM produits_fournisseur
         JOIN utilisateurs ON produits_fournisseur.fournisseur_id = utilisateurs.id
         WHERE produits_fournisseur.statut = 'disponible'

@@ -272,6 +272,22 @@ def init_db():
             connexion.execute(f"ALTER TABLE {nom_table} ENABLE ROW LEVEL SECURITY")
         connexion.commit()
 
+    # Colonnes ajoutées après coup (bases existantes, SQLite comme PostgreSQL) :
+    # numéro de téléphone facultatif, et suivi des changements de statut vus par le client
+    # (lu_client = 0 quand l'agriculteur a fait évoluer la commande).
+    colonnes_ajoutees = (
+        ("utilisateurs", "telephone", "TEXT"),
+        ("commandes", "lu_client", "INTEGER NOT NULL DEFAULT 1"),
+    )
+    for nom_table, colonne, definition in colonnes_ajoutees:
+        try:
+            if colonne not in colonnes_de_table(curseur, nom_table):
+                curseur.execute(f"ALTER TABLE {nom_table} ADD COLUMN {colonne} {definition}")
+                connexion.commit()
+        except Exception as erreur:
+            connexion.rollback()
+            print(f"[migration] ERREUR ajout {nom_table}.{colonne} : {erreur}")
+
     # Ajoute la colonne "lu" aux tables déjà existantes (SQLite comme PostgreSQL) créées
     # avant l'introduction des notifications
     for nom_table in ("commandes", "contacts_fournisseur", "contacts_offre", "contacts_demande"):

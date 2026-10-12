@@ -11,8 +11,11 @@
         <label>Email</label>
         <input type="email" name="email" value="{{ utilisateur.email }}" required>
 
-        <label>Nouveau mot de passe (laisser vide pour ne pas le changer)</label>
-        <input type="password" name="nouveau_mot_de_passe" placeholder="Nouveau mot de passe">
+        <label>Téléphone / WhatsApp (optionnel, visible par les personnes avec qui tu échanges)</label>
+        <input type="tel" name="telephone" value="{{ utilisateur.telephone or '' }}" placeholder="ex: 77 123 45 67">
+
+        <label>Nouveau mot de passe (laisser vide pour ne pas le changer, 8 caractères minimum)</label>
+        <input type="password" name="nouveau_mot_de_passe" placeholder="Nouveau mot de passe" minlength="8">
 
         <label>Mot de passe actuel (requis pour confirmer)</label>
         <input type="password" name="mot_de_passe_actuel" placeholder="Ton mot de passe actuel" required>

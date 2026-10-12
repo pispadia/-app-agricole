@@ -1,18 +1,20 @@
 {% extends "base.html" %}
 {% block contenu %}
+    {% set saisie = saisie or {} %}
     <h2>Créer un compte</h2>
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="text" name="nom" placeholder="Nom complet" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="mot_de_passe" placeholder="Mot de passe" required>
+        <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom complet" required>
+        <input type="email" name="email" value="{{ saisie.get('email', '') }}" placeholder="Email" required>
+        <input type="tel" name="telephone" value="{{ saisie.get('telephone', '') }}" placeholder="Téléphone / WhatsApp (optionnel, ex: 77 123 45 67)">
+        <input type="password" name="mot_de_passe" placeholder="Mot de passe (8 caractères minimum)" minlength="8" required>
 
         <select name="role" required>
-            <option value="" disabled selected>Je suis...</option>
-            <option value="client">Client</option>
-            <option value="agriculteur">Agriculteur</option>
-            <option value="fournisseur">Fournisseur (semences / pépinières)</option>
-            <option value="financeur">Organisme de financement</option>
+            <option value="" disabled {% if not saisie.get('role') %}selected{% endif %}>Je suis...</option>
+            <option value="client" {% if saisie.get('role') == 'client' %}selected{% endif %}>Client</option>
+            <option value="agriculteur" {% if saisie.get('role') == 'agriculteur' %}selected{% endif %}>Agriculteur</option>
+            <option value="fournisseur" {% if saisie.get('role') == 'fournisseur' %}selected{% endif %}>Fournisseur (semences / pépinières)</option>
+            <option value="financeur" {% if saisie.get('role') == 'financeur' %}selected{% endif %}>Organisme de financement</option>
         </select>
 
         <button type="submit">S'inscrire</button>

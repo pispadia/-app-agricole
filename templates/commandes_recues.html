@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_statut_commande.html" import badge_statut %}
 {% block contenu %}
     <h2>Commandes reçues</h2>
@@ -14,6 +15,7 @@
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
                     <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçue le {{ commande.date_creation }}</p>
+                    {{ bouton_whatsapp(commande.telephone_client, "Bonjour, je vous contacte au sujet de votre commande de « " ~ commande.nom_recolte ~ " » (" ~ commande.quantite_demandee ~ ") sur App Agricole.") }}
 
                     {% set actions = {"confirmee": "Confirmer", "livree": "Marquer livrée", "annulee": "Refuser / annuler"} %}
                     {% for statut_suivant in transitions.get(commande.statut, ()) %}

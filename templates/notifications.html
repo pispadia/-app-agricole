@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_statut_commande.html" import badge_statut %}
 {% block contenu %}
     <h2>Notifications</h2>
 
@@ -73,7 +74,23 @@
             <p>Aucun intérêt reçu pour le moment.</p>
         {% endif %}
 
-    {% else %}
-        <p>Tu seras notifié ici dès qu'un agriculteur répondra à l'une de tes commandes.</p>
+    {% elif role == 'client' %}
+        <h3>Suivi de mes commandes</h3>
+        {% if commandes_client %}
+            {% for c in commandes_client %}
+                <div class="carte-recolte">
+                    <div>
+                        <strong>{{ c.nom_recolte }}</strong> — {{ c.quantite_demandee }}
+                        {{ badge_statut(c.statut) }}
+                        {% if c.lu_client == 0 %}<span class="badge badge-epuise">Nouveau</span>{% endif %}<br>
+                        Agriculteur : {{ c.nom_agriculteur }}
+                        <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Commande du {{ c.date_creation }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            <p><a href="{{ url_for('mes_commandes') }}">Voir toutes mes commandes →</a></p>
+        {% else %}
+            <p>Tu seras notifié ici dès qu'un agriculteur répondra à l'une de tes commandes.</p>
+        {% endif %}
     {% endif %}
 {% endblock %}

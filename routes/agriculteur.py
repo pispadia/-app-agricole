@@ -12,7 +12,8 @@ def commandes_recues():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte,
-                  utilisateurs.nom AS nom_client, utilisateurs.email AS email_client
+                  utilisateurs.nom AS nom_client, utilisateurs.email AS email_client,
+                  utilisateurs.telephone AS telephone_client
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON commandes.client_id = utilisateurs.id
@@ -50,7 +51,7 @@ def changer_statut_commande(commande_id):
 
     if commande and nouveau_statut in TRANSITIONS_COMMANDE.get(commande["statut"], ()):
         connexion_bd.execute(
-            "UPDATE commandes SET statut = ? WHERE id = ?", (nouveau_statut, commande_id)
+            "UPDATE commandes SET statut = ?, lu_client = 0 WHERE id = ?", (nouveau_statut, commande_id)
         )
         connexion_bd.commit()
         flash("Statut de la commande mis à jour.")

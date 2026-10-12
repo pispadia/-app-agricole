@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_statut_commande.html" import badge_statut %}
 {% block contenu %}
     <h2>Mes commandes</h2>
@@ -8,13 +9,15 @@
             <div class="carte-recolte">
                 <div>
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
-                    {{ badge_statut(commande.statut) }}<br>
+                    {{ badge_statut(commande.statut) }}
+                    {% if commande.lu_client == 0 %}<span class="badge badge-epuise">Mis à jour</span>{% endif %}<br>
                     Agriculteur : {{ commande.nom_agriculteur }} ({{ commande.email_agriculteur }})<br>
                     Prix affiché : {{ commande.prix }}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
                     <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Passée le {{ commande.date_creation }}</p>
+                    {{ bouton_whatsapp(commande.telephone_agriculteur, "Bonjour, je vous contacte au sujet de ma commande de « " ~ commande.nom_recolte ~ " » (" ~ commande.quantite_demandee ~ ") sur App Agricole.") }}
 
                     {% if commande.statut == 'en_attente' %}
                         <form method="POST" action="{{ url_for('annuler_commande', commande_id=commande.id) }}" style="display:inline;">
