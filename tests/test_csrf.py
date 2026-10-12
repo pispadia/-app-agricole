@@ -20,7 +20,7 @@ def compter_utilisateurs():
     return total
 
 
-INSCRIPTION = {"nom": "Awa", "email": "awa@exemple.sn", "mot_de_passe": "secret", "role": "client"}
+INSCRIPTION = {"nom": "Awa", "email": "awa@exemple.sn", "mot_de_passe": "secret-123", "role": "client"}
 
 
 def test_formulaire_sans_jeton_refuse(client):

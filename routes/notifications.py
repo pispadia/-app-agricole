@@ -25,6 +25,13 @@ def compter_notifications_non_lues(utilisateur_id, role):
         ).fetchone()
         total += r["n"]
 
+    elif role == "client":
+        r = connexion_bd.execute(
+            "SELECT COUNT(*) AS n FROM commandes WHERE client_id = ? AND lu_client = 0",
+            (utilisateur_id,)
+        ).fetchone()
+        total += r["n"]
+
     elif role == "fournisseur":
         r = connexion_bd.execute(
             """SELECT COUNT(*) AS n FROM contacts_fournisseur
@@ -68,6 +75,7 @@ def notifications():
     messages_financement = []
     messages_fournisseur = []
     interets_offre = []
+    commandes_client = []
 
     if role == "agriculteur":
         commandes = connexion_bd.execute(
@@ -100,6 +108,18 @@ def notifications():
                (SELECT id FROM demandes_financement WHERE agriculteur_id = ?)""",
             (utilisateur_id,)
         )
+
+    elif role == "client":
+        commandes_client = connexion_bd.execute(
+            """SELECT commandes.*, recoltes.nom AS nom_recolte, utilisateurs.nom AS nom_agriculteur
+               FROM commandes
+               JOIN recoltes ON commandes.recolte_id = recoltes.id
+               JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+               WHERE commandes.client_id = ? AND commandes.statut != 'en_attente'
+               ORDER BY commandes.lu_client ASC, commandes.date_creation DESC""",
+            (utilisateur_id,)
+        ).fetchall()
+        connexion_bd.execute("UPDATE commandes SET lu_client = 1 WHERE client_id = ?", (utilisateur_id,))
 
     elif role == "fournisseur":
         messages_fournisseur = connexion_bd.execute(
@@ -141,7 +161,8 @@ def notifications():
     return render_template(
         "notifications.html", role=role, commandes=commandes,
         messages_financement=messages_financement,
-        messages_fournisseur=messages_fournisseur, interets_offre=interets_offre
+        messages_fournisseur=messages_fournisseur, interets_offre=interets_offre,
+        commandes_client=commandes_client
     )
 
 

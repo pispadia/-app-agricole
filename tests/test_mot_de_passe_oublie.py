@@ -22,7 +22,7 @@ def client(tmp_path, monkeypatch, emails):
     monkeypatch.setitem(app.config, "WTF_CSRF_ENABLED", False)
     client = app.test_client()
     client.post("/inscription", data={
-        "nom": "Awa", "email": "awa@exemple.sn", "mot_de_passe": "ancien", "role": "client",
+        "nom": "Awa", "email": "awa@exemple.sn", "mot_de_passe": "ancien-mdp", "role": "client",
     })
     return client
 
@@ -48,9 +48,9 @@ def test_reinitialisation_complete(client, emails):
     assert "Si un compte existe" in demander_lien(client, emails)
     assert emails[0][0] == "awa@exemple.sn"
     chemin = chemin_du_lien(emails)
-    client.post(chemin, data={"mot_de_passe": "nouveau", "confirmation": "nouveau"})
-    assert peut_se_connecter(client, "nouveau")
-    assert not peut_se_connecter(client, "ancien")
+    client.post(chemin, data={"mot_de_passe": "nouveau-mdp", "confirmation": "nouveau-mdp"})
+    assert peut_se_connecter(client, "nouveau-mdp")
+    assert not peut_se_connecter(client, "ancien-mdp")
 
 
 def test_email_inconnu_meme_message_sans_envoi(client, emails):
@@ -61,11 +61,11 @@ def test_email_inconnu_meme_message_sans_envoi(client, emails):
 def test_lien_utilisable_une_seule_fois(client, emails):
     demander_lien(client, emails)
     chemin = chemin_du_lien(emails)
-    client.post(chemin, data={"mot_de_passe": "nouveau", "confirmation": "nouveau"})
-    page = client.post(chemin, data={"mot_de_passe": "pirate", "confirmation": "pirate"},
+    client.post(chemin, data={"mot_de_passe": "nouveau-mdp", "confirmation": "nouveau-mdp"})
+    page = client.post(chemin, data={"mot_de_passe": "pirate-mdp", "confirmation": "pirate-mdp"},
                        follow_redirects=True).get_data(as_text=True)
     assert "invalide ou a expiré" in page
-    assert peut_se_connecter(client, "nouveau")
+    assert peut_se_connecter(client, "nouveau-mdp")
 
 
 def test_lien_falsifie_ou_expire(client, emails, monkeypatch):
@@ -81,7 +81,7 @@ def test_lien_falsifie_ou_expire(client, emails, monkeypatch):
 
 def test_confirmation_differente_refusee(client, emails):
     demander_lien(client, emails)
-    page = client.post(chemin_du_lien(emails), data={"mot_de_passe": "a", "confirmation": "b"},
+    page = client.post(chemin_du_lien(emails), data={"mot_de_passe": "aaaaaaaa", "confirmation": "bbbbbbbb"},
                        follow_redirects=True).get_data(as_text=True)
     assert "identiques" in page
-    assert peut_se_connecter(client, "ancien")
+    assert peut_se_connecter(client, "ancien-mdp")

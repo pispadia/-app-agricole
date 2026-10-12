@@ -103,3 +103,36 @@ def prix_valide(texte):
 def utilisateur_connecte():
     return "utilisateur_id" in session
 
+
+
+ROLES = ("client", "agriculteur", "fournisseur", "financeur")
+LONGUEUR_MIN_MOT_DE_PASSE = 8
+
+
+def mot_de_passe_valide(mot_de_passe):
+    """Lève ValueError si le mot de passe est trop court."""
+    if len(mot_de_passe or "") < LONGUEUR_MIN_MOT_DE_PASSE:
+        raise ValueError(f"Le mot de passe doit contenir au moins {LONGUEUR_MIN_MOT_DE_PASSE} caractères.")
+    return mot_de_passe
+
+
+def telephone_valide(texte):
+    """Retourne le numéro nettoyé (ou None s'il est vide), ou lève ValueError s'il est invalide."""
+    texte = " ".join((texte or "").split())
+    if not texte:
+        return None
+    chiffres = re.sub(r"\D", "", texte)
+    if not re.fullmatch(r"\+?[\d .\-()]+", texte) or not 8 <= len(chiffres) <= 15:
+        raise ValueError("Le numéro de téléphone doit contenir entre 8 et 15 chiffres (ex: 77 123 45 67).")
+    return texte
+
+
+@app.template_filter("whatsapp")
+def lien_whatsapp(telephone):
+    """Numéro -> lien wa.me. Un numéro sénégalais local (9 chiffres, 7x) reçoit l'indicatif 221."""
+    chiffres = re.sub(r"\D", "", telephone or "")
+    if chiffres.startswith("00"):
+        chiffres = chiffres[2:]
+    if len(chiffres) == 9 and chiffres.startswith("7"):
+        chiffres = "221" + chiffres
+    return f"https://wa.me/{chiffres}"

@@ -14,7 +14,8 @@ def espace_client():
     tri = request.args.get("tri", "recent")
 
     requete = """
-        SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur
+        SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+               utilisateurs.telephone AS telephone_agriculteur
         FROM recoltes
         JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
         WHERE recoltes.statut = 'disponible'
@@ -200,7 +201,8 @@ def mes_commandes():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.prix,
-                  utilisateurs.nom AS nom_agriculteur, utilisateurs.email AS email_agriculteur
+                  utilisateurs.nom AS nom_agriculteur, utilisateurs.email AS email_agriculteur,
+                  utilisateurs.telephone AS telephone_agriculteur
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
@@ -208,6 +210,9 @@ def mes_commandes():
            ORDER BY commandes.date_creation DESC""",
         (session["utilisateur_id"],)
     ).fetchall()
+    # Les mises à jour affichées ici sont considérées comme vues
+    connexion_bd.execute("UPDATE commandes SET lu_client = 1 WHERE client_id = ?", (session["utilisateur_id"],))
+    connexion_bd.commit()
     connexion_bd.close()
 
     return render_template("mes_commandes.html", nom=session["nom"], commandes=commandes)
@@ -221,7 +226,7 @@ def annuler_commande(commande_id):
     # Le client ne peut annuler que ses propres commandes, tant qu'elles sont en attente
     connexion_bd = get_connexion()
     resultat = connexion_bd.execute(
-        "UPDATE commandes SET statut = 'annulee' WHERE id = ? AND client_id = ? AND statut = 'en_attente'",
+        "UPDATE commandes SET statut = 'annulee', lu = 0 WHERE id = ? AND client_id = ? AND statut = 'en_attente'",
         (commande_id, session["utilisateur_id"])
     )
     connexion_bd.commit()

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_whatsapp.html" import bouton_whatsapp %}
 {% block contenu %}
     <h2>Semences & Pépinières</h2>
     <p>Bienvenue {{ nom }} 👋</p>
@@ -46,6 +47,7 @@
                     <div style="margin-top: 8px;">
                         <a href="{{ url_for('contacter_fournisseur', produit_id=produit.id) }}"><button type="button">Contacter le fournisseur</button></a>
                     </div>
+                    {{ bouton_whatsapp(produit.telephone_fournisseur, "Bonjour, je suis intéressé par votre produit « " ~ produit.nom ~ " » vu sur App Agricole.") }}
                 </div>
             </div>
         {% endfor %}

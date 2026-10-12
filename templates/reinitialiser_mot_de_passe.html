@@ -3,7 +3,7 @@
     <h2>Nouveau mot de passe</h2>
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="password" name="mot_de_passe" placeholder="Nouveau mot de passe" required>
+        <input type="password" name="mot_de_passe" placeholder="Nouveau mot de passe (8 caractères minimum)" minlength="8" required>
         <input type="password" name="confirmation" placeholder="Confirmer le mot de passe" required>
         <button type="submit">Enregistrer</button>
     </form>
