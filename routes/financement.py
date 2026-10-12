@@ -1,7 +1,7 @@
 """Espace financeur et demandes de financement des agriculteurs."""
 from flask import render_template, request, redirect, url_for, session, flash
 from database import get_connexion
-from core import app, utilisateur_connecte
+from core import app, utilisateur_connecte, premium_requis
 
 
 @app.route("/espace-financeur")
@@ -203,6 +203,7 @@ def espace_financement_agriculteur():
 
 
 @app.route("/financement/contacter-offre/<int:offre_id>", methods=["GET", "POST"])
+@premium_requis
 def contacter_offre(offre_id):
     if not utilisateur_connecte() or session["role"] != "agriculteur":
         return redirect(url_for("connexion"))
@@ -236,6 +237,7 @@ def contacter_offre(offre_id):
 
 
 @app.route("/financement/nouvelle-demande", methods=["GET", "POST"])
+@premium_requis
 def nouvelle_demande_financement():
     if not utilisateur_connecte() or session["role"] != "agriculteur":
         return redirect(url_for("connexion"))

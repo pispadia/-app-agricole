@@ -77,7 +77,7 @@ def colonnes_de_table(curseur, nom_table):
 TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
-    "echecs_connexion",
+    "echecs_connexion", "paiements_premium",
 )
 
 
@@ -264,6 +264,21 @@ def init_db():
     """)
     connexion.commit()
 
+    # Paiements d'abonnement Premium déclarés par les utilisateurs (référence de la
+    # transaction Wave / Orange Money), validés à la main par l'administrateur
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS paiements_premium (
+            id {ID_AUTO},
+            utilisateur_id INTEGER NOT NULL,
+            reference TEXT NOT NULL,
+            montant INTEGER NOT NULL,
+            statut TEXT NOT NULL DEFAULT 'en_attente' CHECK(statut IN ('en_attente', 'valide', 'refuse')),
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
     # En ligne (Supabase), active la protection RLS sur toutes les tables : l'API
     # publique de Supabase n'y a alors plus accès, l'application (propriétaire des
     # tables) continue de les utiliser normalement. Sans effet si déjà activée.
@@ -278,6 +293,12 @@ def init_db():
     colonnes_ajoutees = (
         ("utilisateurs", "telephone", "TEXT"),
         ("commandes", "lu_client", "INTEGER NOT NULL DEFAULT 1"),
+        # Premium : date de fin d'abonnement (AAAA-MM-JJ), vide si jamais abonné
+        ("utilisateurs", "premium_jusqu_au", "TEXT"),
+        # Revenus : montant de la vente saisi à la livraison et commission due à la plateforme
+        ("commandes", "montant", "INTEGER"),
+        ("commandes", "commission", "INTEGER"),
+        ("commandes", "commission_payee", "INTEGER NOT NULL DEFAULT 0"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

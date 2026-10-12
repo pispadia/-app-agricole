@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>⭐ Premium</h2>
+
+    {% if fin_premium %}
+        <div class="carte-recolte" style="display:block;">
+            Tu es membre <strong>Premium</strong> jusqu'au <strong>{{ fin_premium.strftime('%d/%m/%Y') }}</strong>.
+            Tu peux renouveler à l'avance : les jours s'ajoutent à ton abonnement en cours.
+        </div>
+    {% endif %}
+
+    <h3>Ce que Premium t'apporte</h3>
+    <ul>
+        <li>💰 <strong>Financement</strong> : publier des demandes de financement et contacter les organismes (agriculteurs).</li>
+        <li>⭐ Un badge <strong>Pro</strong> sur tes annonces.</li>
+        <li>🔝 Tes annonces apparaissent <strong>en premier</strong> dans le catalogue.</li>
+    </ul>
+
+    <h3>S'abonner : {{ prix }} FCFA pour {{ duree }} jours</h3>
+    <ol>
+        <li>Envoie <strong>{{ prix }} FCFA</strong> par Wave ou Orange Money
+            {% if numero_paiement %}au <strong>{{ numero_paiement }}</strong>{% else %}(numéro communiqué par l'équipe){% endif %}.</li>
+        <li>Indique ci-dessous la <strong>référence de la transaction</strong> reçue par SMS.</li>
+        <li>Ton abonnement est activé dès vérification du paiement.</li>
+    </ol>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="reference" placeholder="Référence du paiement (ex: WAVE-123456)" maxlength="100" required>
+        <button type="submit">J'ai payé, activer mon abonnement</button>
+    </form>
+
+    {% if paiements %}
+        <h3>Mes paiements</h3>
+        {% for p in paiements %}
+            <div class="carte-recolte">
+                <div>
+                    {{ p.montant }} FCFA — réf. {{ p.reference }}
+                    {% if p.statut == 'valide' %}<span class="badge badge-dispo">Validé</span>
+                    {% elif p.statut == 'refuse' %}<span class="badge badge-epuise">Refusé</span>
+                    {% else %}<span class="badge badge-attente">En vérification</span>{% endif %}
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

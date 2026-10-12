@@ -1,4 +1,6 @@
 """Espace client : catalogue, panier et commandes."""
+from datetime import date
+
 from flask import render_template, request, redirect, url_for, session, flash
 from database import get_connexion
 from core import app, quantite_valide, utilisateur_connecte
@@ -15,7 +17,8 @@ def espace_client():
 
     requete = """
         SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
-               utilisateurs.telephone AS telephone_agriculteur
+               utilisateurs.telephone AS telephone_agriculteur,
+               utilisateurs.premium_jusqu_au AS premium_agriculteur
         FROM recoltes
         JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
         WHERE recoltes.statut = 'disponible'
@@ -36,7 +39,11 @@ def espace_client():
         "nom": "recoltes.nom ASC",
         "localite": "recoltes.localite ASC",
     }
-    requete += " ORDER BY " + ordres.get(tri, ordres["recent"])
+    # Les annonces des membres Premium passent en premier
+    aujourdhui = date.today().isoformat()
+    requete += (" ORDER BY CASE WHEN utilisateurs.premium_jusqu_au >= ? THEN 0 ELSE 1 END, "
+                + ordres.get(tri, ordres["recent"]))
+    parametres.append(aujourdhui)
 
     connexion_bd = get_connexion()
     recoltes = connexion_bd.execute(requete, parametres).fetchall()
@@ -48,7 +55,7 @@ def espace_client():
     return render_template(
         "espace_client.html", nom=session["nom"], recoltes=recoltes,
         localites=localites, recherche=recherche, localite_choisie=localite, tri_choisi=tri,
-        taille_panier=len(session.get("panier", []))
+        taille_panier=len(session.get("panier", [])), aujourdhui=aujourdhui
     )
 
 

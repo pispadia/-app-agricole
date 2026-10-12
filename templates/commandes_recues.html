@@ -4,6 +4,17 @@
 {% block contenu %}
     <h2>Commandes reçues</h2>
 
+    <div class="carte-recolte" style="display:block;">
+        La plateforme prélève une commission de <strong>{{ (taux_commission * 100) | round(1) }} %</strong>
+        sur chaque vente livrée (montant indiqué à la livraison).<br>
+        {% if commission_due %}
+            Commission à régler : <strong>{{ commission_due }} FCFA</strong>
+            {% if numero_paiement %}— par Wave / Orange Money au <strong>{{ numero_paiement }}</strong>{% endif %}.
+        {% else %}
+            Aucune commission à régler pour le moment.
+        {% endif %}
+    </div>
+
     {% if commandes %}
         {% for commande in commandes %}
             <div class="carte-recolte">
@@ -18,10 +29,18 @@
                     {{ bouton_whatsapp(commande.telephone_client, "Bonjour, je vous contacte au sujet de votre commande de « " ~ commande.nom_recolte ~ " » (" ~ commande.quantite_demandee ~ ") sur App Agricole.") }}
 
                     {% set actions = {"confirmee": "Confirmer", "livree": "Marquer livrée", "annulee": "Refuser / annuler"} %}
+                    {% if commande.statut == 'livree' and commande.montant %}
+                        <p style="margin: 5px 0 0;">Vente : {{ commande.montant }} FCFA — commission : {{ commande.commission }} FCFA
+                            {% if commande.commission_payee %}<span class="badge badge-dispo">Réglée</span>{% else %}<span class="badge badge-attente">À régler</span>{% endif %}</p>
+                    {% endif %}
+
                     {% for statut_suivant in transitions.get(commande.statut, ()) %}
                         <form method="POST" action="{{ url_for('changer_statut_commande', commande_id=commande.id) }}" style="display:inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="statut" value="{{ statut_suivant }}">
+                            {% if statut_suivant == 'livree' %}
+                                <input type="text" name="montant" placeholder="Montant encaissé (FCFA)" required inputmode="numeric" style="width:auto; margin:8px 0 0;">
+                            {% endif %}
                             <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px;{% if statut_suivant == 'annulee' %} background-color:#a94442;{% endif %}">{{ actions[statut_suivant] }}</button>
                         </form>
                     {% endfor %}

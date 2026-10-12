@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Administration — revenus</h2>
+
+    <div class="carte-recolte" style="display:block;">
+        Ventes livrées : <strong>{{ totaux.ventes }} FCFA</strong><br>
+        Commissions encaissées : <strong>{{ totaux.commissions_encaissees }} FCFA</strong>
+        · à encaisser : <strong>{{ totaux.commissions_dues }} FCFA</strong>
+        (taux : {{ (taux_commission * 100) | round(1) }} %)<br>
+        Abonnements Premium encaissés : <strong>{{ totaux.premium_encaisse }} FCFA</strong>
+        · abonnés actifs : <strong>{{ totaux.abonnes }}</strong><br>
+        <strong>Total encaissé : {{ totaux.commissions_encaissees + totaux.premium_encaisse }} FCFA</strong>
+    </div>
+
+    <h3>Paiements Premium à vérifier</h3>
+    {% if paiements %}
+        {% for p in paiements %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ p.nom }}</strong> ({{ p.role }}, {{ p.email }}) — {{ p.montant }} FCFA<br>
+                    Référence : <strong>{{ p.reference }}</strong>
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation }}</p>
+                    {% for decision, libelle, couleur in [("valider", "Valider", ""), ("refuser", "Refuser", "background-color:#a94442;")] %}
+                        <form method="POST" action="{{ url_for('traiter_paiement', paiement_id=p.id, decision=decision) }}" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px; {{ couleur }}">{{ libelle }}</button>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun paiement en attente.</p>
+    {% endif %}
+
+    <h3>Commissions à encaisser</h3>
+    {% if commissions %}
+        {% for c in commissions %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ c.nom_agriculteur }}</strong>{% if c.telephone_agriculteur %} ({{ c.telephone_agriculteur }}){% endif %}
+                    — {{ c.nom_recolte }} : vente {{ c.montant }} FCFA, commission <strong>{{ c.commission }} FCFA</strong>
+                    <form method="POST" action="{{ url_for('commission_reglee', commande_id=c.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px;">Marquer réglée</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucune commission en attente.</p>
+    {% endif %}
+{% endblock %}

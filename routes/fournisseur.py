@@ -1,4 +1,6 @@
 """Espace fournisseur de semences et catalogue des semences/pépinières."""
+from datetime import date
+
 from flask import render_template, request, redirect, url_for, session, flash
 from database import get_connexion
 from core import app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte
@@ -167,7 +169,8 @@ def semences_pepinieres():
 
     requete = """
         SELECT produits_fournisseur.*, utilisateurs.nom AS nom_fournisseur,
-               utilisateurs.telephone AS telephone_fournisseur
+               utilisateurs.telephone AS telephone_fournisseur,
+               utilisateurs.premium_jusqu_au AS premium_fournisseur
         FROM produits_fournisseur
         JOIN utilisateurs ON produits_fournisseur.fournisseur_id = utilisateurs.id
         WHERE produits_fournisseur.statut = 'disponible'
@@ -193,7 +196,11 @@ def semences_pepinieres():
         "nom": "produits_fournisseur.nom ASC",
         "localite": "produits_fournisseur.localite ASC",
     }
-    requete += " ORDER BY " + ordres.get(tri, ordres["recent"])
+    # Les annonces des membres Premium passent en premier
+    aujourdhui = date.today().isoformat()
+    requete += (" ORDER BY CASE WHEN utilisateurs.premium_jusqu_au >= ? THEN 0 ELSE 1 END, "
+                + ordres.get(tri, ordres["recent"]))
+    parametres.append(aujourdhui)
 
     connexion_bd = get_connexion()
     produits = connexion_bd.execute(requete, parametres).fetchall()
@@ -205,7 +212,7 @@ def semences_pepinieres():
     return render_template(
         "semences_pepinieres.html", nom=session["nom"], produits=produits,
         localites=localites, recherche=recherche, localite_choisie=localite, type_choisi=type_produit,
-        tri_choisi=tri
+        tri_choisi=tri, aujourdhui=aujourdhui
     )
 
 

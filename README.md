@@ -17,6 +17,12 @@ Copie `.env.example` dans les variables d'environnement de l'hébergeur, puis d�
 
 Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://www.brevo.com), valide une adresse d'expédition, puis définis `BREVO_API_KEY` et `EMAIL_EXPEDITEUR`. En local sans ces variables, le lien de réinitialisation s'affiche dans la console.
 
+## Revenus : commission et Premium
+
+- **Commission** : quand l'agriculteur marque une commande « livrée », il indique le montant encaissé ; la plateforme calcule sa commission (`TAUX_COMMISSION`, 5 % par défaut). L'agriculteur voit ce qu'il doit et le numéro où payer.
+- **Premium** (`PRIX_PREMIUM_MENSUEL` FCFA pour 30 jours) : badge ⭐ Pro, annonces en tête du catalogue, et accès au financement (publier une demande, contacter un organisme). L'utilisateur paie par Wave / Orange Money au `NUMERO_PAIEMENT` puis déclare la référence sur `/premium`.
+- **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`) : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
+
 ## Organisation du code
 
 - `app.py` : point d'entrée (`python app.py` en local, `gunicorn app:app` en ligne).
