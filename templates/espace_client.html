@@ -34,7 +34,8 @@
                     <img src="{{ recolte.photo }}" alt="{{ recolte.nom }}">
                 {% endif %}
                 <div>
-                    <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}<br>
+                    <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
+                    {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
                     Par {{ recolte.nom_agriculteur }}<br>
                     Détail : {{ recolte.prix }}<br>
                     {% if recolte.prix_gros %}

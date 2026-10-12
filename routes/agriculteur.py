@@ -1,7 +1,8 @@
 """Espace agriculteur : récoltes et commandes reçues."""
 from flask import render_template, request, redirect, url_for, session, flash
 from database import get_connexion
-from core import app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte
+from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
+                  montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT)
 
 
 @app.route("/espace-agriculteur/commandes")
@@ -23,8 +24,11 @@ def commandes_recues():
     ).fetchall()
     connexion_bd.close()
 
+    commission_due = sum((c["commission"] or 0) for c in commandes
+                         if c["statut"] == "livree" and not c["commission_payee"])
     return render_template("commandes_recues.html", nom=session["nom"], commandes=commandes,
-                           transitions=TRANSITIONS_COMMANDE)
+                           transitions=TRANSITIONS_COMMANDE, commission_due=commission_due,
+                           taux_commission=TAUX_COMMISSION, numero_paiement=NUMERO_PAIEMENT)
 
 
 # Changements de statut autorisés pour l'agriculteur : statut actuel -> statuts possibles
@@ -49,14 +53,29 @@ def changer_statut_commande(commande_id):
         (commande_id, session["utilisateur_id"])
     ).fetchone()
 
-    if commande and nouveau_statut in TRANSITIONS_COMMANDE.get(commande["statut"], ()):
+    if not (commande and nouveau_statut in TRANSITIONS_COMMANDE.get(commande["statut"], ())):
+        flash("Ce changement de statut n'est pas possible.")
+    elif nouveau_statut == "livree":
+        # À la livraison, l'agriculteur indique le montant encaissé : la commission
+        # de la plateforme est calculée dessus
+        try:
+            montant = montant_valide(request.form.get("montant", ""))
+        except ValueError as erreur:
+            flash(str(erreur))
+        else:
+            commission = calculer_commission(montant)
+            connexion_bd.execute(
+                """UPDATE commandes SET statut = 'livree', lu_client = 0, montant = ?, commission = ?
+                   WHERE id = ?""", (montant, commission, commande_id)
+            )
+            connexion_bd.commit()
+            flash(f"Commande livrée. Commission de la plateforme : {commission} FCFA.")
+    else:
         connexion_bd.execute(
             "UPDATE commandes SET statut = ?, lu_client = 0 WHERE id = ?", (nouveau_statut, commande_id)
         )
         connexion_bd.commit()
         flash("Statut de la commande mis à jour.")
-    else:
-        flash("Ce changement de statut n'est pas possible.")
 
     connexion_bd.close()
     return redirect(url_for("commandes_recues"))

@@ -35,7 +35,8 @@
                 {% endif %}
                 <div>
                     <strong>{{ produit.nom }}</strong>
-                    ({{ 'Semence' if produit.type_produit == 'semence' else 'Pépinière' }})<br>
+                    ({{ 'Semence' if produit.type_produit == 'semence' else 'Pépinière' }})
+                    {% if produit.premium_fournisseur and produit.premium_fournisseur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
                     Par {{ produit.nom_fournisseur }}<br>
                     {% if produit.variete %}Variété : {{ produit.variete }}<br>{% endif %}
                     {% if produit.duree_croissance %}Durée de croissance : {{ produit.duree_croissance }}<br>{% endif %}

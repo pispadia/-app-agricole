@@ -56,7 +56,7 @@ def test_cycle_complet_d_une_commande(client):
     en_tant_que(client, 1, "agriculteur")
     client.post("/espace-agriculteur/commandes/1/statut", data={"statut": "confirmee"})
     assert statut_commande() == "confirmee"
-    client.post("/espace-agriculteur/commandes/1/statut", data={"statut": "livree"})
+    client.post("/espace-agriculteur/commandes/1/statut", data={"statut": "livree", "montant": "10000"})
     assert statut_commande() == "livree"
 
     en_tant_que(client, 2, "client")

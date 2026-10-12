@@ -3,6 +3,7 @@ import os
 import re
 import base64
 import secrets
+from functools import wraps
 from flask import Flask, session, flash, redirect, request, url_for
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -136,3 +137,77 @@ def lien_whatsapp(telephone):
     if len(chiffres) == 9 and chiffres.startswith("7"):
         chiffres = "221" + chiffres
     return f"https://wa.me/{chiffres}"
+
+
+# --- Modèle économique ---------------------------------------------------------
+# Tous les montants sont en FCFA. Valeurs modifiables par variables d'environnement.
+TAUX_COMMISSION = float(os.environ.get("TAUX_COMMISSION", "0.05"))           # 5 % des ventes livrées
+PRIX_PREMIUM_MENSUEL = int(os.environ.get("PRIX_PREMIUM_MENSUEL", "3000"))    # abonnement de 30 jours
+DUREE_PREMIUM_JOURS = 30
+NUMERO_PAIEMENT = os.environ.get("NUMERO_PAIEMENT", "")                       # numéro Wave / Orange Money
+EMAILS_ADMIN = {e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "").split(",") if e.strip()}
+
+
+def calculer_commission(montant):
+    return round(montant * TAUX_COMMISSION)
+
+
+def montant_valide(texte):
+    """Montant entier positif en FCFA (espaces et points de milliers acceptés)."""
+    chiffres = re.sub(r"[\s.]", "", texte or "").upper().replace("FCFA", "").replace("F", "")
+    if not chiffres.isdigit() or int(chiffres) <= 0:
+        raise ValueError("Indique le montant de la vente en FCFA (ex: 25000).")
+    return int(chiffres)
+
+
+def date_fin_premium(utilisateur):
+    """Date de fin d'abonnement (objet date) si l'utilisateur est Premium aujourd'hui, sinon None."""
+    from datetime import date
+    valeur = utilisateur["premium_jusqu_au"] if utilisateur else None
+    if not valeur:
+        return None
+    fin = date.fromisoformat(str(valeur)[:10])
+    return fin if fin >= date.today() else None
+
+
+def utilisateur_courant():
+    """Ligne de l'utilisateur connecté (ou None)."""
+    if not utilisateur_connecte():
+        return None
+    from database import get_connexion
+    connexion_bd = get_connexion()
+    utilisateur = connexion_bd.execute(
+        "SELECT * FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)
+    ).fetchone()
+    connexion_bd.close()
+    return utilisateur
+
+
+def est_premium():
+    return date_fin_premium(utilisateur_courant()) is not None
+
+
+def est_admin():
+    utilisateur = utilisateur_courant()
+    return bool(utilisateur) and utilisateur["email"].strip().lower() in EMAILS_ADMIN
+
+
+def premium_requis(vue):
+    """Réserve une page aux abonnés Premium ; les autres sont envoyés vers la page d'abonnement."""
+    @wraps(vue)
+    def vue_protegee(*args, **kwargs):
+        if utilisateur_connecte() and not est_premium():
+            flash("Cette fonctionnalité est réservée aux membres Premium.")
+            return redirect(url_for("premium"))
+        return vue(*args, **kwargs)
+    return vue_protegee
+
+
+@app.context_processor
+def injecter_statut_compte():
+    """Rend le statut Premium / administrateur disponible dans tous les templates."""
+    utilisateur = utilisateur_courant()
+    return {
+        "fin_premium": date_fin_premium(utilisateur),
+        "est_admin": bool(utilisateur) and utilisateur["email"].strip().lower() in EMAILS_ADMIN,
+    }
