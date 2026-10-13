@@ -1,5 +1,6 @@
 """Espace agriculteur : récoltes et commandes reçues."""
 from flask import render_template, request, redirect, url_for, session, flash
+import sms
 from database import get_connexion
 from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT)
@@ -38,6 +39,15 @@ TRANSITIONS_COMMANDE = {
 }
 
 
+MESSAGES_STATUT = {"confirmee": "confirmée", "livree": "livrée", "annulee": "annulée"}
+
+
+def alerter_client(commande, statut):
+    sms.alerter(commande["telephone_client"],
+                f"App Agricole : ta commande de {commande['nom_recolte']} a été {MESSAGES_STATUT[statut]} "
+                f"par {session['nom']}.")
+
+
 @app.route("/espace-agriculteur/commandes/<int:commande_id>/statut", methods=["POST"])
 def changer_statut_commande(commande_id):
     if not utilisateur_connecte() or session["role"] != "agriculteur":
@@ -47,8 +57,10 @@ def changer_statut_commande(commande_id):
     connexion_bd = get_connexion()
     # Seulement les commandes portant sur une récolte de cet agriculteur
     commande = connexion_bd.execute(
-        """SELECT commandes.statut FROM commandes
+        """SELECT commandes.statut, recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
+           FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
+           JOIN utilisateurs ON commandes.client_id = utilisateurs.id
            WHERE commandes.id = ? AND recoltes.agriculteur_id = ?""",
         (commande_id, session["utilisateur_id"])
     ).fetchone()
@@ -69,12 +81,14 @@ def changer_statut_commande(commande_id):
                    WHERE id = ?""", (montant, commission, commande_id)
             )
             connexion_bd.commit()
+            alerter_client(commande, "livree")
             flash(f"Commande livrée. Commission de la plateforme : {commission} FCFA.")
     else:
         connexion_bd.execute(
             "UPDATE commandes SET statut = ?, lu_client = 0 WHERE id = ?", (nouveau_statut, commande_id)
         )
         connexion_bd.commit()
+        alerter_client(commande, nouveau_statut)
         flash("Statut de la commande mis à jour.")
 
     connexion_bd.close()
