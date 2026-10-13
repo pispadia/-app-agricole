@@ -77,7 +77,7 @@ def colonnes_de_table(curseur, nom_table):
 TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
-    "echecs_connexion", "paiements_premium",
+    "echecs_connexion", "paiements_premium", "paiements_wave",
 )
 
 
@@ -273,6 +273,23 @@ def init_db():
             reference TEXT NOT NULL,
             montant INTEGER NOT NULL,
             statut TEXT NOT NULL DEFAULT 'en_attente' CHECK(statut IN ('en_attente', 'valide', 'refuse')),
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
+    # Paiements Wave (abonnement Premium ou commissions) : une ligne par session de
+    # paiement ; « details » liste les commandes réglées pour une commission
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS paiements_wave (
+            id {ID_AUTO},
+            utilisateur_id INTEGER NOT NULL,
+            objet TEXT NOT NULL CHECK(objet IN ('premium', 'commission')),
+            montant INTEGER NOT NULL,
+            details TEXT,
+            session_id TEXT,
+            statut TEXT NOT NULL DEFAULT 'en_attente' CHECK(statut IN ('en_attente', 'paye', 'echec')),
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
         )

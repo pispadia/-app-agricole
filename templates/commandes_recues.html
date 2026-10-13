@@ -10,6 +10,12 @@
         {% if commission_due %}
             Commission à régler : <strong>{{ commission_due }} FCFA</strong>
             {% if numero_paiement %}— par Wave / Orange Money au <strong>{{ numero_paiement }}</strong>{% endif %}.
+            {% if wave_actif %}
+                <form method="POST" action="{{ url_for('payer_commissions_wave') }}" style="margin-top:8px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" style="width:auto; background-color:#1dc8f2;">Payer {{ commission_due }} FCFA avec Wave</button>
+                </form>
+            {% endif %}
         {% else %}
             Aucune commission à régler pour le moment.
         {% endif %}

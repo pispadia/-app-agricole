@@ -17,6 +17,13 @@
     </ul>
 
     <h3>S'abonner : {{ prix }} FCFA pour {{ duree }} jours</h3>
+    {% if wave_actif %}
+        <form method="POST" action="{{ url_for('payer_premium_wave') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" style="background-color:#1dc8f2;">Payer {{ prix }} FCFA avec Wave</button>
+        </form>
+        <p style="color:#666; font-size:0.9em;">Activation immédiate après le paiement. Autre moyen de paiement (Orange Money…) :</p>
+    {% endif %}
     <ol>
         <li>Envoie <strong>{{ prix }} FCFA</strong> par Wave ou Orange Money
             {% if numero_paiement %}au <strong>{{ numero_paiement }}</strong>{% else %}(numéro communiqué par l'équipe){% endif %}.</li>

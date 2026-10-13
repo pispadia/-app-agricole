@@ -8,6 +8,18 @@ from core import (app, utilisateur_connecte, date_fin_premium, est_admin,
                   PRIX_PREMIUM_MENSUEL, DUREE_PREMIUM_JOURS, NUMERO_PAIEMENT, TAUX_COMMISSION)
 
 
+def prolonger_premium(connexion_bd, utilisateur_id):
+    """Ajoute DUREE_PREMIUM_JOURS à l'abonnement (depuis sa fin s'il est actif, sinon depuis aujourd'hui)."""
+    utilisateur = connexion_bd.execute(
+        "SELECT premium_jusqu_au FROM utilisateurs WHERE id = ?", (utilisateur_id,)
+    ).fetchone()
+    debut = date_fin_premium(utilisateur) or date.today()
+    fin = debut + timedelta(days=DUREE_PREMIUM_JOURS)
+    connexion_bd.execute("UPDATE utilisateurs SET premium_jusqu_au = ? WHERE id = ?",
+                         (fin.isoformat(), utilisateur_id))
+    return fin
+
+
 @app.route("/premium", methods=["GET", "POST"])
 def premium():
     if not utilisateur_connecte():
@@ -97,11 +109,7 @@ def traiter_paiement(paiement_id, decision):
     ).fetchone()
 
     if paiement and decision == "valider":
-        # Prolonge l'abonnement à partir de sa date de fin s'il est encore actif, sinon d'aujourd'hui
-        debut = date_fin_premium(paiement) or date.today()
-        fin = debut + timedelta(days=DUREE_PREMIUM_JOURS)
-        connexion_bd.execute("UPDATE utilisateurs SET premium_jusqu_au = ? WHERE id = ?",
-                             (fin.isoformat(), paiement["utilisateur_id"]))
+        fin = prolonger_premium(connexion_bd, paiement["utilisateur_id"])
         connexion_bd.execute("UPDATE paiements_premium SET statut = 'valide' WHERE id = ?", (paiement_id,))
         connexion_bd.commit()
         flash(f"Paiement validé : Premium jusqu'au {fin.strftime('%d/%m/%Y')}.")
