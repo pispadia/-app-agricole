@@ -2,7 +2,8 @@
 
 Variables d'environnement :
 - ORANGE_SMS_CLIENT_ID et ORANGE_SMS_CLIENT_SECRET : identifiants de l'application Orange Developer ;
-- ORANGE_SMS_EXPEDITEUR : numéro du compte SMS (ex: 221771234567).
+- ORANGE_SMS_EXPEDITEUR : adresse d'envoi du compte, en général l'indicatif suivi de 0000
+  (Sénégal : 2210000), sauf numéro dédié fourni par Orange.
 Sans ces variables (en local par exemple), le SMS est affiché dans la console.
 Un SMS qui échoue n'empêche jamais l'action de l'utilisateur d'aboutir.
 """
@@ -71,7 +72,8 @@ def envoyer_sms(telephone, message):
         print(f"[sms] Envoi non configuré, SMS pour {destinataire} : {message}")
         return False
 
-    expediteur = numero_international(os.environ["ORANGE_SMS_EXPEDITEUR"])
+    # Pas de contrôle de longueur ici : l'adresse d'envoi Orange est souvent courte (tel:+2210000)
+    expediteur = "tel:+" + re.sub(r"\D", "", os.environ["ORANGE_SMS_EXPEDITEUR"])
     try:
         requete = urllib.request.Request(
             URL_ENVOI.format(expediteur=urllib.parse.quote(expediteur, safe="")),
