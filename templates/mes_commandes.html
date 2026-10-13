@@ -2,6 +2,7 @@
 {% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_statut_commande.html" import badge_statut %}
 {% from "_etoiles.html" import etoiles %}
+{% from "_livraison.html" import infos_livraison %}
 {% block contenu %}
     <h2>Mes commandes</h2>
 
@@ -13,7 +14,8 @@
                     {{ badge_statut(commande.statut) }}
                     {% if commande.lu_client == 0 %}<span class="badge badge-epuise">Mis à jour</span>{% endif %}<br>
                     Agriculteur : <a href="{{ url_for('avis_agriculteur', agriculteur_id=commande.agriculteur_id) }}">{{ commande.nom_agriculteur }}</a> ({{ commande.email_agriculteur }})<br>
-                    Prix affiché : {{ commande.prix }}
+                    Prix affiché : {{ commande.prix }}<br>
+                    {{ infos_livraison(commande, modes_livraison) }}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}

@@ -3,7 +3,8 @@ from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from database import get_connexion
 from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
-                  montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT)
+                  montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
+                  planning_livraison_valide, date_fr, MODES_LIVRAISON)
 
 
 @app.route("/espace-agriculteur/commandes")
@@ -29,7 +30,8 @@ def commandes_recues():
                          if c["statut"] == "livree" and not c["commission_payee"])
     return render_template("commandes_recues.html", nom=session["nom"], commandes=commandes,
                            transitions=TRANSITIONS_COMMANDE, commission_due=commission_due,
-                           taux_commission=TAUX_COMMISSION, numero_paiement=NUMERO_PAIEMENT)
+                           taux_commission=TAUX_COMMISSION, numero_paiement=NUMERO_PAIEMENT,
+                           modes_livraison=MODES_LIVRAISON)
 
 
 # Changements de statut autorisés pour l'agriculteur : statut actuel -> statuts possibles
@@ -42,10 +44,10 @@ TRANSITIONS_COMMANDE = {
 MESSAGES_STATUT = {"confirmee": "confirmée", "livree": "livrée", "annulee": "annulée"}
 
 
-def alerter_client(commande, statut):
+def alerter_client(commande, statut, precision=""):
     sms.alerter(commande["telephone_client"],
                 f"App Agricole : ta commande de {commande['nom_recolte']} a été {MESSAGES_STATUT[statut]} "
-                f"par {session['nom']}.")
+                f"par {session['nom']}.{precision}")
 
 
 @app.route("/espace-agriculteur/commandes/<int:commande_id>/statut", methods=["POST"])
@@ -57,7 +59,7 @@ def changer_statut_commande(commande_id):
     connexion_bd = get_connexion()
     # Seulement les commandes portant sur une récolte de cet agriculteur
     commande = connexion_bd.execute(
-        """SELECT commandes.statut, recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
+        """SELECT commandes.statut, commandes.mode_livraison, recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON commandes.client_id = utilisateurs.id
@@ -83,6 +85,27 @@ def changer_statut_commande(commande_id):
             connexion_bd.commit()
             alerter_client(commande, "livree")
             flash(f"Commande livrée. Commission de la plateforme : {commission} FCFA.")
+    elif nouveau_statut == "confirmee":
+        # À la confirmation, l'agriculteur peut fixer la date et les frais de livraison
+        try:
+            date_prevue, frais = planning_livraison_valide(request.form)
+        except ValueError as erreur:
+            flash(str(erreur))
+        else:
+            connexion_bd.execute(
+                """UPDATE commandes SET statut = 'confirmee', lu_client = 0,
+                          date_livraison_prevue = ?, frais_livraison = ? WHERE id = ?""",
+                (date_prevue, frais, commande_id)
+            )
+            connexion_bd.commit()
+            precision = ""
+            if date_prevue:
+                verbe = "Livraison" if commande["mode_livraison"] == "livraison" else "Retrait"
+                precision = f" {verbe} prévu(e) le {date_fr(date_prevue)}."
+            if frais:
+                precision += f" Frais de livraison : {frais} FCFA."
+            alerter_client(commande, "confirmee", precision)
+            flash("Commande confirmée.")
     else:
         connexion_bd.execute(
             "UPDATE commandes SET statut = ?, lu_client = 0 WHERE id = ?", (nouveau_statut, commande_id)
