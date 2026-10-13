@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Agricole</title>
+    <link rel="manifest" href="{{ url_for('manifeste') }}">
+    <meta name="theme-color" content="#2e7d32">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icones/apple-touch-icon.png') }}">
     <style>
         * {
             box-sizing: border-box;
@@ -194,6 +197,7 @@
                 <a href="{{ url_for('connexion') }}">Connexion</a>
                 <a href="{{ url_for('inscription') }}">Inscription</a>
             {% endif %}
+            <a href="#" id="installer-app" hidden>📲 Installer l'app</a>
         </nav>
     </header>
 
@@ -210,5 +214,26 @@
             {% block contenu %}{% endblock %}
         </div>
     </main>
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("{{ url_for('service_worker') }}");
+        }
+        // Bouton « Installer l'app », affiché quand le navigateur propose l'installation (Android)
+        let demandeInstallation = null;
+        const boutonInstaller = document.getElementById("installer-app");
+        window.addEventListener("beforeinstallprompt", (evenement) => {
+            evenement.preventDefault();
+            demandeInstallation = evenement;
+            boutonInstaller.hidden = false;
+        });
+        boutonInstaller.addEventListener("click", (evenement) => {
+            evenement.preventDefault();
+            if (demandeInstallation) {
+                demandeInstallation.prompt();
+                demandeInstallation = null;
+            }
+            boutonInstaller.hidden = true;
+        });
+    </script>
 </body>
 </html>
