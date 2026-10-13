@@ -110,7 +110,7 @@ class FausseReponse:
 
 def test_envoyer_sms_appelle_l_api_orange(monkeypatch):
     for nom, valeur in (("ORANGE_SMS_CLIENT_ID", "id"), ("ORANGE_SMS_CLIENT_SECRET", "secret"),
-                        ("ORANGE_SMS_EXPEDITEUR", "221770000000")):
+                        ("ORANGE_SMS_EXPEDITEUR", "2210000")):
         monkeypatch.setenv(nom, valeur)
     monkeypatch.setitem(sms._jeton, "valeur", None)
     requetes = []
@@ -126,9 +126,10 @@ def test_envoyer_sms_appelle_l_api_orange(monkeypatch):
     assert sms.envoyer_sms("77 123 45 67", "Encore")
     assert len(requetes) == 3  # le jeton est réutilisé
     envoi = requetes[1]
-    assert envoi.full_url.endswith("/outbound/tel%3A%2B221770000000/requests")
+    assert envoi.full_url.endswith("/outbound/tel%3A%2B2210000/requests")
     assert envoi.headers["Authorization"] == "Bearer jeton"
     corps = json.loads(envoi.data)["outboundSMSMessageRequest"]
+    assert corps["senderAddress"] == "tel:+2210000"
     assert corps["address"] == "tel:+221771234567"
     assert corps["outboundSMSTextMessage"]["message"] == "Bonjour"
 
