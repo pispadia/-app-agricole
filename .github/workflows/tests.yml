@@ -17,6 +17,6 @@ jobs:
       - name: Installer les dépendances
         run: pip install -r requirements.txt pytest
       - name: Vérifier la syntaxe
-        run: python -m compileall -q app.py core.py database.py emails.py routes
+        run: python -m compileall -q app.py core.py database.py emails.py wave.py routes
       - name: Lancer les tests
         run: python -m pytest -q
