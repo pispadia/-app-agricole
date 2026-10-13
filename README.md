@@ -17,6 +17,8 @@ Copie `.env.example` dans les variables d'environnement de l'hébergeur, puis d�
 
 Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://www.brevo.com), valide une adresse d'expédition, puis définis `BREVO_API_KEY` et `EMAIL_EXPEDITEUR`. En local sans ces variables, le lien de réinitialisation s'affiche dans la console.
 
+**Installation sur téléphone** : l'application est installable (application web progressive). Sur Android, le bouton « 📲 Installer l'app » apparaît dans le menu, ou menu Chrome > « Ajouter à l'écran d'accueil » ; sur iPhone, Safari > Partager > « Sur l'écran d'accueil ». Sans réseau, une page « Pas de connexion internet » s'affiche. Le site doit être servi en HTTPS (c'est le cas sur Render).
+
 **Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Sénégal », achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR`. Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
 
 ## Revenus : commission et Premium
