@@ -333,6 +333,12 @@ def init_db():
         ("commandes", "montant", "INTEGER"),
         ("commandes", "commission", "INTEGER"),
         ("commandes", "commission_payee", "INTEGER NOT NULL DEFAULT 0"),
+        # Livraison : retrait chez l'agriculteur ou livraison à l'adresse indiquée ;
+        # date prévue et frais fixés par l'agriculteur à la confirmation
+        ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),
+        ("commandes", "adresse_livraison", "TEXT"),
+        ("commandes", "date_livraison_prevue", "TEXT"),
+        ("commandes", "frais_livraison", "INTEGER"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

@@ -1,0 +1,19 @@
+{# Choix du mode de livraison (commande directe et panier) #}
+{% macro choix_livraison(modes) %}
+    <label>Réception</label>
+    {% for valeur, libelle in modes.items() %}
+        <label style="display:block; font-weight:normal;">
+            <input type="radio" name="mode_livraison" value="{{ valeur }}" {% if loop.first %}checked{% endif %} style="width:auto;"> {{ libelle }}
+        </label>
+    {% endfor %}
+    <label>Adresse de livraison (si livraison à domicile)</label>
+    <textarea name="adresse_livraison" rows="2" maxlength="300" placeholder="Quartier, ville, point de repère..."></textarea>
+{% endmacro %}
+
+{# Résumé de la livraison d'une commande #}
+{% macro infos_livraison(commande, modes) %}
+    🚚 {{ modes.get(commande.mode_livraison, commande.mode_livraison) }}
+    {% if commande.adresse_livraison %} — {{ commande.adresse_livraison }}{% endif %}
+    {% if commande.date_livraison_prevue %}<br>📅 Prévue le {{ commande.date_livraison_prevue | date_fr }}{% endif %}
+    {% if commande.frais_livraison %}<br>Frais de livraison : {{ commande.frais_livraison }} FCFA{% endif %}
+{% endmacro %}

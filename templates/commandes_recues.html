@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_statut_commande.html" import badge_statut %}
+{% from "_livraison.html" import infos_livraison %}
 {% block contenu %}
     <h2>Commandes reçues</h2>
 
@@ -29,7 +30,8 @@
                 <div>
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
                     {{ badge_statut(commande.statut) }}<br>
-                    Client : {{ commande.nom_client }} ({{ commande.email_client }})
+                    Client : {{ commande.nom_client }} ({{ commande.email_client }})<br>
+                    {{ infos_livraison(commande, modes_livraison) }}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
@@ -46,6 +48,13 @@
                         <form method="POST" action="{{ url_for('changer_statut_commande', commande_id=commande.id) }}" style="display:inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="statut" value="{{ statut_suivant }}">
+                            {% if statut_suivant == 'confirmee' %}
+                                <label style="font-weight:normal; margin-top:8px;">{% if commande.mode_livraison == 'livraison' %}Livraison{% else %}Retrait{% endif %} prévu(e) le (facultatif)
+                                    <input type="date" name="date_livraison_prevue" style="width:auto; margin:0;"></label>
+                                {% if commande.mode_livraison == 'livraison' %}
+                                    <input type="text" name="frais_livraison" placeholder="Frais de livraison (FCFA)" inputmode="numeric" style="width:auto; margin:8px 0 0;">
+                                {% endif %}
+                            {% endif %}
                             {% if statut_suivant == 'livree' %}
                                 <input type="text" name="montant" placeholder="Montant encaissé (FCFA)" required inputmode="numeric" style="width:auto; margin:8px 0 0;">
                             {% endif %}

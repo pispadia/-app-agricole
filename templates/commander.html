@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_livraison.html" import choix_livraison %}
 {% block contenu %}
     <h2>Commander : {{ recolte.nom }}</h2>
     <p style="color:#666;">Vendu par {{ recolte.nom_agriculteur }} — {{ recolte.localite }}</p>
@@ -12,6 +13,8 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Quantité souhaitée</label>
         <input type="text" name="quantite_demandee" placeholder="ex: 20 kg" required>
+
+        {{ choix_livraison(modes_livraison) }}
 
         <label>Message pour l'agriculteur (optionnel)</label>
         <textarea name="message" rows="3" placeholder="Précisions, date de livraison souhaitée..."></textarea>

@@ -160,6 +160,51 @@ def montant_valide(texte):
     return int(chiffres)
 
 
+# --- Livraison -----------------------------------------------------------------
+MODES_LIVRAISON = {"retrait": "Retrait chez l'agriculteur", "livraison": "Livraison à domicile"}
+LONGUEUR_MAX_ADRESSE = 300
+
+
+def livraison_valide(formulaire):
+    """Retourne (mode, adresse) d'après le formulaire de commande, ou lève ValueError."""
+    mode = formulaire.get("mode_livraison", "retrait")
+    adresse = " ".join(formulaire.get("adresse_livraison", "").split())
+    if mode not in MODES_LIVRAISON:
+        raise ValueError("Choisis un mode de livraison.")
+    if mode == "retrait":
+        return mode, None
+    if not adresse:
+        raise ValueError("Indique l'adresse de livraison (quartier, ville, repère).")
+    if len(adresse) > LONGUEUR_MAX_ADRESSE:
+        raise ValueError(f"L'adresse ne doit pas dépasser {LONGUEUR_MAX_ADRESSE} caractères.")
+    return mode, adresse
+
+
+def planning_livraison_valide(formulaire):
+    """Date prévue (AAAA-MM-JJ) et frais de livraison (FCFA), tous deux facultatifs."""
+    from datetime import date
+    date_prevue = formulaire.get("date_livraison_prevue", "").strip() or None
+    if date_prevue:
+        try:
+            date_prevue = date.fromisoformat(date_prevue).isoformat()
+        except ValueError:
+            raise ValueError("La date de livraison prévue n'est pas valide.")
+    frais = re.sub(r"[\s.]", "", formulaire.get("frais_livraison", "")).upper().replace("FCFA", "").replace("F", "")
+    if frais and not frais.isdigit():
+        raise ValueError("Les frais de livraison doivent être un montant en FCFA (ex: 1500).")
+    return date_prevue, int(frais) if frais else None
+
+
+@app.template_filter("date_fr")
+def date_fr(valeur):
+    """'2026-11-05' -> '05/11/2026'."""
+    try:
+        annee, mois, jour = str(valeur)[:10].split("-")
+        return f"{jour}/{mois}/{annee}"
+    except ValueError:
+        return valeur
+
+
 def date_fin_premium(utilisateur):
     """Date de fin d'abonnement (objet date) si l'utilisateur est Premium aujourd'hui, sinon None."""
     from datetime import date

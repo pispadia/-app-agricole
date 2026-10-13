@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_livraison.html" import choix_livraison %}
 {% block contenu %}
     <h2>Mon panier</h2>
 
@@ -24,6 +25,7 @@
 
         <form method="POST" action="{{ url_for('valider_panier') }}" style="margin-top: 20px;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {{ choix_livraison(modes_livraison) }}
             <button type="submit">Valider et envoyer les commandes</button>
         </form>
     {% else %}
