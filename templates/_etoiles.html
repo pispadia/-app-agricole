@@ -1,0 +1,8 @@
+{# Note sur 5 en étoiles, suivie du nombre d'avis s'il est fourni #}
+{% macro etoiles(note, nb_avis=none) %}
+    {% if note %}
+        {% set arrondie = (note | float) | round | int %}
+        <span class="etoiles" title="{{ '%.1f' | format(note | float) }} / 5">{{ "★" * arrondie }}{{ "☆" * (5 - arrondie) }}</span>
+        {% if nb_avis is not none %}<span style="color:#666;">{{ '%.1f' | format(note | float) }} ({{ nb_avis }} avis)</span>{% endif %}
+    {% endif %}
+{% endmacro %}

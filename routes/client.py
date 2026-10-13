@@ -5,6 +5,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from database import get_connexion
 from core import app, quantite_valide, utilisateur_connecte
+from routes.avis import NOTES_AGRICULTEURS
 
 
 @app.route("/espace-client")
@@ -19,9 +20,11 @@ def espace_client():
     requete = """
         SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
                utilisateurs.telephone AS telephone_agriculteur,
-               utilisateurs.premium_jusqu_au AS premium_agriculteur
+               utilisateurs.premium_jusqu_au AS premium_agriculteur,
+               notes.note_moyenne, notes.nb_avis
         FROM recoltes
         JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+        LEFT JOIN """ + NOTES_AGRICULTEURS + """ notes ON notes.agriculteur_id = recoltes.agriculteur_id
         WHERE recoltes.statut = 'disponible'
     """
     parametres = []
@@ -39,6 +42,7 @@ def espace_client():
         "recent": "recoltes.date_creation DESC",
         "nom": "recoltes.nom ASC",
         "localite": "recoltes.localite ASC",
+        "note": "COALESCE(notes.note_moyenne, 0) DESC, recoltes.date_creation DESC",
     }
     # Les annonces des membres Premium passent en premier
     aujourdhui = date.today().isoformat()
@@ -222,12 +226,13 @@ def mes_commandes():
 
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
-        """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.prix,
+        """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.prix, recoltes.agriculteur_id,
                   utilisateurs.nom AS nom_agriculteur, utilisateurs.email AS email_agriculteur,
-                  utilisateurs.telephone AS telephone_agriculteur
+                  utilisateurs.telephone AS telephone_agriculteur, avis.note AS note_avis
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+           LEFT JOIN avis ON avis.commande_id = commandes.id
            WHERE commandes.client_id = ?
            ORDER BY commandes.date_creation DESC""",
         (session["utilisateur_id"],)

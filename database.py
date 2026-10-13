@@ -77,7 +77,7 @@ def colonnes_de_table(curseur, nom_table):
 TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
-    "echecs_connexion", "paiements_premium", "paiements_wave",
+    "echecs_connexion", "paiements_premium", "paiements_wave", "avis",
 )
 
 
@@ -292,6 +292,23 @@ def init_db():
             statut TEXT NOT NULL DEFAULT 'en_attente' CHECK(statut IN ('en_attente', 'paye', 'echec')),
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
+    # Avis d'un client sur une commande livrée : un seul avis par commande
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS avis (
+            id {ID_AUTO},
+            commande_id INTEGER NOT NULL UNIQUE,
+            client_id INTEGER NOT NULL,
+            agriculteur_id INTEGER NOT NULL,
+            note INTEGER NOT NULL CHECK(note BETWEEN 1 AND 5),
+            commentaire TEXT,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (commande_id) REFERENCES commandes (id),
+            FOREIGN KEY (client_id) REFERENCES utilisateurs (id),
+            FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id)
         )
     """)
     connexion.commit()
