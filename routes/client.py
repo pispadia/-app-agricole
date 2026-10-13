@@ -2,6 +2,7 @@
 from datetime import date
 
 from flask import render_template, request, redirect, url_for, session, flash
+import sms
 from database import get_connexion
 from core import app, quantite_valide, utilisateur_connecte
 
@@ -61,10 +62,16 @@ def espace_client():
 
 def get_recolte_avec_agriculteur(connexion_bd, recolte_id):
     return connexion_bd.execute(
-        """SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur
+        """SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+                  utilisateurs.telephone AS telephone_agriculteur
            FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
            WHERE recoltes.id = ?""", (recolte_id,)
     ).fetchone()
+
+
+def message_nouvelle_commande(produits):
+    return (f"App Agricole : nouvelle commande de {session['nom']} pour {', '.join(produits)}. "
+            "Connecte-toi pour la confirmer.")
 
 
 def recolte_commandable(recolte):
@@ -138,6 +145,7 @@ def valider_panier():
 
     connexion_bd = get_connexion()
     envoyees, indisponibles = 0, []
+    produits_par_telephone = {}  # un seul SMS par agriculteur
     for item in panier:
         recolte = get_recolte_avec_agriculteur(connexion_bd, item["recolte_id"])
         if not recolte_commandable(recolte):
@@ -148,8 +156,13 @@ def valider_panier():
             (item["recolte_id"], session["utilisateur_id"], item["quantite"], "Commande depuis le panier")
         )
         envoyees += 1
+        if recolte["telephone_agriculteur"]:
+            produits_par_telephone.setdefault(recolte["telephone_agriculteur"], []).append(recolte["nom"])
     connexion_bd.commit()
     connexion_bd.close()
+
+    for telephone, produits in produits_par_telephone.items():
+        sms.alerter(telephone, message_nouvelle_commande(produits))
 
     session["panier"] = []
     if indisponibles:
@@ -167,7 +180,8 @@ def commander(recolte_id):
 
     connexion_bd = get_connexion()
     recolte = connexion_bd.execute(
-        """SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur
+        """SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+                  utilisateurs.telephone AS telephone_agriculteur
            FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
            WHERE recoltes.id = ?""", (recolte_id,)
     ).fetchone()
@@ -192,6 +206,7 @@ def commander(recolte_id):
         )
         connexion_bd.commit()
         connexion_bd.close()
+        sms.alerter(recolte["telephone_agriculteur"], message_nouvelle_commande([recolte["nom"]]))
 
         flash(f"Ta commande a été envoyée à {recolte['nom_agriculteur']}. Il te contactera pour la suite.")
         return redirect(url_for("mes_commandes"))
@@ -237,6 +252,15 @@ def annuler_commande(commande_id):
         (commande_id, session["utilisateur_id"])
     )
     connexion_bd.commit()
+    if resultat.rowcount:
+        commande = connexion_bd.execute(
+            """SELECT recoltes.nom, utilisateurs.telephone FROM commandes
+               JOIN recoltes ON commandes.recolte_id = recoltes.id
+               JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+               WHERE commandes.id = ?""", (commande_id,)
+        ).fetchone()
+        sms.alerter(commande["telephone"],
+                    f"App Agricole : {session['nom']} a annulé sa commande de {commande['nom']}.")
     connexion_bd.close()
 
     if resultat.rowcount:

@@ -17,6 +17,8 @@ Copie `.env.example` dans les variables d'environnement de l'hébergeur, puis d�
 
 Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://www.brevo.com), valide une adresse d'expédition, puis définis `BREVO_API_KEY` et `EMAIL_EXPEDITEUR`. En local sans ces variables, le lien de réinitialisation s'affiche dans la console.
 
+**Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Sénégal », achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR`. Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
+
 ## Revenus : commission et Premium
 
 - **Commission** : quand l'agriculteur marque une commande « livrée », il indique le montant encaissé ; la plateforme calcule sa commission (`TAUX_COMMISSION`, 5 % par défaut). L'agriculteur voit ce qu'il doit et le numéro où payer.
@@ -35,7 +37,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 ```powershell
 python -m pytest
-python -m compileall -q app.py core.py database.py emails.py wave.py routes
+python -m compileall -q app.py core.py database.py emails.py sms.py wave.py routes
 ```
 
 Ces vérifications tournent aussi automatiquement sur GitHub (onglet *Actions*) à chaque pull request et à chaque mise à jour de `main`. Les contrôles automatiques couvrent les règles de saisie principales. Avant chaque mise en ligne, teste également manuellement l'inscription, les quatre rôles, l'ajout au panier et le changement de statut d'une commande.
