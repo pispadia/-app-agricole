@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_statut_commande.html" import badge_statut %}
+{% from "_etoiles.html" import etoiles %}
 {% block contenu %}
     <h2>Mes commandes</h2>
 
@@ -11,7 +12,7 @@
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
                     {{ badge_statut(commande.statut) }}
                     {% if commande.lu_client == 0 %}<span class="badge badge-epuise">Mis à jour</span>{% endif %}<br>
-                    Agriculteur : {{ commande.nom_agriculteur }} ({{ commande.email_agriculteur }})<br>
+                    Agriculteur : <a href="{{ url_for('avis_agriculteur', agriculteur_id=commande.agriculteur_id) }}">{{ commande.nom_agriculteur }}</a> ({{ commande.email_agriculteur }})<br>
                     Prix affiché : {{ commande.prix }}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
@@ -24,6 +25,24 @@
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px; background-color:#a94442;">Annuler la commande</button>
                         </form>
+                    {% endif %}
+
+                    {% if commande.statut == 'livree' %}
+                        {% if commande.note_avis %}
+                            <p style="margin: 8px 0 0;">Ton avis : {{ etoiles(commande.note_avis) }}</p>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('donner_avis', commande_id=commande.id) }}" style="margin-top:8px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <label>Note ta commande :
+                                    <select name="note" required style="width:auto;">
+                                        <option value="">—</option>
+                                        {% for n in range(5, 0, -1) %}<option value="{{ n }}">{{ "★" * n }}</option>{% endfor %}
+                                    </select>
+                                </label>
+                                <textarea name="commentaire" maxlength="500" placeholder="Ton commentaire (facultatif)"></textarea>
+                                <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Envoyer mon avis</button>
+                            </form>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

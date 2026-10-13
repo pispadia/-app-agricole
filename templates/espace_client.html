@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_whatsapp.html" import bouton_whatsapp %}
+{% from "_etoiles.html" import etoiles %}
 {% block contenu %}
     <h2>Espace Client</h2>
     <p>Bienvenue {{ nom }} 👋</p>
@@ -21,6 +22,7 @@
             <option value="recent" {% if tri_choisi == 'recent' %}selected{% endif %}>Plus récent</option>
             <option value="nom" {% if tri_choisi == 'nom' %}selected{% endif %}>Nom (A-Z)</option>
             <option value="localite" {% if tri_choisi == 'localite' %}selected{% endif %}>Localité (A-Z)</option>
+            <option value="note" {% if tri_choisi == 'note' %}selected{% endif %}>Mieux notés</option>
         </select>
         <button type="submit">Filtrer</button>
     </form>
@@ -36,7 +38,8 @@
                 <div>
                     <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
                     {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
-                    Par {{ recolte.nom_agriculteur }}<br>
+                    Par <a href="{{ url_for('avis_agriculteur', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a>
+                    {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}<br>
                     Détail : {{ recolte.prix }}<br>
                     {% if recolte.prix_gros %}
                         Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>

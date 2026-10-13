@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_etoiles.html" import etoiles %}
+{% block contenu %}
+    <h2>Avis sur {{ agriculteur.nom }}</h2>
+
+    {% if avis %}
+        <p>{{ etoiles(agriculteur.note_moyenne, agriculteur.nb_avis) }}</p>
+        {% for un_avis in avis %}
+            <div class="carte-recolte" style="display:block;">
+                {{ etoiles(un_avis.note) }} — <strong>{{ un_avis.nom_client }}</strong>, pour « {{ un_avis.nom_recolte }} »
+                {% if un_avis.commentaire %}
+                    <p style="margin: 5px 0 0;">{{ un_avis.commentaire }}</p>
+                {% endif %}
+                <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Le {{ un_avis.date_creation }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Aucun avis pour le moment.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('tableau_de_bord') }}">← Retour</a></p>
+{% endblock %}

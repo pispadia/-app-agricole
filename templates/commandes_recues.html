@@ -21,6 +21,8 @@
         {% endif %}
     </div>
 
+    <p><a href="{{ url_for('avis_agriculteur', agriculteur_id=session['utilisateur_id']) }}">⭐ Voir les avis de mes clients</a></p>
+
     {% if commandes %}
         {% for commande in commandes %}
             <div class="carte-recolte">
