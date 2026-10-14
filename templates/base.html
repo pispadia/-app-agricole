@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ langue }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -223,19 +223,20 @@
     <header>
         <div class="logo">🌾 App Agricole</div>
         <nav>
-            <a href="{{ url_for('accueil') }}">Accueil</a>
+            <a href="{{ url_for('accueil') }}">{{ "Accueil" | t }}</a>
             {% if session.get('utilisateur_id') %}
-                <a href="{{ url_for('tableau_de_bord') }}">Tableau de bord</a>
-                <a href="{{ url_for('notifications') }}">🔔 Notifications{% if nb_notifications %} <span class="badge badge-epuise" style="margin-left:2px;">{{ nb_notifications }}</span>{% endif %}</a>
-                <a href="{{ url_for('premium') }}">{% if fin_premium %}⭐ Premium{% else %}⭐ Passer Premium{% endif %}</a>
+                <a href="{{ url_for('tableau_de_bord') }}">{{ "Tableau de bord" | t }}</a>
+                <a href="{{ url_for('notifications') }}">🔔 {{ "Notifications" | t }}{% if nb_notifications %} <span class="badge badge-epuise" style="margin-left:2px;">{{ nb_notifications }}</span>{% endif %}</a>
+                <a href="{{ url_for('premium') }}">{% if fin_premium %}⭐ Premium{% else %}⭐ {{ "Passer Premium" | t }}{% endif %}</a>
                 {% if est_admin %}<a href="{{ url_for('admin') }}">Admin</a>{% endif %}
-                <a href="{{ url_for('mon_profil') }}">Mon profil</a>
-                <a href="{{ url_for('deconnexion') }}">Déconnexion</a>
+                <a href="{{ url_for('mon_profil') }}">{{ "Mon profil" | t }}</a>
+                <a href="{{ url_for('deconnexion') }}">{{ "Déconnexion" | t }}</a>
             {% else %}
-                <a href="{{ url_for('connexion') }}">Connexion</a>
-                <a href="{{ url_for('inscription') }}">Inscription</a>
+                <a href="{{ url_for('connexion') }}">{{ "Connexion" | t }}</a>
+                <a href="{{ url_for('inscription') }}">{{ "Inscription" | t }}</a>
             {% endif %}
-            <a href="#" id="installer-app" hidden>📲 Installer l'app</a>
+            <a href="#" id="installer-app" hidden>📲 {{ "Installer l'app" | t }}</a>
+            <a href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}">🌍 {{ "Wolof" if langue == "fr" else "Français" }}</a>
         </nav>
     </header>
 

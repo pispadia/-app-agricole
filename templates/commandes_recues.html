@@ -2,7 +2,7 @@
 {% from "_statut_commande.html" import badge_statut %}
 {% from "_livraison.html" import infos_livraison %}
 {% block contenu %}
-    <h2>Commandes reçues</h2>
+    <h2>{{ "Commandes reçues" | t }}</h2>
 
     <div class="carte-recolte" style="display:block;">
         La plateforme prélève une commission de <strong>{{ (taux_commission * 100) | round(1) }} %</strong>
@@ -48,9 +48,9 @@
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
                     <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçue le {{ commande.date_creation }}</p>
-                    <p style="margin: 8px 0 0;"><a href="{{ url_for('messages_commande', commande_id=commande.id) }}">💬 Discuter{% if commande.messages_non_lus %} <span class="badge badge-epuise">{{ commande.messages_non_lus }} nouveau{{ 'x' if commande.messages_non_lus > 1 }}</span>{% endif %}</a></p>
+                    <p style="margin: 8px 0 0;"><a href="{{ url_for('messages_commande', commande_id=commande.id) }}">💬 {{ "Discuter" | t }}{% if commande.messages_non_lus %} <span class="badge badge-epuise">{{ commande.messages_non_lus }} nouveau{{ 'x' if commande.messages_non_lus > 1 }}</span>{% endif %}</a></p>
 
-                    {% set actions = {"confirmee": "Confirmer", "livree": "Marquer livrée", "annulee": "Refuser / annuler"} %}
+                    {% set actions = {"confirmee": "Confirmer" | t, "livree": "Marquer livrée" | t, "annulee": "Refuser / annuler" | t} %}
                     {% if commande.statut == 'livree' and commande.montant %}
                         <p style="margin: 5px 0 0;">Vente : {{ commande.montant }} FCFA — commission : {{ commande.commission }} FCFA
                             {% if commande.commission_payee %}<span class="badge badge-dispo">Réglée</span>{% else %}<span class="badge badge-attente">À régler</span>{% endif %}</p>
@@ -80,8 +80,8 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>Aucune commande reçue pour le moment.</p>
+        <p>{{ "Aucune commande reçue pour le moment." | t }}</p>
     {% endif %}
 
-    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+    <p><a href="{{ url_for('espace_agriculteur') }}">{{ "← Retour à mon espace" | t }}</a></p>
 {% endblock %}

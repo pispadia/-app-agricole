@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block contenu %}
-    <h2>Connexion</h2>
+    <h2>{{ "Connexion" | t }}</h2>
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="mot_de_passe" placeholder="Mot de passe" required>
-        <button type="submit">Se connecter</button>
+        <input type="email" name="email" placeholder="{{ "Email" | t }}" required>
+        <input type="password" name="mot_de_passe" placeholder="{{ "Mot de passe" | t }}" required>
+        <button type="submit">{{ "Se connecter" | t }}</button>
     </form>
-    <p><a href="{{ url_for('mot_de_passe_oublie') }}">Mot de passe oublié ?</a></p>
+    <p><a href="{{ url_for('mot_de_passe_oublie') }}">{{ "Mot de passe oublié ?" | t }}</a></p>
 {% endblock %}
