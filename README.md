@@ -21,6 +21,8 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 **Livraison** : à la commande, le client choisit le retrait chez l'agriculteur ou la livraison à domicile (avec son adresse). En confirmant, l'agriculteur peut indiquer la date prévue et les frais de livraison, envoyés au client par SMS.
 
+**Messagerie** : chaque commande a sa discussion entre le client et l'agriculteur (« 💬 Discuter »). Les numéros de téléphone et e-mails tapés dans les messages sont masqués automatiquement, pour que les échanges restent sur la plateforme. Les messages non lus apparaissent dans les notifications.
+
 **Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Moyen-Orient et Afrique » (pays : Sénégal), achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR` (en général `2210000`, sauf numéro dédié fourni par Orange). Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
 
 ## Revenus : commission et Premium

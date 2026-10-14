@@ -7,7 +7,10 @@ from core import app, utilisateur_connecte
 def compter_notifications_non_lues(utilisateur_id, role):
     """Compte le nombre total de notifications non lues pour l'utilisateur connecté."""
     connexion_bd = get_connexion()
-    total = 0
+    # Messages non lus dans les discussions de commandes
+    total = connexion_bd.execute(
+        "SELECT COUNT(*) AS n FROM messages_commande WHERE destinataire_id = ? AND lu = 0", (utilisateur_id,)
+    ).fetchone()["n"]
 
     if role == "agriculteur":
         r = connexion_bd.execute(
@@ -76,11 +79,23 @@ def notifications():
     messages_fournisseur = []
     interets_offre = []
     commandes_client = []
+    # Discussions avec des messages non lus (marqués lus à l'ouverture de la discussion)
+    discussions = connexion_bd.execute(
+        """SELECT commande_id, COUNT(*) AS nombre, MAX(recoltes.nom) AS nom_recolte,
+                  MAX(utilisateurs.nom) AS nom_auteur
+           FROM messages_commande
+           JOIN commandes ON messages_commande.commande_id = commandes.id
+           JOIN recoltes ON commandes.recolte_id = recoltes.id
+           JOIN utilisateurs ON messages_commande.auteur_id = utilisateurs.id
+           WHERE messages_commande.destinataire_id = ? AND messages_commande.lu = 0
+           GROUP BY commande_id""",
+        (utilisateur_id,)
+    ).fetchall()
 
     if role == "agriculteur":
         commandes = connexion_bd.execute(
             """SELECT commandes.*, recoltes.nom AS nom_recolte,
-                      utilisateurs.nom AS nom_client, utilisateurs.email AS email_client
+                      utilisateurs.nom AS nom_client
                FROM commandes
                JOIN recoltes ON commandes.recolte_id = recoltes.id
                JOIN utilisateurs ON commandes.client_id = utilisateurs.id
@@ -162,7 +177,7 @@ def notifications():
         "notifications.html", role=role, commandes=commandes,
         messages_financement=messages_financement,
         messages_fournisseur=messages_fournisseur, interets_offre=interets_offre,
-        commandes_client=commandes_client
+        commandes_client=commandes_client, discussions=discussions
     )
 
 
