@@ -7,6 +7,7 @@
         <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom du produit (ex: Tomates)" required>
         <input type="text" name="quantite" value="{{ saisie.get('quantite', '') }}" placeholder="Quantité (ex: 200 kg)" required>
         <input type="text" name="prix" value="{{ saisie.get('prix', '') }}" placeholder="Prix au détail (ex: 500 FCFA / kg)" required>
+        <p style="margin:0 0 8px; font-size:0.9em;"><a href="{{ url_for('prix_marche') }}" target="_blank" rel="noopener">📈 Voir les prix du marché pour fixer ton prix</a></p>
 
         <label>Prix en gros (optionnel)</label>
         <input type="text" name="prix_gros" value="{{ saisie.get('prix_gros', '') }}" placeholder="Prix en gros (ex: 400 FCFA / kg)">

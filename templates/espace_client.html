@@ -27,6 +27,8 @@
     </form>
 
     <h3 style="margin-top: 30px;">Récoltes disponibles</h3>
+    <p><a href="{{ url_for('prix_marche') }}">📈 Voir les prix du marché</a></p>
+
 
     {% if recoltes %}
         {% for recolte in recoltes %}
@@ -39,7 +41,9 @@
                     {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
                     Par <a href="{{ url_for('avis_agriculteur', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a>
                     {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}<br>
-                    Détail : {{ recolte.prix }}<br>
+                    Détail : {{ recolte.prix }}
+                    {% set courant = prix_courants.get(recolte.id) %}
+                    {% if courant %}<span style="color:#666; font-size:0.85em;">(prix courant : {{ courant.median }} FCFA/kg)</span>{% endif %}<br>
                     {% if recolte.prix_gros %}
                         Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>
                     {% endif %}

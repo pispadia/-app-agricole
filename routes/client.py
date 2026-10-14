@@ -7,6 +7,7 @@ from database import get_connexion
 from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees)
 from routes.avis import NOTES_AGRICULTEURS
+from prix_marche import prix_du_marche, produit_cle
 
 
 @app.route("/espace-client")
@@ -52,6 +53,8 @@ def espace_client():
 
     connexion_bd = get_connexion()
     recoltes = connexion_bd.execute(requete, parametres).fetchall()
+    marche = prix_du_marche(connexion_bd)
+    prix_courants = {r["id"]: marche.get(produit_cle(r["nom"])) for r in recoltes}
     localites = connexion_bd.execute(
         "SELECT DISTINCT localite FROM recoltes WHERE statut = 'disponible' ORDER BY localite"
     ).fetchall()
@@ -60,7 +63,7 @@ def espace_client():
     return render_template(
         "espace_client.html", nom=session["nom"], recoltes=recoltes,
         localites=localites, recherche=recherche, localite_choisie=localite, tri_choisi=tri,
-        taille_panier=len(session.get("panier", [])), aujourdhui=aujourdhui
+        taille_panier=len(session.get("panier", [])), aujourdhui=aujourdhui, prix_courants=prix_courants
     )
 
 

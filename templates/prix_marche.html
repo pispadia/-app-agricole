@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>📈 Prix du marché</h2>
+    <p style="color:#666;">Prix au kilo calculés à partir des annonces publiées sur App Agricole ces {{ periode }} derniers jours. Le prix courant est le prix du milieu : la moitié des annonces sont moins chères, l'autre moitié plus chères.</p>
+
+    {% if produits %}
+        <div style="overflow-x:auto;">
+            <table class="tableau">
+                <tr><th>Produit</th><th>Prix courant</th><th>Fourchette</th><th>Annonces</th></tr>
+                {% for p in produits %}
+                    <tr>
+                        <td><strong>{{ p.nom }}</strong></td>
+                        <td><strong>{{ p.median }} FCFA/kg</strong></td>
+                        <td>{{ p.min }} – {{ p.max }} FCFA/kg</td>
+                        <td>{{ p.nombre }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% else %}
+        <p>Pas encore assez d'annonces avec un prix au kilo (ex : « 500 FCFA / kg ») pour calculer des prix du marché.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('tableau_de_bord') }}">← Retour</a></p>
+{% endblock %}
