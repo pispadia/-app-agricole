@@ -3,7 +3,7 @@ from datetime import date
 
 from flask import render_template, request, redirect, url_for, session, flash
 import sms
-from database import get_connexion
+from database import get_connexion, COLONNES_RECOLTE
 from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
 from routes.avis import NOTES_AGRICULTEURS
@@ -20,7 +20,7 @@ def espace_client():
     tri = request.args.get("tri", "recent")
 
     requete = """
-        SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+        SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
                utilisateurs.premium_jusqu_au AS premium_agriculteur,
                notes.note_moyenne, notes.nb_avis
         FROM recoltes
@@ -69,7 +69,7 @@ def espace_client():
 
 def get_recolte_avec_agriculteur(connexion_bd, recolte_id):
     return connexion_bd.execute(
-        """SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+        f"""SELECT {COLONNES_RECOLTE}, utilisateurs.nom AS nom_agriculteur,
                   utilisateurs.telephone AS telephone_agriculteur
            FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
            WHERE recoltes.id = ?""", (recolte_id,)
@@ -198,7 +198,7 @@ def commander(recolte_id):
 
     connexion_bd = get_connexion()
     recolte = connexion_bd.execute(
-        """SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+        f"""SELECT {COLONNES_RECOLTE}, utilisateurs.nom AS nom_agriculteur,
                   utilisateurs.telephone AS telephone_agriculteur
            FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
            WHERE recoltes.id = ?""", (recolte_id,)

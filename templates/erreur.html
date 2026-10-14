@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block titre %}{{ titre }} · App Agricole{% endblock %}
+{% block contenu %}
+    <h2>{{ titre }}</h2>
+    <p>{{ message }}</p>
+    <p><a href="{{ url_for('accueil') }}"><button type="button">Retour à l'accueil</button></a></p>
+{% endblock %}

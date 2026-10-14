@@ -1,11 +1,12 @@
 """Annonces publiques : page de chaque récolte, visible sans compte et partageable
 (WhatsApp, Facebook...) avec aperçu (titre, prix, photo)."""
 import base64
+import hashlib
 from datetime import date
 from urllib.parse import quote
 
-from flask import abort, render_template, Response, session, url_for
-from database import get_connexion
+from flask import abort, render_template, request, Response, session, url_for
+from database import get_connexion, COLONNES_RECOLTE
 from core import app, utilisateur_connecte
 from prix_marche import prix_du_marche, produit_cle
 from routes.avis import NOTES_AGRICULTEURS
@@ -13,7 +14,7 @@ from routes.avis import NOTES_AGRICULTEURS
 
 def recolte_publique(connexion_bd, recolte_id):
     return connexion_bd.execute(
-        f"""SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
+        f"""SELECT {COLONNES_RECOLTE}, utilisateurs.nom AS nom_agriculteur,
                    utilisateurs.premium_jusqu_au AS premium_agriculteur,
                    notes.note_moyenne, notes.nb_avis
             FROM recoltes
@@ -49,16 +50,28 @@ def voir_annonce(recolte_id):
     )
 
 
-@app.route("/annonce/<int:recolte_id>/photo")
-def photo_annonce(recolte_id):
-    """La photo en tant que fichier image : pour l'aperçu des liens partagés et le cache du navigateur."""
+def reponse_photo(table, identifiant):
+    """La photo (stockée en base64) en tant que fichier image, mise en cache par le navigateur."""
     connexion_bd = get_connexion()
-    ligne = connexion_bd.execute("SELECT photo FROM recoltes WHERE id = ?", (recolte_id,)).fetchone()
+    ligne = connexion_bd.execute(f"SELECT photo FROM {table} WHERE id = ?", (identifiant,)).fetchone()
     connexion_bd.close()
     photo = ligne["photo"] if ligne else None
     if not photo or not photo.startswith("data:image/") or ";base64," not in photo:
         abort(404)
     entete, donnees = photo.split(",", 1)
     reponse = Response(base64.b64decode(donnees), mimetype=entete[len("data:"):].split(";")[0])
-    reponse.headers["Cache-Control"] = "public, max-age=86400"
-    return reponse
+    # Cache d'une heure ; ensuite le navigateur revérifie avec l'empreinte (ETag) et ne
+    # retélécharge la photo que si elle a été remplacée
+    reponse.headers["Cache-Control"] = "public, max-age=3600"
+    reponse.set_etag(hashlib.md5(donnees.encode()).hexdigest())
+    return reponse.make_conditional(request)
+
+
+@app.route("/annonce/<int:recolte_id>/photo")
+def photo_annonce(recolte_id):
+    return reponse_photo("recoltes", recolte_id)
+
+
+@app.route("/produit/<int:produit_id>/photo")
+def photo_produit(produit_id):
+    return reponse_photo("produits_fournisseur", produit_id)

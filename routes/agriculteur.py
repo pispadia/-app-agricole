@@ -2,7 +2,7 @@
 from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from routes.alertes import prevenir_clients
-from database import get_connexion
+from database import get_connexion, COLONNES_RECOLTE
 from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
                   planning_livraison_valide, date_fr, MODES_LIVRAISON, MODES_PAIEMENT)
@@ -144,7 +144,7 @@ def espace_agriculteur():
 
     connexion_bd = get_connexion()
     recoltes = connexion_bd.execute(
-        "SELECT * FROM recoltes WHERE agriculteur_id = ? ORDER BY date_creation DESC",
+        f"SELECT {COLONNES_RECOLTE} FROM recoltes WHERE agriculteur_id = ? ORDER BY date_creation DESC",
         (session["utilisateur_id"],)
     ).fetchall()
     connexion_bd.close()

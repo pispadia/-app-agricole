@@ -2,7 +2,7 @@
 from datetime import date
 
 from flask import render_template, request, redirect, url_for, session, flash
-from database import get_connexion
+from database import get_connexion, COLONNES_PRODUIT
 from core import app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte
 
 
@@ -13,7 +13,7 @@ def espace_fournisseur():
 
     connexion_bd = get_connexion()
     produits = connexion_bd.execute(
-        "SELECT * FROM produits_fournisseur WHERE fournisseur_id = ? ORDER BY date_creation DESC",
+        f"SELECT {COLONNES_PRODUIT} FROM produits_fournisseur WHERE fournisseur_id = ? ORDER BY date_creation DESC",
         (session["utilisateur_id"],)
     ).fetchall()
     connexion_bd.close()
@@ -168,7 +168,7 @@ def semences_pepinieres():
     tri = request.args.get("tri", "recent")
 
     requete = """
-        SELECT produits_fournisseur.*, utilisateurs.nom AS nom_fournisseur,
+        SELECT """ + COLONNES_PRODUIT + """, utilisateurs.nom AS nom_fournisseur,
                utilisateurs.telephone AS telephone_fournisseur,
                utilisateurs.premium_jusqu_au AS premium_fournisseur
         FROM produits_fournisseur
