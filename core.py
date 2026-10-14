@@ -176,6 +176,14 @@ def montant_valide(texte):
 # --- Livraison -----------------------------------------------------------------
 MODES_LIVRAISON = {"retrait": "Retrait chez l'agriculteur", "livraison": "Livraison à domicile"}
 LONGUEUR_MAX_ADRESSE = 300
+MODES_PAIEMENT = {"livraison": "Paiement à la livraison", "wave": "Paiement en ligne avec Wave"}
+
+
+def mode_paiement_valide(formulaire):
+    """'wave' seulement si le paiement Wave est configuré ; sinon paiement à la livraison."""
+    import wave
+    mode = formulaire.get("mode_paiement", "livraison")
+    return "wave" if mode == "wave" and wave.wave_active() else "livraison"
 
 
 def livraison_valide(formulaire):

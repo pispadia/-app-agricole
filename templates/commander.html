@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_livraison.html" import choix_livraison %}
+{% from "_livraison.html" import choix_livraison, choix_paiement %}
 {% block contenu %}
     <h2>Commander : {{ recolte.nom }}</h2>
     <p style="color:#666;">Vendu par {{ recolte.nom_agriculteur }} — {{ recolte.localite }}</p>
@@ -15,6 +15,7 @@
         <input type="text" name="quantite_demandee" placeholder="ex: 20 kg" required>
 
         {{ choix_livraison(modes_livraison) }}
+        {{ choix_paiement(modes_paiement) }}
 
         <label>Message pour l'agriculteur (optionnel)</label>
         <textarea name="message" rows="3" placeholder="Précisions, date de livraison souhaitée..."></textarea>

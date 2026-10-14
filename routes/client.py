@@ -5,7 +5,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from database import get_connexion
 from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
-                  masquer_coordonnees)
+                  masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
 from routes.avis import NOTES_AGRICULTEURS
 from prix_marche import prix_du_marche, produit_cle
 
@@ -124,7 +124,8 @@ def voir_panier():
             articles.append({"index": index, "recolte": recolte, "quantite": item["quantite"]})
     connexion_bd.close()
 
-    return render_template("panier.html", nom=session["nom"], articles=articles, modes_livraison=MODES_LIVRAISON)
+    return render_template("panier.html", nom=session["nom"], articles=articles, modes_livraison=MODES_LIVRAISON,
+                           modes_paiement=MODES_PAIEMENT)
 
 
 @app.route("/panier/supprimer/<int:index>", methods=["POST"])
@@ -155,6 +156,7 @@ def valider_panier():
     except ValueError as erreur:
         flash(str(erreur))
         return redirect(url_for("voir_panier"))
+    mode_paiement = mode_paiement_valide(request.form)
 
     connexion_bd = get_connexion()
     envoyees, indisponibles = 0, []
@@ -165,10 +167,11 @@ def valider_panier():
             indisponibles.append(recolte["nom"] if recolte else "une récolte supprimée")
             continue
         connexion_bd.execute(
-            """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison, adresse_livraison)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison,
+                                     adresse_livraison, mode_paiement)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (item["recolte_id"], session["utilisateur_id"], item["quantite"], "Commande depuis le panier",
-             mode_livraison, adresse_livraison)
+             mode_livraison, adresse_livraison, mode_paiement)
         )
         envoyees += 1
         if recolte["telephone_agriculteur"]:
@@ -217,9 +220,11 @@ def commander(recolte_id):
         message = masquer_coordonnees(request.form.get("message", ""))
 
         connexion_bd.execute(
-            """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison, adresse_livraison)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            (recolte_id, session["utilisateur_id"], quantite_demandee, message, mode_livraison, adresse_livraison)
+            """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison,
+                                     adresse_livraison, mode_paiement)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (recolte_id, session["utilisateur_id"], quantite_demandee, message, mode_livraison,
+             adresse_livraison, mode_paiement_valide(request.form))
         )
         connexion_bd.commit()
         connexion_bd.close()
@@ -229,7 +234,8 @@ def commander(recolte_id):
         return redirect(url_for("mes_commandes"))
 
     connexion_bd.close()
-    return render_template("commander.html", recolte=recolte, modes_livraison=MODES_LIVRAISON)
+    return render_template("commander.html", recolte=recolte, modes_livraison=MODES_LIVRAISON,
+                           modes_paiement=MODES_PAIEMENT)
 
 
 @app.route("/mes-commandes")
@@ -258,7 +264,7 @@ def mes_commandes():
     connexion_bd.close()
 
     return render_template("mes_commandes.html", nom=session["nom"], commandes=commandes,
-                           modes_livraison=MODES_LIVRAISON)
+                           modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT)
 
 
 @app.route("/mes-commandes/<int:commande_id>/annuler", methods=["POST"])

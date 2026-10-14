@@ -279,13 +279,14 @@ def init_db():
     """)
     connexion.commit()
 
-    # Paiements Wave (abonnement Premium ou commissions) : une ligne par session de
-    # paiement ; « details » liste les commandes réglées pour une commission
-    connexion.execute(f"""
+    # Paiements Wave (abonnement Premium, commissions ou commande payée par le client) :
+    # une ligne par session de paiement ; « details » liste les commandes concernées
+    objets_paiement = "('premium', 'commission', 'commande')"
+    table_paiements_wave = f"""
         CREATE TABLE IF NOT EXISTS paiements_wave (
             id {ID_AUTO},
             utilisateur_id INTEGER NOT NULL,
-            objet TEXT NOT NULL CHECK(objet IN ('premium', 'commission')),
+            objet TEXT NOT NULL CHECK(objet IN {objets_paiement}),
             montant INTEGER NOT NULL,
             details TEXT,
             session_id TEXT,
@@ -293,8 +294,31 @@ def init_db():
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
         )
-    """)
+    """
+    connexion.execute(table_paiements_wave)
     connexion.commit()
+
+    # Migration : bases créées quand seuls 'premium' et 'commission' étaient acceptés
+    if UTILISE_POSTGRES:
+        contrainte = connexion.execute(
+            """SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint
+               WHERE conname = 'paiements_wave_objet_check'"""
+        ).fetchone()
+        if contrainte and "commande" not in contrainte["definition"]:
+            connexion.execute("ALTER TABLE paiements_wave DROP CONSTRAINT paiements_wave_objet_check")
+            connexion.execute(f"ALTER TABLE paiements_wave ADD CONSTRAINT paiements_wave_objet_check "
+                              f"CHECK (objet IN {objets_paiement})")
+            connexion.commit()
+    else:
+        definition_table = connexion.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='paiements_wave'"
+        ).fetchone()
+        if "'commande'" not in definition_table[0]:
+            connexion.execute("ALTER TABLE paiements_wave RENAME TO paiements_wave_ancien")
+            connexion.execute(table_paiements_wave)
+            connexion.execute("INSERT INTO paiements_wave SELECT * FROM paiements_wave_ancien")
+            connexion.execute("DROP TABLE paiements_wave_ancien")
+            connexion.commit()
 
     # Avis d'un client sur une commande livrée : un seul avis par commande
     connexion.execute(f"""
@@ -358,6 +382,13 @@ def init_db():
         # Compte suspendu par un administrateur (fraude, contournement de la commission...)
         ("utilisateurs", "suspendu", "INTEGER NOT NULL DEFAULT 0"),
         ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),
+        # Paiement : à la livraison, ou en ligne via Wave à la plateforme, qui garde sa
+        # commission et reverse le reste à l'agriculteur (ou rembourse si la commande est annulée)
+        ("commandes", "mode_paiement", "TEXT NOT NULL DEFAULT 'livraison'"),
+        ("commandes", "montant_a_payer", "INTEGER"),
+        ("commandes", "paye_en_ligne", "INTEGER NOT NULL DEFAULT 0"),
+        ("commandes", "reverse_agriculteur", "INTEGER NOT NULL DEFAULT 0"),
+        ("commandes", "rembourse", "INTEGER NOT NULL DEFAULT 0"),
         ("commandes", "adresse_livraison", "TEXT"),
         ("commandes", "date_livraison_prevue", "TEXT"),
         ("commandes", "frais_livraison", "INTEGER"),

@@ -25,6 +25,39 @@
         <strong>Total encaissé : {{ totaux.commissions_encaissees + totaux.premium_encaisse }} FCFA</strong>
     </div>
 
+    {% if a_reverser %}
+        <h3>À reverser aux agriculteurs (commandes payées en ligne et livrées)</h3>
+        {% for c in a_reverser %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ c.nom_agriculteur }}</strong>{% if c.telephone_agriculteur %} ({{ c.telephone_agriculteur }}){% endif %}
+                    — {{ c.nom_recolte }} : payé {{ c.montant_a_payer }} FCFA, commission {{ c.commission }} FCFA<br>
+                    À envoyer par Wave : <strong>{{ c.montant_a_payer - c.commission }} FCFA</strong>
+                    <form method="POST" action="{{ url_for('regler_commande_payee', commande_id=c.id, action='reversee') }}" style="margin-top:8px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Marquer reversé</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if a_rembourser %}
+        <h3>À rembourser aux clients (commandes payées puis annulées)</h3>
+        {% for c in a_rembourser %}
+            <div class="carte-recolte">
+                <div>
+                    <strong>{{ c.nom_client }}</strong>{% if c.telephone_client %} ({{ c.telephone_client }}){% endif %}
+                    — {{ c.nom_recolte }} : à rembourser <strong>{{ c.montant_a_payer }} FCFA</strong>
+                    <form method="POST" action="{{ url_for('regler_commande_payee', commande_id=c.id, action='remboursee') }}" style="margin-top:8px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Marquer remboursé</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <h3>Paiements Premium à vérifier</h3>
     {% if paiements %}
         {% for p in paiements %}

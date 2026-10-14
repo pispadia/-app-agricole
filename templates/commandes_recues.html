@@ -31,6 +31,19 @@
                     {{ badge_statut(commande.statut) }}<br>
                     Client : {{ commande.nom_client }}<br>
                     {{ infos_livraison(commande, modes_livraison) }}
+                    {% if commande.mode_paiement == 'wave' %}
+                        <br>💳 Paiement en ligne avec Wave :
+                        {% if commande.paye_en_ligne %}
+                            <span class="badge badge-dispo">Payée{% if commande.montant_a_payer %} ({{ commande.montant_a_payer }} FCFA){% endif %}</span>
+                            {% if commande.statut != 'annulee' %}
+                                — tu recevras {{ commande.montant_a_payer - commande.commission }} FCFA (commission déduite){% if commande.reverse_agriculteur %}, <strong>déjà reversés</strong>{% else %} après la livraison{% endif %}.
+                            {% endif %}
+                        {% elif commande.statut == 'confirmee' %}
+                            <span class="badge badge-attente">En attente du paiement du client</span> — ne livre pas avant le paiement.
+                        {% elif commande.statut == 'en_attente' %}
+                            fixe le prix en confirmant ; le client paiera ensuite.
+                        {% endif %}
+                    {% endif %}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
@@ -47,6 +60,9 @@
                         <form method="POST" action="{{ url_for('changer_statut_commande', commande_id=commande.id) }}" style="display:inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="statut" value="{{ statut_suivant }}">
+                            {% if statut_suivant == 'confirmee' and commande.mode_paiement == 'wave' %}
+                                <input type="text" name="montant" placeholder="Prix total des produits (FCFA)" required inputmode="numeric" style="width:auto; margin:8px 0 0;">
+                            {% endif %}
                             {% if statut_suivant == 'confirmee' %}
                                 <label style="font-weight:normal; margin-top:8px;">{% if commande.mode_livraison == 'livraison' %}Livraison{% else %}Retrait{% endif %} prévu(e) le (facultatif)
                                     <input type="date" name="date_livraison_prevue" style="width:auto; margin:0;"></label>
@@ -54,7 +70,7 @@
                                     <input type="text" name="frais_livraison" placeholder="Frais de livraison (FCFA)" inputmode="numeric" style="width:auto; margin:8px 0 0;">
                                 {% endif %}
                             {% endif %}
-                            {% if statut_suivant == 'livree' %}
+                            {% if statut_suivant == 'livree' and not commande.paye_en_ligne %}
                                 <input type="text" name="montant" placeholder="Montant encaissé (FCFA)" required inputmode="numeric" style="width:auto; margin:8px 0 0;">
                             {% endif %}
                             <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px;{% if statut_suivant == 'annulee' %} background-color:#a94442;{% endif %}">{{ actions[statut_suivant] }}</button>
