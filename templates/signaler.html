@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>🚩 Signaler l'annonce « {{ recolte.nom }} »</h2>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Raison</label>
+        {% for valeur, libelle in motifs.items() %}
+            <label style="display:block; font-weight:normal;">
+                <input type="radio" name="motif" value="{{ valeur }}" required style="width:auto;"> {{ libelle }}
+            </label>
+        {% endfor %}
+        <textarea name="commentaire" rows="3" maxlength="500" placeholder="Précisions (facultatif)"></textarea>
+        <button type="submit" style="background-color:#a94442;">Envoyer le signalement</button>
+    </form>
+    <p><a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}">← Retour à l'annonce</a></p>
+{% endblock %}

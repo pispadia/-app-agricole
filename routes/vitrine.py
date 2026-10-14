@@ -46,7 +46,7 @@ def plan_du_site():
     connexion_bd = get_connexion()
     annonces = connexion_bd.execute(
         """SELECT recoltes.id FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
-           WHERE recoltes.statut = 'disponible' AND utilisateurs.suspendu = 0 ORDER BY recoltes.id DESC LIMIT 5000"""
+           WHERE recoltes.statut = 'disponible' AND recoltes.masquee = 0 AND utilisateurs.suspendu = 0 ORDER BY recoltes.id DESC LIMIT 5000"""
     ).fetchall()
     connexion_bd.close()
     adresses = [url_for("accueil", _external=True), url_for("catalogue_public", _external=True),
