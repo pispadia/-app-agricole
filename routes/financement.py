@@ -14,9 +14,17 @@ def espace_financeur():
         "SELECT * FROM offres_financement WHERE financeur_id = ? ORDER BY date_creation DESC",
         (session["utilisateur_id"],)
     ).fetchall()
+    interets = connexion_bd.execute(
+        """SELECT COUNT(*) AS n FROM contacts_offre
+           JOIN offres_financement ON contacts_offre.offre_id = offres_financement.id
+           WHERE offres_financement.financeur_id = ?""", (session["utilisateur_id"],)
+    ).fetchone()["n"]
+    demandes_ouvertes = connexion_bd.execute(
+        "SELECT COUNT(*) AS n FROM demandes_financement WHERE statut = 'ouverte'").fetchone()["n"]
     connexion_bd.close()
 
-    return render_template("espace_financeur.html", nom=session["nom"], offres=offres)
+    return render_template("espace_financeur.html", nom=session["nom"], offres=offres,
+                           interets=interets, demandes_ouvertes=demandes_ouvertes)
 
 
 @app.route("/espace-financeur/nouvelle-offre", methods=["GET", "POST"])

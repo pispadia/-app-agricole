@@ -530,3 +530,14 @@ button:active, .btn:active { transform: translateY(1px); }
     border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 @media (max-width: 600px) { .carte-producteurs { height: 380px; } }
+.bouton-langue { padding: 7px 10px; }
+.avatar {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; text-decoration: none; font-weight: 700;
+    background: var(--vert-pale); color: var(--vert-fonce); border: 2px solid transparent;
+}
+.avatar:hover, .avatar.actif { border-color: var(--vert); }
+@media (max-width: 600px) {
+    .texte-langue { display: none; }
+    .bouton-quitter { padding: 7px 10px; font-size: 0.85em; }
+}

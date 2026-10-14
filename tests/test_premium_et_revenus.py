@@ -77,10 +77,10 @@ def test_admin_suit_et_encaisse_les_commissions(client):
     livrer_une_commande(client)
     en_tant_que(client, 3, "client")
     page = client.get("/admin").get_data(as_text=True)
-    assert "Fatou" in page and "à encaisser : <strong>1000 FCFA" in page
+    assert "Fatou" in page and "1 000</div><div class=\"tuile-libelle\">FCFA de commissions à encaisser" in page
     client.post("/admin/commissions/1/reglee")
     assert requete("SELECT commission_payee FROM commandes WHERE id = 1")["commission_payee"] == 1
-    assert "Commissions encaissées : <strong>1000 FCFA" in client.get("/admin").get_data(as_text=True)
+    assert "commissions encaissées : <strong>1000 FCFA" in client.get("/admin").get_data(as_text=True)
 
 
 def test_admin_reserve_aux_administrateurs(client):

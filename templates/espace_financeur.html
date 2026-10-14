@@ -1,12 +1,26 @@
 {% extends "base.html" %}
+{% block mise_en_page %}large{% endblock %}
 {% block contenu %}
-    <h2>Espace Financement</h2>
-    <p>Bienvenue {{ nom }} 👋</p>
+    <div class="entete-page">
+        <div>
+            <div class="surtitre">Espace Financement</div>
+            <h1>Bonjour {{ nom.split(' ')[0] }} 👋</h1>
+            <p>Tes offres de financement pour les agriculteurs.</p>
+        </div>
+        <div class="groupe-boutons">
+            <a class="btn btn-clair" href="{{ url_for('interets_recus') }}">📨 Intérêts et demandes</a>
+            <a class="btn" href="{{ url_for('nouvelle_offre') }}">＋ Publier une offre</a>
+        </div>
+    </div>
 
-    <a href="{{ url_for('nouvelle_offre') }}"><button>+ Publier une offre</button></a>
-    <a href="{{ url_for('interets_recus') }}"><button>📨 Intérêts & demandes des agriculteurs</button></a>
+    <div class="tuiles">
+        <div class="tuile"><div class="tuile-icone">💼</div><div class="tuile-valeur">{{ offres | length }}</div><div class="tuile-libelle">Offres publiées</div></div>
+        <div class="tuile"><div class="tuile-icone icone-bleu">✅</div><div class="tuile-valeur">{{ offres | selectattr('statut', 'equalto', 'active') | list | length }}</div><div class="tuile-libelle">Offres actives</div></div>
+        <a class="tuile" href="{{ url_for('interets_recus') }}"><div class="tuile-icone icone-ambre">🤝</div><div class="tuile-valeur">{{ interets }}</div><div class="tuile-libelle">Intérêts reçus</div></a>
+        <a class="tuile" href="{{ url_for('interets_recus') }}"><div class="tuile-icone icone-rose">📄</div><div class="tuile-valeur">{{ demandes_ouvertes }}</div><div class="tuile-libelle">Demandes ouvertes des agriculteurs</div></a>
+    </div>
 
-    <h3 style="margin-top: 30px;">Mes offres publiées</h3>
+    <div class="titre-section"><h2>Mes offres publiées</h2><a href="{{ url_for('nouvelle_offre') }}">＋ Publier</a></div>
 
     {% if offres %}
         {% for offre in offres %}
@@ -26,11 +40,11 @@
                     {% if offre.description %}
                         <p style="margin: 5px 0 0; color: #666;">{{ offre.description }}</p>
                     {% endif %}
-                    <div style="margin-top: 8px;">
-                        <a href="{{ url_for('modifier_offre', offre_id=offre.id) }}"><button type="button">Modifier</button></a>
-                        <form method="POST" action="{{ url_for('basculer_statut_offre', offre_id=offre.id) }}" style="display:inline;">
+                    <div class="groupe-boutons">
+                        <a class="btn btn-clair btn-petit" href="{{ url_for('modifier_offre', offre_id=offre.id) }}">Modifier</a>
+                        <form method="POST" action="{{ url_for('basculer_statut_offre', offre_id=offre.id) }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit">
+                            <button type="submit" class="btn-clair">
                                 {% if offre.statut == 'active' %}Fermer l'offre{% else %}Réactiver{% endif %}
                             </button>
                         </form>
@@ -39,6 +53,6 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>Tu n'as encore publié aucune offre.</p>
+        <div class="vide"><p>Tu n'as encore publié aucune offre.</p><a class="btn" href="{{ url_for('nouvelle_offre') }}">＋ Publier une offre</a></div>
     {% endif %}
 {% endblock %}

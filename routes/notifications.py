@@ -183,72 +183,7 @@ def notifications():
 
 @app.route("/tableau-de-bord")
 def tableau_de_bord():
+    """Page d'accueil après connexion : l'espace du rôle (chiffres clés et raccourcis)."""
     if not utilisateur_connecte():
         return redirect(url_for("connexion"))
-
-    role = session["role"]
-    # Agriculteurs et clients : leur espace sert de tableau de bord (chiffres et raccourcis)
-    if role in ("agriculteur", "client"):
-        return redirect(url_for(f"espace_{role}"))
-    utilisateur_id = session["utilisateur_id"]
-    connexion_bd = get_connexion()
-    stats = {}
-
-    if role == "agriculteur":
-        stats["recoltes_total"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM recoltes WHERE agriculteur_id = ?", (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["recoltes_disponibles"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM recoltes WHERE agriculteur_id = ? AND statut = 'disponible'",
-            (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["commandes_recues"] = connexion_bd.execute(
-            """SELECT COUNT(*) AS n FROM commandes
-               JOIN recoltes ON commandes.recolte_id = recoltes.id
-               WHERE recoltes.agriculteur_id = ?""",
-            (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["demandes_financement"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM demandes_financement WHERE agriculteur_id = ?", (utilisateur_id,)
-        ).fetchone()["n"]
-
-    elif role == "fournisseur":
-        stats["produits_total"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM produits_fournisseur WHERE fournisseur_id = ?", (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["produits_disponibles"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM produits_fournisseur WHERE fournisseur_id = ? AND statut = 'disponible'",
-            (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["messages_recus"] = connexion_bd.execute(
-            """SELECT COUNT(*) AS n FROM contacts_fournisseur
-               JOIN produits_fournisseur ON contacts_fournisseur.produit_id = produits_fournisseur.id
-               WHERE produits_fournisseur.fournisseur_id = ?""",
-            (utilisateur_id,)
-        ).fetchone()["n"]
-
-    elif role == "financeur":
-        stats["offres_total"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM offres_financement WHERE financeur_id = ?", (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["offres_actives"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM offres_financement WHERE financeur_id = ? AND statut = 'active'",
-            (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["interets_recus"] = connexion_bd.execute(
-            """SELECT COUNT(*) AS n FROM contacts_offre
-               JOIN offres_financement ON contacts_offre.offre_id = offres_financement.id
-               WHERE offres_financement.financeur_id = ?""",
-            (utilisateur_id,)
-        ).fetchone()["n"]
-        stats["demandes_ouvertes"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM demandes_financement WHERE statut = 'ouverte'"
-        ).fetchone()["n"]
-
-    elif role == "client":
-        stats["commandes_passees"] = connexion_bd.execute(
-            "SELECT COUNT(*) AS n FROM commandes WHERE client_id = ?", (utilisateur_id,)
-        ).fetchone()["n"]
-
-    connexion_bd.close()
-    return render_template("tableau_de_bord.html", role=role, stats=stats)
+    return redirect(url_for(f"espace_{session['role']}"))

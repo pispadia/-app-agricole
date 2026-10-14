@@ -14,14 +14,14 @@ def client(tmp_path, monkeypatch):
 
 def test_francais_par_defaut(client):
     page = client.get("/").get_data(as_text=True)
-    assert "Bienvenue sur l" in page and "🌍 Wolof" in page
+    assert "Bienvenue sur l" in page and "🌍<span class=\"texte-langue\"> Wolof" in page
 
 
 def test_passer_en_wolof_et_revenir(client):
     page = client.get("/langue/wo", headers={"Referer": "http://localhost/connexion"}, follow_redirects=True)
     texte = page.get_data(as_text=True)
     assert page.request.path == "/connexion"  # retour sur la page d'origine
-    assert "Baatu jàll" in texte and "🌍 Français" in texte
+    assert "Baatu jàll" in texte and "🌍<span class=\"texte-langue\"> Français" in texte
     assert "Dalal ak jàmm" in client.get("/").get_data(as_text=True)
     client.get("/langue/fr")
     assert "Bienvenue sur l" in client.get("/").get_data(as_text=True)

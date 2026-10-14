@@ -1,33 +1,48 @@
 {% extends "base.html" %}
+{% block mise_en_page %}large{% endblock %}
 {% block contenu %}
-    <h2>Administration</h2>
-
-    <div class="carte-recolte" style="display:block;">
-        <strong>Comptes :</strong>
-        {{ comptes.get('agriculteur', 0) }} agriculteurs · {{ comptes.get('client', 0) }} clients ·
-        {{ comptes.get('fournisseur', 0) }} fournisseurs · {{ comptes.get('financeur', 0) }} financeurs
-        {% if suspendus %}· <span style="color:#a94442;">{{ suspendus }} suspendu{{ 's' if suspendus > 1 }}</span>{% endif %}<br>
-        <strong>Commandes :</strong>
-        {{ commandes.get('en_attente', 0) }} en attente · {{ commandes.get('confirmee', 0) }} confirmées ·
-        {{ commandes.get('livree', 0) }} livrées · {{ commandes.get('annulee', 0) }} annulées<br>
-        <a href="{{ url_for('admin_statistiques') }}">📊 Statistiques mois par mois</a> ·
-        <a href="{{ url_for('admin_utilisateurs') }}">👥 Gérer les comptes (rechercher, suspendre)</a> ·
-        <a href="{{ url_for('export_comptable') }}">📒 Comptabilité et export Excel</a> ·
-        <a href="{{ url_for('admin_support') }}">📨 Demandes{% if demandes_support %} <span class="badge badge-epuise">{{ demandes_support }}</span>{% endif %}</a> ·
-        <a href="{{ url_for('admin_verifications') }}">✅ Vérifications{% if verifications %} <span class="badge badge-attente">{{ verifications }}</span>{% endif %}</a> ·
-        <a href="{{ url_for('admin_signalements') }}">🚩 Signalements{% if signalements %} <span class="badge badge-epuise">{{ signalements }}</span>{% endif %}</a>
+    <div class="entete-page">
+        <div>
+            <div class="surtitre">Administration</div>
+            <h1>Tableau de bord</h1>
+            <p>{{ comptes.get('agriculteur', 0) }} agriculteurs · {{ comptes.get('client', 0) }} clients ·
+               {{ comptes.get('fournisseur', 0) }} fournisseurs · {{ comptes.get('financeur', 0) }} financeurs
+               {% if suspendus %}· <span style="color:var(--rouge);">{{ suspendus }} suspendu{{ 's' if suspendus > 1 }}</span>{% endif %}</p>
+        </div>
+        <a class="btn" href="{{ url_for('admin_statistiques') }}">📊 Statistiques mois par mois</a>
     </div>
 
-    <h3>Revenus</h3>
+    {% if demandes_support or verifications or signalements or paiements %}
+        <div class="bandeau">
+            <div>
+                <strong>À traiter</strong>
+                <p>{% if demandes_support %}{{ demandes_support }} demande(s) · {% endif %}{% if verifications %}{{ verifications }} vérification(s) · {% endif %}{% if signalements %}{{ signalements }} annonce(s) signalée(s) · {% endif %}{% if paiements %}{{ paiements | length }} paiement(s) Premium{% endif %}</p>
+            </div>
+        </div>
+    {% endif %}
 
-    <div class="carte-recolte" style="display:block;">
-        Ventes livrées : <strong>{{ totaux.ventes }} FCFA</strong><br>
-        Commissions encaissées : <strong>{{ totaux.commissions_encaissees }} FCFA</strong>
-        · à encaisser : <strong>{{ totaux.commissions_dues }} FCFA</strong>
-        (taux : {{ (taux_commission * 100) | round(1) }} %)<br>
-        Abonnements Premium encaissés : <strong>{{ totaux.premium_encaisse }} FCFA</strong>
-        · abonnés actifs : <strong>{{ totaux.abonnes }}</strong><br>
-        <strong>Total encaissé : {{ totaux.commissions_encaissees + totaux.premium_encaisse }} FCFA</strong>
+    <div class="tuiles">
+        <div class="tuile"><div class="tuile-icone">💰</div><div class="tuile-valeur">{{ "{:,}".format(totaux.commissions_encaissees + totaux.premium_encaisse).replace(",", " ") }}</div><div class="tuile-libelle">FCFA encaissés (commissions + Premium)</div></div>
+        <div class="tuile"><div class="tuile-icone icone-ambre">⏳</div><div class="tuile-valeur">{{ "{:,}".format(totaux.commissions_dues).replace(",", " ") }}</div><div class="tuile-libelle">FCFA de commissions à encaisser</div></div>
+        <div class="tuile"><div class="tuile-icone icone-bleu">📦</div><div class="tuile-valeur">{{ commandes.get('en_attente', 0) + commandes.get('confirmee', 0) }}</div><div class="tuile-libelle">Commandes en cours · {{ commandes.get('livree', 0) }} livrées</div></div>
+        <div class="tuile"><div class="tuile-icone icone-rose">⭐</div><div class="tuile-valeur">{{ totaux.abonnes }}</div><div class="tuile-libelle">Abonnés Premium actifs</div></div>
+    </div>
+
+    <div class="actions">
+        <a class="action" href="{{ url_for('admin_support') }}"><span class="tuile-icone icone-rose">📨</span><div><strong>Demandes et litiges{% if demandes_support %} <span class="badge badge-epuise">{{ demandes_support }}</span>{% endif %}</strong><span>Répondre aux utilisateurs</span></div></a>
+        <a class="action" href="{{ url_for('admin_verifications') }}"><span class="tuile-icone">✅</span><div><strong>Vérifications{% if verifications %} <span class="badge badge-attente">{{ verifications }}</span>{% endif %}</strong><span>Pièces d'identité à contrôler</span></div></a>
+        <a class="action" href="{{ url_for('admin_signalements') }}"><span class="tuile-icone icone-ambre">🚩</span><div><strong>Signalements{% if signalements %} <span class="badge badge-epuise">{{ signalements }}</span>{% endif %}</strong><span>Modération des annonces</span></div></a>
+        <a class="action" href="{{ url_for('admin_utilisateurs') }}"><span class="tuile-icone icone-bleu">👥</span><div><strong>Comptes</strong><span>Rechercher, suspendre</span></div></a>
+        <a class="action" href="{{ url_for('export_comptable') }}"><span class="tuile-icone">📒</span><div><strong>Comptabilité</strong><span>Export Excel</span></div></a>
+        <a class="action" href="{{ url_for('admin_statistiques') }}"><span class="tuile-icone icone-bleu">📊</span><div><strong>Statistiques</strong><span>Évolution mois par mois</span></div></a>
+    </div>
+
+    <div class="carte" style="box-shadow:none;">
+        <strong>Revenus</strong><br>
+        Ventes livrées : <strong>{{ totaux.ventes }} FCFA</strong> ·
+        commissions encaissées : <strong>{{ totaux.commissions_encaissees }} FCFA</strong>
+        (taux : {{ (taux_commission * 100) | round(1) }} %) ·
+        Premium encaissé : <strong>{{ totaux.premium_encaisse }} FCFA</strong>
     </div>
 
     {% if a_reverser %}

@@ -30,7 +30,6 @@
                     <a href="{{ url_for('notifications') }}" class="{{ 'actif' if page == 'notifications' }}">{{ "Notifications" | t }}{% if nb_notifications %}<span class="badge badge-epuise badge-menu">{{ nb_notifications }}</span>{% endif %}</a>
                     <a href="{{ url_for('premium') }}" class="{{ 'actif' if page == 'premium' }}">{% if fin_premium %}⭐ Premium{% else %}{{ "Premium" | t }}{% endif %}</a>
                     {% if est_admin %}<a href="{{ url_for('admin') }}" class="{{ 'actif' if page.startswith('admin') }}">Admin</a>{% endif %}
-                    <a href="{{ url_for('mon_profil') }}" class="{{ 'actif' if page == 'mon_profil' }}">{{ "Mon profil" | t }}</a>
                 {% else %}
                     <a href="{{ url_for('accueil') }}" class="{{ 'actif' if page == 'accueil' }}">{{ "Accueil" | t }}</a>
                     <a href="{{ url_for('catalogue_public') }}" class="{{ 'actif' if page == 'catalogue_public' }}">{{ "Récoltes" | t }}</a>
@@ -39,9 +38,10 @@
                     <a href="{{ url_for('connexion') }}" class="{{ 'actif' if page == 'connexion' }}">{{ "Connexion" | t }}</a>
                 {% endif %}
                 <a href="#" id="installer-app" hidden>📲 {{ "Installer l'app" | t }}</a>
-                <a href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}">🌍 {{ "Wolof" if langue == "fr" else "Français" }}</a>
             </nav>
+            <a class="bouton-quitter bouton-langue" href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}" title="{{ 'Wolof' if langue == 'fr' else 'Français' }}">🌍<span class="texte-langue"> {{ "Wolof" if langue == "fr" else "Français" }}</span></a>
             {% if session.get('utilisateur_id') %}
+                <a class="avatar {{ 'actif' if page == 'mon_profil' }}" href="{{ url_for('mon_profil') }}" title="{{ 'Mon profil' | t }}">{{ (session.get('nom') or '?')[:1] | upper }}</a>
                 <a class="bouton-quitter" href="{{ url_for('deconnexion') }}">{{ "Déconnexion" | t }}</a>
             {% else %}
                 <a class="btn btn-petit" href="{{ url_for('inscription') }}">{{ "Inscription" | t }}</a>

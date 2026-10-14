@@ -55,7 +55,7 @@ def test_litige_sur_une_commande_puis_reponse(client, envois):
     connecter(client, 1, "client")
     page = client.get("/admin/support").get_data(as_text=True)
     assert "Pas livré depuis une semaine" in page and "vendeur Fatou" in page
-    assert "📨 Demandes" in client.get("/admin").get_data(as_text=True)
+    assert "Demandes et litiges" in client.get("/admin").get_data(as_text=True)
     client.post("/admin/support/1/repondre", data={"reponse": "Le vendeur livre demain."})
     assert any(e[0] == "email" and e[1] == "a@x.sn" for e in envois)
     assert any(e[0] == "push" and e[1] == 3 for e in envois)
