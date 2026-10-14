@@ -19,8 +19,17 @@ def accueil():
     return render_template("accueil.html")
 
 
+def memoriser_page_suivante():
+    """Mémorise la page où aller après la connexion (ex: commander depuis une annonce partagée).
+    Seulement un chemin de ce site, pour ne jamais rediriger vers un site extérieur."""
+    suivant = request.args.get("suivant", "")
+    if suivant.startswith("/") and not suivant.startswith(("//", "/\\")):
+        session["suivant"] = suivant
+
+
 @app.route("/inscription", methods=["GET", "POST"])
 def inscription():
+    memoriser_page_suivante()
     if request.method == "POST":
         nom = request.form["nom"]
         email = request.form["email"]
@@ -106,6 +115,7 @@ def deconnecter_compte_suspendu():
 
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
+    memoriser_page_suivante()
     if request.method == "POST":
         email = request.form["email"]
         mot_de_passe = request.form["mot_de_passe"]
@@ -138,6 +148,10 @@ def connexion():
         session["utilisateur_id"] = utilisateur["id"]
         session["nom"] = utilisateur["nom"]
         session["role"] = utilisateur["role"]
+
+        suivant = session.pop("suivant", None)
+        if suivant:
+            return redirect(suivant)
 
         if utilisateur["role"] == "client":
             return redirect(url_for("espace_client"))

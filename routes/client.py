@@ -26,7 +26,7 @@ def espace_client():
         FROM recoltes
         JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
         LEFT JOIN """ + NOTES_AGRICULTEURS + """ notes ON notes.agriculteur_id = recoltes.agriculteur_id
-        WHERE recoltes.statut = 'disponible'
+        WHERE recoltes.statut = 'disponible' AND utilisateurs.suspendu = 0
     """
     parametres = []
 
