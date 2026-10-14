@@ -37,7 +37,7 @@
                     <img src="{{ recolte.photo }}" alt="{{ recolte.nom }}">
                 {% endif %}
                 <div>
-                    <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
+                    <strong><a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}" style="color:inherit;">{{ recolte.nom }}</a></strong> — {{ recolte.quantite }}
                     {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
                     Par <a href="{{ url_for('avis_agriculteur', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a>
                     {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}<br>

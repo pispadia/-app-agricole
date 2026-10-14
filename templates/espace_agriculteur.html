@@ -34,6 +34,8 @@
                         <p style="margin: 5px 0 0; color: #666;">{{ recolte.description }}</p>
                     {% endif %}
                     <div style="margin-top: 8px;">
+                        <a href="{{ lien_partage_whatsapp(recolte) }}" target="_blank" rel="noopener"><button type="button" style="background-color:#25d366;">📤 {{ "Partager sur WhatsApp" | t }}</button></a>
+                        <a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}"><button type="button">{{ "Voir l'annonce" | t }}</button></a>
                         <a href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}"><button type="button">{{ "Modifier" | t }}</button></a>
                         <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}" style="display:inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

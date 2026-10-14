@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_etoiles.html" import etoiles %}
+{% set titre_annonce = recolte.nom ~ " — " ~ recolte.prix ~ " (" ~ recolte.localite ~ ")" %}
+{% block titre %}{{ titre_annonce }} · App Agricole{% endblock %}
+{% block meta %}
+    {# Aperçu du lien quand il est partagé sur WhatsApp, Facebook... #}
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="App Agricole">
+    <meta property="og:title" content="{{ titre_annonce }}">
+    <meta property="og:description" content="{{ recolte.quantite }} disponible{{ ' dès le ' ~ (recolte.date_disponibilite | date_fr) if recolte.date_disponibilite }}. Vendu par {{ recolte.nom_agriculteur }} sur App Agricole.">
+    <meta property="og:url" content="{{ url_for('voir_annonce', recolte_id=recolte.id, _external=True) }}">
+    {% if recolte.photo %}<meta property="og:image" content="{{ url_for('photo_annonce', recolte_id=recolte.id, _external=True) }}">{% endif %}
+{% endblock %}
+{% block contenu %}
+    <div class="carte-recolte" style="display:block;">
+        {% if recolte.photo %}
+            <img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}" style="width:100%; max-width:none; height:auto; max-height:320px; object-fit:cover; border-radius:8px;">
+        {% endif %}
+        <h2 style="margin-bottom:5px;">{{ recolte.nom }}</h2>
+        {% if recolte.statut != 'disponible' %}<span class="badge badge-epuise">Plus disponible</span>{% endif %}
+        <p style="margin:5px 0;">
+            <strong>{{ recolte.prix }}</strong>
+            {% if prix_courant %}<span style="color:#666; font-size:0.9em;">(prix courant : {{ prix_courant.median }} FCFA/kg)</span>{% endif %}<br>
+            {% if recolte.prix_gros %}Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>{% endif %}
+            Quantité : {{ recolte.quantite }}<br>
+            📍 {{ recolte.localite }} · disponible le {{ recolte.date_disponibilite | date_fr }}
+        </p>
+        {% if recolte.description %}<p style="color:#555;">{{ recolte.description }}</p>{% endif %}
+        <p>
+            Vendu par <strong>{{ recolte.nom_agriculteur }}</strong>
+            {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}
+            {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}
+        </p>
+
+        {% if recolte.statut == 'disponible' %}
+            {% if role == 'client' %}
+                <a href="{{ url_for('commander', recolte_id=recolte.id) }}"><button type="button">Commander</button></a>
+            {% elif role is none %}
+                <a href="{{ url_for('inscription', suivant=url_for('commander', recolte_id=recolte.id)) }}"><button type="button">Créer un compte pour commander</button></a>
+                <p style="text-align:center;"><a href="{{ url_for('connexion', suivant=url_for('commander', recolte_id=recolte.id)) }}">J'ai déjà un compte</a></p>
+            {% endif %}
+        {% endif %}
+    </div>
+    <p style="font-size:0.85em; color:#666;">App Agricole met en relation agriculteurs et acheteurs au Sénégal. Paiement à la livraison ou avec Wave.</p>
+{% endblock %}
