@@ -24,3 +24,11 @@ def test_page_hors_ligne_et_liens_dans_les_pages():
     assert "Pas de connexion" in client.get("/hors-ligne").get_data(as_text=True)
     page = client.get("/").get_data(as_text=True)
     assert 'rel="manifest"' in page and "serviceWorker" in page
+
+
+def test_accueil_redirige_un_utilisateur_connecte():
+    client = app.test_client()
+    with client.session_transaction() as session:
+        session.update(utilisateur_id=1, nom="Test", role="client")
+    reponse = client.get("/")
+    assert reponse.status_code == 302 and reponse.headers["Location"].endswith("/tableau-de-bord")

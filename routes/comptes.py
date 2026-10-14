@@ -12,6 +12,9 @@ from core import app, utilisateur_connecte, mot_de_passe_valide, telephone_valid
 
 @app.route("/")
 def accueil():
+    # Déjà connecté : rien à faire sur la page d'inscription / connexion
+    if utilisateur_connecte():
+        return redirect(url_for("tableau_de_bord"))
     return render_template("accueil.html")
 
 
