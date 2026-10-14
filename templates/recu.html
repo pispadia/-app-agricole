@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block titre %}Reçu {{ numero }} · App Agricole{% endblock %}
+{% block contenu %}
+    <style>
+        .recu { background:#fff; border:1px solid #ddd; border-radius:8px; padding:20px; }
+        .recu table { width:100%; border-collapse:collapse; margin:12px 0; }
+        .recu td { padding:6px 0; border-bottom:1px solid #eee; }
+        .recu td:last-child { text-align:right; }
+        .recu .total td { font-weight:bold; border-bottom:none; font-size:1.1em; }
+        @media print {
+            header, .ne-pas-imprimer, .flash { display:none !important; }
+            body, main, .conteneur { background:#fff !important; padding:0 !important; margin:0 !important; box-shadow:none !important; }
+            .recu { border:none; }
+        }
+    </style>
+
+    <div class="recu">
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <div><strong style="font-size:1.2em;">🌾 App Agricole</strong><br><span style="color:#666;">Reçu de commande</span></div>
+            <div style="text-align:right;"><strong>{{ numero }}</strong><br>Commande du {{ commande.date_creation | date_fr }}</div>
+        </div>
+
+        <p style="margin-top:16px;">
+            <strong>Vendeur :</strong> {{ commande.nom_agriculteur }} ({{ commande.localite }})<br>
+            <strong>Client :</strong> {{ commande.nom_client }}<br>
+            <strong>Livraison :</strong>
+            {% if commande.mode_livraison == 'livraison' %}livrée{% if commande.adresse_livraison %} à {{ commande.adresse_livraison }}{% endif %}{% else %}retrait chez le producteur{% endif %}
+            {% if commande.date_livraison_prevue %} — le {{ commande.date_livraison_prevue | date_fr }}{% endif %}<br>
+            <strong>Paiement :</strong> {{ "Wave (en ligne)" if commande.paye_en_ligne else "à la livraison" }}
+        </p>
+
+        <table>
+            <tr><td>{{ commande.nom_recolte }} — {{ commande.quantite_demandee }}<br><span style="font-size:0.85em; color:#666;">Prix affiché : {{ commande.prix }}</span></td><td>{{ montant }} FCFA</td></tr>
+            {% if frais %}<tr><td>Frais de livraison</td><td>{{ frais }} FCFA</td></tr>{% endif %}
+            <tr class="total"><td>Total payé</td><td>{{ total }} FCFA</td></tr>
+        </table>
+
+        {% if voir_commission and commande.commission is not none %}
+            <p style="font-size:0.9em; color:#555;">
+                Commission App Agricole : {{ commande.commission }} FCFA
+                ({{ "réglée" if commande.commission_payee or commande.paye_en_ligne else "à régler" }})<br>
+                Net pour le vendeur : <strong>{{ montant - commande.commission }} FCFA</strong>
+            </p>
+        {% endif %}
+
+        <p style="font-size:0.8em; color:#999; margin-top:16px;">Commande livrée. Reçu émis par App Agricole, plateforme de mise en relation entre agriculteurs et acheteurs au Sénégal.</p>
+    </div>
+
+    <p class="ne-pas-imprimer" style="margin-top:12px;">
+        <button type="button" onclick="window.print()">🖨️ Imprimer / enregistrer en PDF</button>
+    </p>
+    <p class="ne-pas-imprimer"><a href="{{ url_for('tableau_de_bord') }}">← Retour</a></p>
+{% endblock %}
