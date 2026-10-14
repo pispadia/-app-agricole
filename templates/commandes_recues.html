@@ -61,6 +61,9 @@
                     {% if commande.statut == 'livree' %}
                         <p style="margin: 5px 0 0;"><a href="{{ url_for('recu_commande', commande_id=commande.id) }}">🧾 Reçu</a></p>
                     {% endif %}
+                    {% if commande.statut != 'en_attente' %}
+                        <p style="margin: 5px 0 0; font-size:0.88em;"><a href="{{ url_for('contact', commande=commande.id) }}" style="color:var(--rouge);">⚠️ Signaler un problème</a></p>
+                    {% endif %}
 
                     {% for statut_suivant in transitions.get(commande.statut, ()) %}
                         <form method="POST" action="{{ url_for('changer_statut_commande', commande_id=commande.id) }}" style="display:inline;">

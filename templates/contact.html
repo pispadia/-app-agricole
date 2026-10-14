@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titre %}Contact · App Agricole{% endblock %}
+{% block contenu %}
+    <h1>Contacter l'équipe</h1>
+    <p style="color:var(--discret);">Une question, un problème sur une commande ou un paiement ? Écris-nous, nous répondons en général sous 48 h.</p>
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% if not utilisateur %}
+            <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Ton nom" maxlength="100" required>
+            <input type="email" name="email" value="{{ saisie.get('email', '') }}" placeholder="Ton e-mail (pour la réponse)" required>
+        {% endif %}
+        <label>Sujet</label>
+        <select name="categorie" required>
+            <option value="" disabled {% if not commande_choisie and not saisie.get('categorie') %}selected{% endif %}>Choisis un sujet...</option>
+            {% for cle, libelle in categories.items() %}
+                <option value="{{ cle }}" {% if saisie.get('categorie') == cle or (commande_choisie and cle == 'commande' and not saisie.get('categorie')) %}selected{% endif %}>{{ libelle }}</option>
+            {% endfor %}
+        </select>
+        {% if commandes %}
+            <label>Commande concernée (facultatif)</label>
+            <select name="commande_id">
+                <option value="">— Aucune —</option>
+                {% for c in commandes %}
+                    <option value="{{ c.id }}" {% if c.id == commande_choisie %}selected{% endif %}>N°{{ c.id }} · {{ c.nom_recolte }} · {{ c.date_creation | date_fr }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+        <label>Message</label>
+        <textarea name="message" rows="6" maxlength="2000" placeholder="Explique ce qui se passe : dates, quantités, montant..." required>{{ saisie.get('message', '') }}</textarea>
+        <button type="submit">Envoyer</button>
+    </form>
+
+    {% if demandes %}
+        <h3>Mes demandes</h3>
+        {% for d in demandes %}
+            <div class="carte-recolte" style="display:block;">
+                <strong>N°{{ d.id }} · {{ categories.get(d.categorie, d.categorie) }}</strong>
+                {% if d.statut == 'traitee' %}<span class="badge badge-dispo">Traitée</span>{% else %}<span class="badge badge-attente">En cours</span>{% endif %}
+                <p style="margin:6px 0; white-space:pre-wrap;">{{ d.message }}</p>
+                <p style="margin:0; font-size:0.85em; color:var(--discret);">Envoyée le {{ d.date_creation | date_fr }}{% if d.commande_id %} · commande n°{{ d.commande_id }}{% endif %}</p>
+                {% if d.reponse %}
+                    <div class="bulle bulle-moi" style="max-width:100%; margin-top:10px;">
+                        <strong>Réponse de l'équipe :</strong>
+                        <div class="bulle-texte">{{ d.reponse }}</div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
