@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block contenu %}
-    <h2>Administration — revenus</h2>
+    <h2>Administration</h2>
+
+    <div class="carte-recolte" style="display:block;">
+        <strong>Comptes :</strong>
+        {{ comptes.get('agriculteur', 0) }} agriculteurs · {{ comptes.get('client', 0) }} clients ·
+        {{ comptes.get('fournisseur', 0) }} fournisseurs · {{ comptes.get('financeur', 0) }} financeurs
+        {% if suspendus %}· <span style="color:#a94442;">{{ suspendus }} suspendu{{ 's' if suspendus > 1 }}</span>{% endif %}<br>
+        <strong>Commandes :</strong>
+        {{ commandes.get('en_attente', 0) }} en attente · {{ commandes.get('confirmee', 0) }} confirmées ·
+        {{ commandes.get('livree', 0) }} livrées · {{ commandes.get('annulee', 0) }} annulées<br>
+        <a href="{{ url_for('admin_utilisateurs') }}">👥 Gérer les comptes (rechercher, suspendre)</a>
+    </div>
+
+    <h3>Revenus</h3>
 
     <div class="carte-recolte" style="display:block;">
         Ventes livrées : <strong>{{ totaux.ventes }} FCFA</strong><br>

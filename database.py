@@ -355,6 +355,8 @@ def init_db():
         # Adresse e-mail confirmée par lien (vide tant que non confirmée) ; on garde
         # l'adresse et non un simple drapeau pour qu'un changement d'e-mail l'invalide
         ("utilisateurs", "email_confirme", "TEXT"),
+        # Compte suspendu par un administrateur (fraude, contournement de la commission...)
+        ("utilisateurs", "suspendu", "INTEGER NOT NULL DEFAULT 0"),
         ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),
         ("commandes", "adresse_livraison", "TEXT"),
         ("commandes", "date_livraison_prevue", "TEXT"),
