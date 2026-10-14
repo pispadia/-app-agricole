@@ -2,6 +2,7 @@
 {% from "_statut_commande.html" import badge_statut %}
 {% block contenu %}
     <h2>Notifications</h2>
+    {% include "_activer_push.html" %}
 
     {% if discussions %}
         <h3>Nouveaux messages</h3>

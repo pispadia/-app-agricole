@@ -24,3 +24,28 @@ self.addEventListener("fetch", (evenement) => {
         );
     }
 });
+
+// Notifications push : affichées même quand l'application est fermée
+self.addEventListener("push", (evenement) => {
+    let donnees = {};
+    try { donnees = evenement.data ? evenement.data.json() : {}; } catch (e) { donnees = {texte: evenement.data.text()}; }
+    evenement.waitUntil(self.registration.showNotification(donnees.titre || "App Agricole", {
+        body: donnees.texte || "",
+        icon: "/static/icones/icone-192.png",
+        badge: "/static/icones/icone-192.png",
+        data: {url: donnees.url || "/"},
+    }));
+});
+
+self.addEventListener("notificationclick", (evenement) => {
+    evenement.notification.close();
+    const url = new URL(evenement.notification.data.url || "/", self.location.origin).href;
+    evenement.waitUntil(
+        self.clients.matchAll({type: "window", includeUncontrolled: true}).then((fenetres) => {
+            for (const fenetre of fenetres) {
+                if ("focus" in fenetre) { fenetre.navigate(url); return fenetre.focus(); }
+            }
+            return self.clients.openWindow(url);
+        })
+    );
+});

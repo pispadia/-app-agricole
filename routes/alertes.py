@@ -4,7 +4,7 @@ import threading
 from flask import render_template, request, redirect, url_for, session, flash
 from markupsafe import escape
 
-import sms
+import push
 from database import get_connexion
 from core import app, utilisateur_connecte
 from emails import envoyer_email
@@ -99,6 +99,7 @@ def prevenir_clients(connexion_bd, recolte_id, nom, localite, prix):
                 f'<p><a href="{lien}">Voir l\'annonce et commander</a></p>'
                 f"<p>Tu peux gérer tes alertes dans « Mes alertes » sur App Agricole.</p>",
             )
-            sms.alerter(client["telephone"], f"App Agricole : {nom} disponible à {localite} ({prix}). {lien}")
+            push.alerter(client["id"], client["telephone"],
+                         f"App Agricole : {nom} disponible à {localite} ({prix}). {lien}", lien)
 
     threading.Thread(target=envoyer, daemon=True).start()

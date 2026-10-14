@@ -3,7 +3,7 @@ commandes payées par les clients (la plateforme garde sa commission et reverse 
 from flask import redirect, request, url_for, session, flash
 from database import get_connexion
 from core import app, utilisateur_connecte, PRIX_PREMIUM_MENSUEL
-import sms
+import push
 import wave
 from routes.premium import prolonger_premium
 from routes.parrainage import recompenser_parrainage
@@ -78,13 +78,14 @@ def verifier_paiement(connexion_bd, paiement):
                 "UPDATE commandes SET paye_en_ligne = 1, commission_payee = 1, lu = 0 WHERE id = ?", (commande_id,)
             )
             agriculteur = connexion_bd.execute(
-                """SELECT utilisateurs.telephone, recoltes.nom FROM commandes
+                """SELECT utilisateurs.telephone, recoltes.nom, recoltes.agriculteur_id FROM commandes
                    JOIN recoltes ON commandes.recolte_id = recoltes.id
                    JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
                    WHERE commandes.id = ?""", (commande_id,)
             ).fetchone()
-            sms.alerter(agriculteur["telephone"],
-                        f"App Agricole : la commande de {agriculteur['nom']} est payée en ligne. Tu peux livrer.")
+            push.alerter(agriculteur["agriculteur_id"], agriculteur["telephone"],
+                         f"App Agricole : la commande de {agriculteur['nom']} est payée en ligne. Tu peux livrer.",
+                         "/espace-agriculteur/commandes")
         else:
             for commande_id in (paiement["details"] or "").split(","):
                 if commande_id:

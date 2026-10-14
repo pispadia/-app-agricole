@@ -171,7 +171,7 @@ TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
-    "photos_recolte", "verifications",
+    "photos_recolte", "verifications", "parametres", "abonnements_push",
 )
 
 
@@ -495,6 +495,25 @@ def init_db():
             id {ID_AUTO},
             utilisateur_id INTEGER NOT NULL UNIQUE,
             piece TEXT NOT NULL,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    # Réglages internes de l'application (ex. clés des notifications push)
+    connexion.execute("""
+        CREATE TABLE IF NOT EXISTS parametres (
+            cle TEXT PRIMARY KEY,
+            valeur TEXT NOT NULL
+        )
+    """)
+    # Appareils (téléphone, navigateur) où l'utilisateur a activé les notifications push
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS abonnements_push (
+            id {ID_AUTO},
+            utilisateur_id INTEGER NOT NULL,
+            endpoint TEXT NOT NULL UNIQUE,
+            p256dh TEXT NOT NULL,
+            auth TEXT NOT NULL,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
         )
