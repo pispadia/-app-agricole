@@ -84,6 +84,25 @@
                     <p style="text-align:center; margin:8px 0 0;"><a href="{{ url_for('connexion', suivant=url_for('commander', recolte_id=recolte.id)) }}">J'ai déjà un compte</a></p>
                 {% endif %}
             {% endif %}
+            {% if objectif_groupe and recolte.statut == 'disponible' %}
+                <div class="achat-groupe">
+                    <strong>👥 Achat groupé : prix de gros {{ recolte.prix_gros }} dès {{ objectif_groupe }}</strong>
+                    {% if groupe %}
+                        <div class="jauge"><div style="width:{{ groupe.pourcent }}%"></div></div>
+                        <p>{{ groupe.total }} sur {{ objectif_groupe }} · {{ groupe.participants | length }} participant(s) · il manque {{ groupe.manque }} · jusqu'au {{ groupe.groupe.date_limite | date_fr }}</p>
+                        <a class="btn btn-clair btn-petit" href="{{ url_for('voir_achat_groupe', groupe_id=groupe.groupe.id) }}">{{ "Rejoindre le groupe" if role == 'client' else "Voir l'achat groupé" }}</a>
+                    {% elif role == 'client' %}
+                        <p>Pas besoin de tout acheter seul : lance un groupe, d'autres acheteurs complètent la quantité (7 jours).</p>
+                        <form method="POST" action="{{ url_for('lancer_achat_groupe', recolte_id=recolte.id) }}" class="formulaire-groupe">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="text" name="quantite" placeholder="Ta part (ex: 100 kg)" required>
+                            <button type="submit" class="btn-petit">Lancer l'achat groupé</button>
+                        </form>
+                    {% else %}
+                        <p>Des clients peuvent s'associer pour obtenir le prix de gros.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
             <p style="font-size:0.85em; color:var(--discret); margin:14px 0 0;">Paiement à la livraison ou avec Wave. Les échanges passent par la messagerie d'App Agricole.</p>
             <p style="font-size:0.85em; margin:6px 0 0;"><a href="{{ url_for('signaler_annonce', recolte_id=recolte.id) }}" style="color:var(--rouge);">🚩 Signaler cette annonce</a></p>
         </div>

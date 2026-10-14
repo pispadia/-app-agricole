@@ -11,6 +11,7 @@ from core import app, utilisateur_connecte
 from prix_marche import prix_du_marche, produit_cle
 from routes.avis import NOTES_AGRICULTEURS
 from routes.favoris import etat_client
+from routes.achats_groupes import groupe_possible, groupe_ouvert, resume_groupe
 
 
 def recolte_publique(connexion_bd, recolte_id):
@@ -48,10 +49,13 @@ def voir_annonce(recolte_id):
     photos = connexion_bd.execute(
         "SELECT id FROM photos_recolte WHERE recolte_id = ? ORDER BY id", (recolte_id,)).fetchall()
     favori, suivi = etat_client(connexion_bd, recolte_id, recolte["agriculteur_id"])
+    objectif_groupe = groupe_possible(recolte)
+    groupe = groupe_ouvert(connexion_bd, recolte_id) if objectif_groupe else None
+    groupe = resume_groupe(connexion_bd, groupe) if groupe else None
     connexion_bd.close()
     return render_template(
         "annonce.html", recolte=recolte, prix_courant=prix_courant, photos=photos, aujourdhui=date.today().isoformat(),
-        favori=favori, suivi=suivi,
+        favori=favori, suivi=suivi, objectif_groupe=objectif_groupe, groupe=groupe,
         role=session.get("role") if utilisateur_connecte() else None,
     )
 

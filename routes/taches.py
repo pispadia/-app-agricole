@@ -92,7 +92,8 @@ def taches_quotidiennes():
     connexion_bd = get_connexion()
     from routes.commandes_regulieres import passer_commandes_du_jour  # import local : évite un cycle
     from routes.rapport_mensuel import preparer_rapports
-    messages = preparer_rappels(connexion_bd) + passer_commandes_du_jour(connexion_bd)
+    from routes.achats_groupes import expirer_groupes
+    messages = preparer_rappels(connexion_bd) + passer_commandes_du_jour(connexion_bd) + expirer_groupes(connexion_bd)
     rapports = preparer_rapports(connexion_bd)
     connexion_bd.close()
     lien = url_for("accueil", _external=True)

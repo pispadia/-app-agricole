@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titre %}Achat groupé : {{ recolte.nom }} · App Agricole{% endblock %}
+{% block meta %}
+    <meta property="og:title" content="Achat groupé : {{ recolte.nom }} au prix de gros ({{ groupe.prix }})">
+    <meta property="og:description" content="Il manque {{ manque }} pour atteindre {{ groupe.objectif }}. Rejoins le groupe sur App Agricole.">
+{% endblock %}
+{% block contenu %}
+    <div class="surtitre">👥 Achat groupé n°{{ groupe.id }}</div>
+    <h1 style="margin-top:4px;">{{ recolte.nom }} au prix de gros</h1>
+    <p>Vendu par <a href="{{ url_for('boutique', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a> · 📍 {{ recolte.localite }} · <a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}">Voir l'annonce</a></p>
+
+    <div class="carte">
+        <div class="prix-offre" style="font-size:1.5em;">{{ groupe.prix }} <s class="prix-barre">{{ recolte.prix }}</s></div>
+        <p style="margin:4px 0 12px;">Prix de gros dès <strong>{{ groupe.objectif }}</strong> commandés ensemble.</p>
+        <div class="jauge jauge-grande"><div style="width:{{ pourcent }}%"></div></div>
+        <p style="margin:8px 0 0;"><strong>{{ total }}</strong> sur {{ groupe.objectif }} ({{ pourcent }} %)
+            {% if groupe.statut == 'ouvert' and ouvert %} · il manque <strong>{{ manque }}</strong> · jusqu'au {{ groupe.date_limite | date_fr }}{% endif %}</p>
+        {% if groupe.statut == 'reussi' %}
+            <p class="badge badge-livree" style="margin-top:10px;">🎉 Objectif atteint : les commandes ont été envoyées à l'agriculteur</p>
+        {% elif not ouvert %}
+            <p class="badge badge-epuise" style="margin-top:10px;">Terminé sans atteindre l'objectif</p>
+        {% endif %}
+    </div>
+
+    {% if ouvert and recolte.statut == 'disponible' %}
+        <div class="carte" style="margin-top:16px;">
+            {% if role == 'client' %}
+                <h2 style="margin-top:0;">{% if ma_part %}Ta part : {{ ma_part }}{% else %}Rejoindre le groupe{% endif %}</h2>
+                <form method="POST" class="formulaire-groupe">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="text" name="quantite" placeholder="Ta quantité (ex: 100 kg)" value="{{ ma_part or '' }}" required>
+                    <button type="submit" class="btn-petit">{% if ma_part %}Modifier ma part{% else %}Je participe{% endif %}</button>
+                </form>
+                {% if ma_part %}
+                    <form method="POST" style="margin-top:8px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="quitter">
+                        <button type="submit" class="btn-clair btn-petit">Quitter le groupe</button>
+                    </form>
+                {% endif %}
+                <p style="font-size:0.88em; color:var(--discret); margin:10px 0 0;">Rien n'est commandé tant que l'objectif n'est pas atteint. Ensuite, chacun reçoit sa commande au prix de gros et règle l'agriculteur (livraison ou Wave).</p>
+            {% elif role is none %}
+                <a class="btn" href="{{ url_for('inscription', suivant=url_for('voir_achat_groupe', groupe_id=groupe.id)) }}">Créer un compte pour participer</a>
+                <p style="text-align:center; margin:8px 0 0;"><a href="{{ url_for('connexion', suivant=url_for('voir_achat_groupe', groupe_id=groupe.id)) }}">J'ai déjà un compte</a></p>
+            {% else %}
+                <p style="margin:0;">Seuls les comptes clients peuvent participer.</p>
+            {% endif %}
+            <a class="btn btn-whatsapp btn-petit" style="margin-top:12px;" target="_blank" rel="noopener"
+               href="https://wa.me/?text={{ ('Achat groupé de ' ~ recolte.nom ~ ' au prix de gros (' ~ groupe.prix ~ ') : il manque ' ~ manque ~ '. Rejoins-nous : ' ~ lien) | urlencode }}">📤 Inviter sur WhatsApp</a>
+        </div>
+    {% endif %}
+
+    <h2>Participants ({{ participants | length }})</h2>
+    {% for p in participants %}
+        <div class="carte-recolte" style="display:flex; justify-content:space-between;"><span>👤 {{ p.nom.split(' ')[0] }}</span><strong>{{ p.quantite }}</strong></div>
+    {% else %}
+        <p class="vide">Personne pour le moment.</p>
+    {% endfor %}
+{% endblock %}
