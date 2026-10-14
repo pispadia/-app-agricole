@@ -11,27 +11,7 @@
         <a href="{{ url_for('parrainage') }}"><button type="button">🎁 Inviter et gagner du Premium</button></a>
     </p>
 
-    <form method="GET">
-        <input type="text" name="recherche" placeholder="Rechercher un produit ou mot-clé" value="{{ recherche }}">
-        <select name="localite">
-            <option value="">Toutes les localités</option>
-            {% for l in localites %}
-                <option value="{{ l.localite }}" {% if l.localite == localite_choisie %}selected{% endif %}>{{ l.localite }}</option>
-            {% endfor %}
-        </select>
-        <select name="periode">
-            <option value="">Disponible maintenant et à venir</option>
-            <option value="maintenant" {% if periode_choisie == 'maintenant' %}selected{% endif %}>Disponible maintenant</option>
-            <option value="a_venir" {% if periode_choisie == 'a_venir' %}selected{% endif %}>À venir (pré-commande)</option>
-        </select>
-        <select name="tri">
-            <option value="recent" {% if tri_choisi == 'recent' %}selected{% endif %}>Plus récent</option>
-            <option value="nom" {% if tri_choisi == 'nom' %}selected{% endif %}>Nom (A-Z)</option>
-            <option value="localite" {% if tri_choisi == 'localite' %}selected{% endif %}>Localité (A-Z)</option>
-            <option value="note" {% if tri_choisi == 'note' %}selected{% endif %}>Mieux notés</option>
-        </select>
-        <button type="submit">Filtrer</button>
-    </form>
+    {% include "_filtres_catalogue.html" %}
 
     <h3 style="margin-top: 30px;">Récoltes disponibles</h3>
     <p><a href="{{ url_for('prix_marche') }}">📈 Voir les prix du marché</a></p>

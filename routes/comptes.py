@@ -24,7 +24,8 @@ def accueil():
     # Déjà connecté : rien à faire sur la page d'inscription / connexion
     if utilisateur_connecte():
         return redirect(url_for("tableau_de_bord"))
-    return render_template("accueil.html")
+    from routes.vitrine import page_accueil
+    return page_accueil()
 
 
 def memoriser_page_suivante():
@@ -37,6 +38,8 @@ def memoriser_page_suivante():
 
 @app.route("/inscription", methods=["GET", "POST"])
 def inscription():
+    # Rôle présélectionné depuis la page d'accueil (« Je vends mes récoltes »)
+    role_propose = request.args.get("role") if request.args.get("role") in ROLES else None
     memoriser_page_suivante()
     if request.args.get("parrain"):
         session["parrain"] = request.args["parrain"][:20]
@@ -87,7 +90,7 @@ def inscription():
             flash("Compte créé avec succès, tu peux te connecter.")
         return redirect(url_for("connexion"))
 
-    return render_template("inscription.html")
+    return render_template("inscription.html", saisie={"role": role_propose} if role_propose else {})
 
 
 # Après MAX_ECHECS mots de passe faux pour un même email en DUREE_BLOCAGE secondes,

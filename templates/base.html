@@ -260,6 +260,7 @@
                 <a href="{{ url_for('mon_profil') }}">{{ "Mon profil" | t }}</a>
                 <a href="{{ url_for('deconnexion') }}">{{ "Déconnexion" | t }}</a>
             {% else %}
+                <a href="{{ url_for('catalogue_public') }}">{{ "Récoltes" | t }}</a>
                 <a href="{{ url_for('connexion') }}">{{ "Connexion" | t }}</a>
                 <a href="{{ url_for('inscription') }}">{{ "Inscription" | t }}</a>
             {% endif %}
