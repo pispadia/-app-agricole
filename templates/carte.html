@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block titre %}Carte des producteurs · App Agricole{% endblock %}
+{% block meta %}
+    <meta name="description" content="Carte des récoltes à vendre au Sénégal : trouvez les producteurs près de chez vous.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='leaflet/leaflet.css') }}">
+{% endblock %}
+{% block mise_en_page %}large{% endblock %}
+{% block contenu %}
+    <div class="entete-page">
+        <div>
+            <h1>🗺️ Carte des producteurs</h1>
+            <p>{{ total }} récolte{{ 's' if total > 1 }} disponible{{ 's' if total > 1 }} au Sénégal</p>
+        </div>
+        <div class="groupe-boutons">
+            <a class="btn btn-clair" href="{{ url_for('catalogue_public') }}">Voir en liste</a>
+            <button type="button" id="pres-de-moi" class="btn" style="width:auto; margin:0;">📍 Près de chez moi</button>
+        </div>
+    </div>
+
+    <div id="carte" class="carte-producteurs"></div>
+    <p id="etat-position" style="color:var(--discret); font-size:0.9em;"></p>
+
+    <div id="plus-proches" hidden>
+        <div class="titre-section"><h2>Les plus proches de toi</h2></div>
+        <div id="liste-proches" class="actions"></div>
+    </div>
+
+    {% if non_placees %}
+        <div class="titre-section"><h2>Autres localités</h2></div>
+        <div class="actions">
+            {% for r in non_placees %}
+                <a class="action" href="{{ url_for('voir_annonce', recolte_id=r.id) }}"><span class="tuile-icone">🌾</span><div><strong>{{ r.nom }} · {{ r.prix }}</strong><span>📍 {{ r.localite }}</span></div></a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
+    <script>
+        (function () {
+            const points = {{ points | tojson }};
+            const echapper = (texte) => String(texte).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+            const etat = document.getElementById("etat-position");
+            if (typeof L === "undefined") {
+                document.getElementById("carte").innerHTML = '<div class="vide" style="height:100%; display:grid; place-items:center;">Carte indisponible pour le moment.</div>';
+                return;
+            }
+            const carte = L.map("carte", {scrollWheelZoom: false}).setView([14.4, -14.8], 7);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 17, attribution: "© OpenStreetMap",
+            }).addTo(carte);
+
+            const limites = [];
+            points.forEach((point) => {
+                const contenu = point.annonces.map((a) =>
+                    `<div style="margin:4px 0;"><a href="${a.url}"><strong>${echapper(a.nom)}</strong></a> · ${echapper(a.prix)}<br>` +
+                    `<span style="color:#63736a;">${echapper(a.quantite)} · ${echapper(a.vendeur)}</span></div>`).join("");
+                const icone = L.divIcon({className: "marqueur", html: `<span>${point.annonces.length}</span>`, iconSize: [34, 34]});
+                L.marker([point.lat, point.lon], {icon: icone}).addTo(carte)
+                    .bindPopup(`<div style="max-height:220px; overflow:auto;"><strong>📍 ${echapper(point.annonces[0].localite)}</strong>${contenu}</div>`);
+                limites.push([point.lat, point.lon]);
+            });
+            if (limites.length > 1) carte.fitBounds(limites, {padding: [30, 30], maxZoom: 9});
+
+            function distance(a, b) {
+                const rad = (x) => x * Math.PI / 180;
+                const h = Math.sin(rad(b[0] - a[0]) / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(rad(b[1] - a[1]) / 2) ** 2;
+                return 6371 * 2 * Math.asin(Math.sqrt(h));
+            }
+
+            document.getElementById("pres-de-moi").addEventListener("click", () => {
+                if (!navigator.geolocation) { etat.textContent = "Ton navigateur ne donne pas ta position."; return; }
+                etat.textContent = "Recherche de ta position...";
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const moi = [position.coords.latitude, position.coords.longitude];
+                    L.circleMarker(moi, {radius: 8, color: "#155c39", fillColor: "#1f7a4d", fillOpacity: 1}).addTo(carte).bindPopup("Tu es ici");
+                    carte.setView(moi, 9);
+                    const proches = [];
+                    points.forEach((p) => p.annonces.forEach((a) => proches.push({...a, km: distance(moi, [p.lat, p.lon])})));
+                    proches.sort((x, y) => x.km - y.km);
+                    document.getElementById("liste-proches").innerHTML = proches.slice(0, 12).map((a) =>
+                        `<a class="action" href="${a.url}"><span class="tuile-icone">🌾</span><div><strong>${echapper(a.nom)} · ${echapper(a.prix)}</strong>` +
+                        `<span>📍 ${echapper(a.localite)} · à ${Math.round(a.km)} km</span></div></a>`).join("") || '<div class="vide">Aucune annonce placée sur la carte.</div>';
+                    document.getElementById("plus-proches").hidden = false;
+                    etat.textContent = "";
+                }, () => { etat.textContent = "Position refusée : autorise la localisation pour ce site, ou parcours la carte."; },
+                {enableHighAccuracy: false, timeout: 10000});
+            });
+        })();
+    </script>
+{% endblock %}

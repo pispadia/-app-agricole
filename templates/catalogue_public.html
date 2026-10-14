@@ -11,7 +11,10 @@
             <h1>🌾 Récoltes à vendre</h1>
             <p>Directement des agriculteurs du Sénégal{% if recoltes %} · {{ recoltes | length }} annonce{{ 's' if recoltes | length > 1 }}{% endif %}</p>
         </div>
-        <a class="btn btn-clair" href="{{ url_for('prix_marche') }}">📈 Prix du marché</a>
+        <div class="groupe-boutons">
+            <a class="btn btn-clair" href="{{ url_for('carte_producteurs') }}">🗺️ Voir sur la carte</a>
+            <a class="btn btn-clair" href="{{ url_for('prix_marche') }}">📈 Prix du marché</a>
+        </div>
     </div>
     {% include "_filtres_catalogue.html" %}
 

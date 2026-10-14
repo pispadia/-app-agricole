@@ -25,6 +25,7 @@
                     {% if session.get('role') == 'agriculteur' %}<a href="{{ url_for('commandes_recues') }}" class="{{ 'actif' if page == 'commandes_recues' }}">{{ "Commandes" | t }}</a>{% endif %}
                     {% if session.get('role') == 'client' %}<a href="{{ url_for('mes_commandes') }}" class="{{ 'actif' if page == 'mes_commandes' }}">{{ "Commandes" | t }}</a>{% endif %}
                     <a href="{{ url_for('catalogue_public') }}" class="{{ 'actif' if page == 'catalogue_public' }}">{{ "Récoltes" | t }}</a>
+                    <a href="{{ url_for('carte_producteurs') }}" class="{{ 'actif' if page == 'carte_producteurs' }}">{{ "Carte" | t }}</a>
                     <a href="{{ url_for('prix_marche') }}" class="{{ 'actif' if page == 'prix_marche' }}">{{ "Prix du marché" | t }}</a>
                     <a href="{{ url_for('notifications') }}" class="{{ 'actif' if page == 'notifications' }}">{{ "Notifications" | t }}{% if nb_notifications %}<span class="badge badge-epuise badge-menu">{{ nb_notifications }}</span>{% endif %}</a>
                     <a href="{{ url_for('premium') }}" class="{{ 'actif' if page == 'premium' }}">{% if fin_premium %}⭐ Premium{% else %}{{ "Premium" | t }}{% endif %}</a>
@@ -33,6 +34,7 @@
                 {% else %}
                     <a href="{{ url_for('accueil') }}" class="{{ 'actif' if page == 'accueil' }}">{{ "Accueil" | t }}</a>
                     <a href="{{ url_for('catalogue_public') }}" class="{{ 'actif' if page == 'catalogue_public' }}">{{ "Récoltes" | t }}</a>
+                    <a href="{{ url_for('carte_producteurs') }}" class="{{ 'actif' if page == 'carte_producteurs' }}">{{ "Carte" | t }}</a>
                     <a href="{{ url_for('prix_marche') }}" class="{{ 'actif' if page == 'prix_marche' }}">{{ "Prix du marché" | t }}</a>
                     <a href="{{ url_for('connexion') }}" class="{{ 'actif' if page == 'connexion' }}">{{ "Connexion" | t }}</a>
                 {% endif %}
