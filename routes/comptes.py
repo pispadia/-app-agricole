@@ -8,7 +8,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_connexion
 from emails import envoyer_email
 from core import (app, utilisateur_connecte, mot_de_passe_valide, telephone_valide, ROLES,
-                  utilisateur_courant, email_confirme)
+                  utilisateur_courant, email_confirme, limite_atteinte)
+
+# Limites anti-abus (chaque e-mail envoyé consomme le quota Brevo : 300 par jour en offre gratuite).
+# Les inscriptions sont comptées par adresse IP ; une IP peut être partagée (réseau mobile,
+# cybercafé), d'où une limite large.
+MAX_INSCRIPTIONS_PAR_IP = 20
+MAX_LIENS_PAR_EMAIL = 3
+MAX_LIENS_PAR_IP = 10
+UNE_HEURE = 3600
 
 
 @app.route("/")
@@ -43,6 +51,10 @@ def inscription():
             telephone = telephone_valide(request.form.get("telephone", ""))
         except ValueError as erreur:
             flash(str(erreur))
+            return render_template("inscription.html", saisie=request.form)
+
+        if limite_atteinte(f"inscription-ip:{request.remote_addr}", MAX_INSCRIPTIONS_PAR_IP, UNE_HEURE):
+            flash("Trop de comptes créés depuis cette connexion. Réessaie dans une heure.")
             return render_template("inscription.html", saisie=request.form)
 
         mot_de_passe_hache = generate_password_hash(mot_de_passe)
@@ -223,6 +235,8 @@ def renvoyer_confirmation_email():
         return redirect(url_for("connexion"))
     if email_confirme(utilisateur):
         flash("Ton adresse e-mail est déjà confirmée.")
+    elif limite_atteinte(f"confirmation:{utilisateur['id']}", MAX_LIENS_PAR_EMAIL, UNE_HEURE):
+        flash("Tu as déjà demandé plusieurs liens : vérifie tes e-mails (et les spams), ou réessaie dans une heure.")
     elif envoyer_lien_confirmation(utilisateur):
         flash(f"Un lien de confirmation a été envoyé à {utilisateur['email']}.")
     else:
@@ -264,7 +278,11 @@ def mot_de_passe_oublie():
         ).fetchone()
         connexion_bd.close()
 
-        if utilisateur:
+        # Au-delà des limites, rien n'est envoyé, mais le message reste le même (on ne révèle
+        # pas si l'adresse est inscrite)
+        if (utilisateur
+                and not limite_atteinte(f"reinitialisation-ip:{request.remote_addr}", MAX_LIENS_PAR_IP, UNE_HEURE)
+                and not limite_atteinte(f"reinitialisation:{email.lower()}", MAX_LIENS_PAR_EMAIL, UNE_HEURE)):
             lien = url_for("reinitialiser_mot_de_passe",
                            jeton=creer_jeton_reinitialisation(utilisateur), _external=True)
             envoye = envoyer_email(

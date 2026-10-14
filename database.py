@@ -169,7 +169,7 @@ def colonnes_de_table(curseur, nom_table):
 TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
-    "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit",
+    "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi",
 )
 
 
@@ -456,6 +456,17 @@ def init_db():
             localite TEXT,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (client_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
+    # Limites d'envoi (e-mails de réinitialisation, de confirmation, inscriptions) : une
+    # ligne par envoi, pour bloquer les abus qui épuiseraient le quota d'e-mails
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS limites_envoi (
+            id {ID_AUTO},
+            cle TEXT NOT NULL,
+            instant INTEGER NOT NULL
         )
     """)
     connexion.commit()
