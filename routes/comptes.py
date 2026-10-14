@@ -38,6 +38,8 @@ def memoriser_page_suivante():
 @app.route("/inscription", methods=["GET", "POST"])
 def inscription():
     memoriser_page_suivante()
+    if request.args.get("parrain"):
+        session["parrain"] = request.args["parrain"][:20]
     if request.method == "POST":
         nom = request.form["nom"]
         email = request.form["email"]
@@ -71,6 +73,11 @@ def inscription():
             flash("Cet email est déjà utilisé.")
             return render_template("inscription.html", saisie=request.form)
         utilisateur = connexion.execute("SELECT * FROM utilisateurs WHERE email = ?", (email,)).fetchone()
+        from routes.parrainage import parrain_du_code
+        parrain_id = parrain_du_code(connexion, session.pop("parrain", None))
+        if parrain_id and parrain_id != utilisateur["id"]:
+            connexion.execute("UPDATE utilisateurs SET parrain_id = ? WHERE id = ?", (parrain_id, utilisateur["id"]))
+            connexion.commit()
         connexion.close()
 
         if envoyer_lien_confirmation(utilisateur):

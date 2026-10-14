@@ -52,6 +52,7 @@ WOLOF = {
     "Acheter semences / pépinières": "Jënd jiwu",
     "Financement": "Xaalis",
     "Mes statistiques": "Samay limu jaay",
+    "Inviter et gagner du Premium": "Woo ay nit te am Premium",
     "Mes récoltes publiées": "Samay ngóob yi ma siiwal",
     "Disponible": "Am na",
     "Épuisé": "Jeex na",

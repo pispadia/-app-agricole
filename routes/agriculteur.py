@@ -2,6 +2,7 @@
 from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from routes.alertes import prevenir_clients
+from routes.parrainage import recompenser_parrainage
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, encoder_photo, masquer_coordonnees, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
@@ -77,6 +78,7 @@ def changer_statut_commande(commande_id):
         # Déjà payée en ligne : montant et commission sont connus, l'admin reversera la somme due
         connexion_bd.execute("UPDATE commandes SET statut = 'livree', lu_client = 0 WHERE id = ?", (commande_id,))
         connexion_bd.commit()
+        recompenser_parrainage(connexion_bd, commande_id)
         alerter_client(commande, "livree")
         flash("Commande livrée. La plateforme va te reverser le montant de la vente (commission déduite).")
     elif nouveau_statut == "livree":

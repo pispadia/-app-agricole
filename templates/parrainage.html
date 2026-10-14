@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>🎁 Parraine et gagne du Premium</h2>
+    <p>Invite des agriculteurs et des acheteurs. Dès que l'un d'eux réalise sa première vente ou son
+       premier achat (livré, d'au moins {{ montant_minimum }} FCFA), tu reçois <strong>1 mois de Premium offert</strong>
+       (jusqu'à {{ maximum }} mois par an).</p>
+
+    <div class="carte-recolte" style="display:block;">
+        Ton lien d'invitation :<br>
+        <input type="text" value="{{ lien }}" readonly onclick="this.select()" style="margin:6px 0;">
+        Ton code : <strong>{{ code }}</strong>
+        <a href="{{ lien_whatsapp }}" target="_blank" rel="noopener"><button type="button" style="background-color:#25d366; margin-top:8px;">📤 Inviter sur WhatsApp</button></a>
+    </div>
+
+    <h3>Mes filleuls ({{ filleuls | length }}) · {{ recompenses }} mois gagné{{ 's' if recompenses > 1 }}</h3>
+    {% for f in filleuls %}
+        <div class="carte-recolte" style="display:block;">
+            <strong>{{ f.nom }}</strong> — {{ f.role | capitalize }}
+            {% if f.parrainage_recompense_le %}<span class="badge badge-dispo">1 mois gagné</span>
+            {% else %}<span class="badge badge-attente">En attente de sa première vente</span>{% endif %}
+        </div>
+    {% else %}
+        <p>Personne ne s'est encore inscrit avec ton lien.</p>
+    {% endfor %}
+{% endblock %}

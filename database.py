@@ -498,6 +498,10 @@ def init_db():
         ("utilisateurs", "email_confirme", "TEXT"),
         # Compte suspendu par un administrateur (fraude, contournement de la commission...)
         ("utilisateurs", "suspendu", "INTEGER NOT NULL DEFAULT 0"),
+        # Parrainage : code d'invitation, parrain, et date de la récompense versée au parrain
+        ("utilisateurs", "code_parrainage", "TEXT"),
+        ("utilisateurs", "parrain_id", "INTEGER"),
+        ("utilisateurs", "parrainage_recompense_le", "TEXT"),
         ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),
         # Paiement : à la livraison, ou en ligne via Wave à la plateforme, qui garde sa
         # commission et reverse le reste à l'agriculteur (ou rembourse si la commande est annulée)
