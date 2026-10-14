@@ -2,7 +2,8 @@
 (.github/workflows/taches.yml) avec le jeton secret TACHES_TOKEN :
 - pré-commandes : le client est prévenu le jour où la récolte réservée est prête ;
 - commandes en attente depuis plus de 48 h : l'agriculteur est relancé ;
-- Premium : le membre est prévenu 3 jours avant la fin de son abonnement.
+- Premium : le membre est prévenu 3 jours avant la fin de son abonnement ;
+- début de mois : chaque agriculteur actif reçoit son bilan du mois passé (routes/rapport_mensuel.py).
 Chaque rappel n'est envoyé qu'une fois (colonnes rappel_pret_envoye, relance_envoyee,
 rappel_premium_pour). Sans TACHES_TOKEN, l'adresse n'existe pas (404)."""
 import hmac
@@ -90,7 +91,9 @@ def taches_quotidiennes():
         abort(404)
     connexion_bd = get_connexion()
     from routes.commandes_regulieres import passer_commandes_du_jour  # import local : évite un cycle
+    from routes.rapport_mensuel import preparer_rapports
     messages = preparer_rappels(connexion_bd) + passer_commandes_du_jour(connexion_bd)
+    rapports = preparer_rapports(connexion_bd)
     connexion_bd.close()
     lien = url_for("accueil", _external=True)
 
@@ -98,7 +101,9 @@ def taches_quotidiennes():
         for email, telephone, sujet, texte in messages:
             envoyer_email(email, sujet, f"<p>{escape(texte)}</p><p><a href=\"{lien}\">{lien}</a></p>")
             sms.alerter(telephone, f"App Agricole : {texte}")
+        for email, sujet, html in rapports:
+            envoyer_email(email, sujet, html)
 
     # Envoi en arrière-plan : la réponse part tout de suite, même s'il y a beaucoup de rappels
     threading.Thread(target=envoyer, daemon=True).start()
-    return jsonify({"rappels": len(messages)})
+    return jsonify({"rappels": len(messages), "rapports": len(rapports)})

@@ -47,6 +47,7 @@
 
     <div class="actions">
         <a class="action" href="{{ url_for('affiche_boutique') }}"><span class="tuile-icone">🖨️</span><div><strong>{{ "Ma boutique et mon affiche QR" | t }}</strong><span>{{ "À poser sur ton étal au marché" | t }}</span></div></a>
+        <a class="action" href="{{ url_for('rapport_mensuel') }}"><span class="tuile-icone icone-ambre">🗓️</span><div><strong>{{ "Mon bilan du mois" | t }}</strong><span>{{ "Ventes, avis, conseils prix" | t }}</span></div></a>
         <a class="action" href="{{ url_for('statistiques_agriculteur') }}"><span class="tuile-icone icone-bleu">📊</span><div><strong>{{ "Mes statistiques" | t }}</strong><span>{{ "Ventes, produits les plus demandés" | t }}</span></div></a>
         {% if ia_active %}<a class="action" href="{{ url_for('conseiller_agricole') }}"><span class="tuile-icone icone-rose">🤖</span><div><strong>{{ "Conseiller agricole" | t }}</strong><span>{{ "Maladies, engrais, semis : demande à l'IA" | t }}</span></div></a>{% endif %}
         <a class="action" href="{{ url_for('meteo_agriculteur') }}"><span class="tuile-icone icone-bleu">🌦️</span><div><strong>{{ "Météo agricole" | t }}</strong><span>{{ "7 jours et conseils" | t }}</span></div></a>

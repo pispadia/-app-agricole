@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block mise_en_page %}large{% endblock %}
+{% block contenu %}
+    <div class="entete-page">
+        <div>
+            <div class="surtitre">{{ "Espace Agriculteur" | t }}</div>
+            <h1>🗓️ {{ "Mon bilan de" | t }} {{ chiffres.libelle }}</h1>
+            <p>{{ "Tes ventes, tes clients et des conseils pour le mois suivant." | t }}</p>
+        </div>
+        <form method="GET" class="groupe-boutons">
+            <select name="mois" onchange="this.form.submit()" style="width:auto; margin:0;">
+                {% for valeur, libelle in choix_mois %}<option value="{{ valeur }}" {% if valeur == chiffres.mois %}selected{% endif %}>{{ libelle }}</option>{% endfor %}
+            </select>
+            <noscript><button type="submit" class="btn-petit">{{ "Voir" | t }}</button></noscript>
+        </form>
+    </div>
+
+    <div class="tuiles">
+        <div class="tuile"><div class="tuile-icone icone-ambre">📦</div><div class="tuile-valeur">{{ chiffres.recues }}</div><div class="tuile-libelle">{{ "Commandes reçues" | t }} ({{ chiffres.livrees }} {{ "livrées" | t }})</div></div>
+        <div class="tuile"><div class="tuile-icone icone-bleu">💰</div><div class="tuile-valeur">{{ montant(chiffres.ventes) }}</div><div class="tuile-libelle">{{ "FCFA de ventes livrées" | t }}</div></div>
+        <div class="tuile"><div class="tuile-icone icone-rose">⭐</div><div class="tuile-valeur">{% if chiffres.note_avis %}{{ chiffres.note_avis }}{% else %}–{% endif %}</div><div class="tuile-libelle">{{ chiffres.nb_avis }} {{ "nouvel(s) avis" | t }}</div></div>
+        <div class="tuile"><div class="tuile-icone">➕</div><div class="tuile-valeur">{{ chiffres.abonnes }}</div><div class="tuile-libelle">{{ "nouveaux abonnés" | t }}</div></div>
+    </div>
+
+    <div class="carte">
+        <h2 style="margin-top:0;">🏆 {{ "Produits les plus demandés" | t }}</h2>
+        {% if chiffres.produits %}
+            <ol style="margin:0; padding-left:20px;">{% for nom, n in chiffres.produits %}<li><strong>{{ nom }}</strong> : {{ n }} {{ "commande(s)" | t }}</li>{% endfor %}</ol>
+        {% else %}
+            <p style="margin:0; color:var(--discret);">{{ "Aucune commande ce mois-là." | t }}</p>
+        {% endif %}
+        <p style="margin:12px 0 0; color:var(--discret);">🌾 {{ chiffres.publiees }} {{ "annonce(s) publiée(s) ce mois-là." | t }}</p>
+    </div>
+
+    <div class="carte" style="margin-top:16px;">
+        <h2 style="margin-top:0;">💡 {{ "Conseils prix (annonces en ligne)" | t }}</h2>
+        {% if chiffres.conseils %}
+            <ul style="margin:0; padding-left:20px;">{% for conseil in chiffres.conseils %}<li style="margin-bottom:6px;">{{ conseil }}</li>{% endfor %}</ul>
+        {% else %}
+            <p style="margin:0; color:var(--discret);">{{ "Tes prix sont proches du prix courant du marché (ou il n'y a pas encore assez d'annonces pour comparer)." | t }}</p>
+        {% endif %}
+        <p style="margin:12px 0 0;"><a href="{{ url_for('prix_marche') }}">📈 {{ "Voir les prix du marché" | t }}</a></p>
+    </div>
+
+    <form method="POST" class="carte" style="margin-top:16px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label style="display:flex; gap:10px; align-items:center; font-weight:normal; margin:0;">
+            <input type="checkbox" name="rapport_mensuel" value="1" {% if actif %}checked{% endif %} style="width:auto; margin:0;">
+            {{ "Recevoir ce bilan par e-mail au début de chaque mois" | t }}
+        </label>
+        <button type="submit" class="btn-clair btn-petit" style="margin-top:10px;">{{ "Enregistrer" | t }}</button>
+    </form>
+{% endblock %}
