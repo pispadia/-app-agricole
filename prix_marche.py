@@ -4,6 +4,7 @@ Les prix sont saisis en texte libre ("500 FCFA / kg", "450000 F / tonne") ; seul
 annonces dont le prix est exprimé au kilo ou à la tonne sont prises en compte.
 """
 import re
+import time
 import unicodedata
 from datetime import date, timedelta
 from statistics import median
@@ -52,8 +53,19 @@ def prix_au_kg(prix):
     return None
 
 
+_cache = {"instant": 0, "valeur": None}
+DUREE_CACHE = 10 * 60  # les prix du marché bougent lentement : recalculés au plus toutes les 10 min
+
+
 def prix_du_marche(connexion_bd):
     """{produit: {"nom", "median", "min", "max", "nombre"}} pour les produits assez représentés."""
+    if _cache["valeur"] is not None and time.time() - _cache["instant"] < DUREE_CACHE:
+        return _cache["valeur"]
+    _cache["valeur"], _cache["instant"] = _calculer_prix_du_marche(connexion_bd), time.time()
+    return _cache["valeur"]
+
+
+def _calculer_prix_du_marche(connexion_bd):
     depuis = (date.today() - timedelta(days=PERIODE_JOURS)).isoformat()
     annonces = connexion_bd.execute(
         "SELECT nom, prix FROM recoltes WHERE date_creation >= ?", (depuis,)

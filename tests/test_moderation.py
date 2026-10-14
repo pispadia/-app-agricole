@@ -90,3 +90,24 @@ def test_reserve_aux_admins(client):
     client.post("/admin/signalements/1/masquer")
     assert masquee() == 0
     assert moderation.SEUIL_MASQUAGE == 3
+
+
+def test_photo_d_une_annonce_masquee_reservee_au_vendeur(tmp_path, monkeypatch):
+    import base64
+    monkeypatch.setattr(database, "DB_NAME", str(tmp_path / "photos.db"))
+    database.init_db()
+    connexion = database.get_connexion()
+    connexion.execute("INSERT INTO utilisateurs (nom, email, mot_de_passe, role) VALUES ('Fatou', 'f@x.sn', 'x', 'agriculteur')")
+    photo = "data:image/png;base64," + base64.b64encode(b"\x89PNG\r\n\x1a\n0000").decode()
+    connexion.execute("""INSERT INTO recoltes (agriculteur_id, nom, quantite, prix, date_disponibilite, localite, photo, masquee)
+                         VALUES (1, 'Mil', '1 kg', '5 FCFA', '2026-01-01', 'Thiès', ?, 1)""", (photo,))
+    connexion.execute("INSERT INTO photos_recolte (recolte_id, photo) VALUES (1, ?)", (photo,))
+    connexion.commit()
+    connexion.close()
+    visiteur = app.test_client()
+    assert visiteur.get("/annonce/1/photo").status_code == 404
+    assert visiteur.get("/annonce/1/photo/1").status_code == 404
+    with visiteur.session_transaction() as session:
+        session.update(utilisateur_id=1, nom="Fatou", role="agriculteur")
+    assert visiteur.get("/annonce/1/photo").status_code == 200
+    assert visiteur.get("/annonce/1/photo/1").status_code == 200

@@ -5,6 +5,8 @@ import push
 from database import get_connexion
 from core import app, utilisateur_connecte
 
+MAX_APPAREILS = 5
+
 
 def abonnement_valide(donnees):
     """(endpoint, p256dh, auth) si l'abonnement envoyé par le navigateur est correct, sinon None."""
@@ -38,6 +40,12 @@ def abonnement_push():
     connexion_bd.execute(
         "INSERT INTO abonnements_push (utilisateur_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)",
         (session["utilisateur_id"], endpoint, p256dh, auth))
+    # Au plus quelques appareils par compte : les plus anciens sont oubliés
+    anciens = connexion_bd.execute(
+        "SELECT id FROM abonnements_push WHERE utilisateur_id = ? ORDER BY id DESC",
+        (session["utilisateur_id"],)).fetchall()[MAX_APPAREILS:]
+    for ancien in anciens:
+        connexion_bd.execute("DELETE FROM abonnements_push WHERE id = ?", (ancien["id"],))
     connexion_bd.commit()
     connexion_bd.close()
     push.alerter(session["utilisateur_id"], None,
