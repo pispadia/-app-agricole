@@ -18,5 +18,6 @@
             <option value="localite" {% if tri_choisi == 'localite' %}selected{% endif %}>Localité (A-Z)</option>
             <option value="note" {% if tri_choisi == 'note' %}selected{% endif %}>Mieux notés</option>
         </select>
+        <label class="filtre-promo"><input type="checkbox" name="promo" value="1" {% if promo_choisie %}checked{% endif %}> 🏷️ En promo</label>
         <button type="submit">Filtrer</button>
     </form>

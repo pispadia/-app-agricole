@@ -11,6 +11,7 @@
             {% endif %}
             <span class="fiche-etiquettes">
                 {% if a_venir_ %}<span class="badge badge-attente">🌱 À venir : prête le {{ recolte.date_disponibilite | date_fr }}</span>{% endif %}
+                {% if promo_active(recolte) %}<span class="badge badge-promo">🏷️ −{{ promo_active(recolte) }} %</span>{% endif %}
                 {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}
             </span>
         </a>
@@ -19,7 +20,12 @@
                 <a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}">{{ recolte.nom }}</a>
                 {% if recolte.verification_agriculteur == 'verifie' %}<span class="badge badge-livree" title="Identité vérifiée par App Agricole">✅ Vérifié</span>{% endif %}
             </div>
-            <div class="fiche-prix">{{ recolte.prix }}</div>
+            {% set promo_ = prix_promo(recolte) %}
+            {% if promo_ %}
+                <div class="fiche-prix">{{ promo_ }} <s class="prix-barre">{{ recolte.prix }}</s></div>
+            {% else %}
+                <div class="fiche-prix">{{ recolte.prix }}</div>
+            {% endif %}
             {% if prix_courant %}<div class="fiche-info">≈ prix courant : {{ prix_courant.median }} FCFA/kg</div>{% endif %}
             {% if recolte.prix_gros %}<div class="fiche-info">Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}</div>{% endif %}
             <div class="fiche-info">📦 {{ recolte.quantite }} · 📍 {{ recolte.localite }}</div>

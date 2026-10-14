@@ -561,3 +561,14 @@ button:active, .btn:active { transform: translateY(1px); }
 .bouton-dictee { display: inline-block; width: auto; margin: -4px 0 12px; }
 .bouton-dictee.ecoute { background: #fdecea; border-color: var(--rouge); color: var(--rouge); animation: pulsation 1.2s ease-in-out infinite; }
 @keyframes pulsation { 50% { opacity: 0.6; } }
+
+/* Promotions */
+.badge-promo { background: #fde8e4; color: #b42318; }
+.prix-barre { color: var(--discret); font-weight: normal; font-size: 0.7em; white-space: nowrap; }
+.filtre-promo { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 0; white-space: nowrap; }
+.filtre-promo input { width: auto; margin: 0; }
+.promo-details { display: inline-block; }
+.promo-details summary { list-style: none; cursor: pointer; }
+.promo-details summary::-webkit-details-marker { display: none; }
+.formulaire-promo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.formulaire-promo select { width: auto; margin: 0; }

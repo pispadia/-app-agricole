@@ -27,7 +27,7 @@ ID_AUTO = "SERIAL PRIMARY KEY" if UTILISE_POSTGRES else "INTEGER PRIMARY KEY AUT
 COLONNES_RECOLTE = """recoltes.id, recoltes.agriculteur_id, recoltes.nom, recoltes.quantite, recoltes.prix,
     recoltes.prix_gros, recoltes.quantite_gros_min, recoltes.date_disponibilite, recoltes.localite,
     recoltes.description, recoltes.statut, recoltes.date_creation, recoltes.masquee,
-    (recoltes.photo IS NOT NULL) AS a_photo"""
+    recoltes.promo_pourcent, recoltes.promo_jusqu_au, (recoltes.photo IS NOT NULL) AS a_photo"""
 COLONNES_PRODUIT = """produits_fournisseur.id, produits_fournisseur.fournisseur_id, produits_fournisseur.nom,
     produits_fournisseur.type_produit, produits_fournisseur.variete, produits_fournisseur.duree_croissance,
     produits_fournisseur.quantite, produits_fournisseur.prix, produits_fournisseur.localite,
@@ -693,6 +693,10 @@ def init_db():
         ("commandes", "negociation", "TEXT"),
         # Commande créée par une commande régulière
         ("commandes", "reguliere_id", "INTEGER"),
+        # Promotion sur une annonce (−10 % à −50 %) jusqu'à une date ; prix promo retenu à la commande
+        ("recoltes", "promo_pourcent", "INTEGER"),
+        ("recoltes", "promo_jusqu_au", "TEXT"),
+        ("commandes", "prix_promo", "TEXT"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

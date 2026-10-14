@@ -39,7 +39,7 @@
                     {{ badge_statut(commande.statut) }}
                     {% if commande.lu_client == 0 %}<span class="badge badge-epuise">Mis à jour</span>{% endif %}<br>
                     Agriculteur : <a href="{{ url_for('avis_agriculteur', agriculteur_id=commande.agriculteur_id) }}">{{ commande.nom_agriculteur }}</a><br>
-                    Prix affiché : {{ commande.prix }}<br>
+                    {% if commande.prix_promo %}🏷️ Prix promo : {{ commande.prix_promo }}{% else %}Prix affiché : {{ commande.prix }}{% endif %}<br>
                     {{ negociation(commande, 'client') }}
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
