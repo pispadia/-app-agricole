@@ -30,6 +30,17 @@
         {% endif %}
         <input type="file" name="photo" accept="image/*">
 
+        <label>Autres photos (3 maximum)</label>
+        {% for photo in photos %}
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <img src="{{ url_for('photo_supplementaire', recolte_id=recolte.id, photo_id=photo.id) }}" style="max-width:80px; border-radius:5px;">
+                <label style="margin:0; font-weight:normal;"><input type="checkbox" name="supprimer_photo" value="{{ photo.id }}" style="width:auto;"> Supprimer</label>
+            </div>
+        {% endfor %}
+        {% if photos | length < 3 %}
+            <input type="file" name="photos_supplementaires" accept="image/*" multiple>
+        {% endif %}
+
         <button type="submit">Enregistrer les modifications</button>
     </form>
     <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>

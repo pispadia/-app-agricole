@@ -23,6 +23,8 @@
 
         <label>{{ "Photo du produit (optionnel)" | t }}</label>
         <input type="file" name="photo" accept="image/*">
+        <label>{{ "Autres photos (optionnel, 3 maximum)" | t }}</label>
+        <input type="file" name="photos_supplementaires" accept="image/*" multiple>
 
         <button type="submit">{{ "Publier" | t }}</button>
     </form>

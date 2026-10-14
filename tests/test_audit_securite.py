@@ -36,7 +36,7 @@ def test_entetes_de_securite_et_cookie(client):
 
 
 def test_envoi_trop_gros_refuse(client):
-    reponse = client.post("/connexion", data={"email": "x" * (6 * 1024 * 1024)})
+    reponse = client.post("/connexion", data={"email": "x" * (10 * 1024 * 1024)})
     assert reponse.status_code == 302
 
 

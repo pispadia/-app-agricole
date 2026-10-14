@@ -12,9 +12,18 @@
     {% if recolte.a_photo %}<meta property="og:image" content="{{ url_for('photo_annonce', recolte_id=recolte.id, _external=True) }}">{% endif %}
 {% endblock %}
 {% block contenu %}
+    <style>
+        .galerie { display:flex; gap:8px; overflow-x:auto; scroll-snap-type:x mandatory; border-radius:8px; }
+        .galerie img { flex:0 0 100%; width:100%; max-width:none; height:320px; object-fit:cover; border-radius:8px; scroll-snap-align:start; }
+    </style>
     <div class="carte-recolte" style="display:block;">
-        {% if recolte.a_photo %}
-            <img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}" style="width:100%; max-width:none; height:auto; max-height:320px; object-fit:cover; border-radius:8px;">
+        {% if recolte.a_photo or photos %}
+            {# Galerie : on fait défiler les photos du doigt (ou avec la barre sur ordinateur) #}
+            <div class="galerie">
+                {% if recolte.a_photo %}<img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}">{% endif %}
+                {% for photo in photos %}<img src="{{ url_for('photo_supplementaire', recolte_id=recolte.id, photo_id=photo.id) }}" alt="{{ recolte.nom }} (photo {{ loop.index + 1 }})" loading="lazy">{% endfor %}
+            </div>
+            {% if (photos | length) + (1 if recolte.a_photo else 0) > 1 %}<p style="margin:2px 0 0; font-size:0.8em; color:#666;">📷 {{ (photos | length) + (1 if recolte.a_photo else 0) }} photos · fais défiler →</p>{% endif %}
         {% endif %}
         <h2 style="margin-bottom:5px;">{{ recolte.nom }}</h2>
         {% if recolte.statut != 'disponible' %}<span class="badge badge-epuise">Plus disponible</span>{% endif %}

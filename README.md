@@ -29,6 +29,8 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 **Annonces partageables** : chaque récolte a une page publique `/annonce/<id>` (sans compte, sans coordonnées), avec aperçu pour WhatsApp/Facebook (titre, prix, photo). L'agriculteur la partage avec le bouton « 📤 Partager sur WhatsApp » ; un visiteur qui s'inscrit depuis l'annonce revient directement sur la commande.
 
+**Plusieurs photos** : jusqu'à 4 photos par annonce (la photo principale + 3 autres), affichées en galerie défilante sur la page de l'annonce. L'agriculteur peut en ajouter ou en supprimer depuis « Modifier ».
+
 **Alertes produits** (`/mes-alertes`, clients) : « préviens-moi quand il y a du mil à Thiès » (10 alertes maximum). À chaque nouvelle récolte publiée, les clients dont une alerte correspond (même produit, localité facultative) reçoivent un e-mail et un SMS avec le lien de l'annonce.
 
 **Pré-commandes** : une récolte dont la date de disponibilité est future (jusqu'à un an) apparaît « 🌱 À venir » et se réserve dès maintenant ; filtre « Disponible maintenant / À venir » dans le catalogue, mention « Pré-commande » dans les commandes du client et de l'agriculteur.
