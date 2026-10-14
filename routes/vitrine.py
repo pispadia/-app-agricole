@@ -36,7 +36,7 @@ def catalogue_public():
 
 @app.route("/robots.txt")
 def robots():
-    lignes = ["User-agent: *", "Allow: /$", "Allow: /catalogue", "Allow: /annonce/", "Allow: /prix-du-marche",
+    lignes = ["User-agent: *", "Allow: /$", "Allow: /catalogue", "Allow: /annonce/", "Allow: /prix-du-marche", "Allow: /carte",
               "Disallow: /", f"Sitemap: {url_for('plan_du_site', _external=True)}"]
     return Response("\n".join(lignes) + "\n", mimetype="text/plain")
 
