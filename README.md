@@ -31,6 +31,8 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 **Alertes produits** (`/mes-alertes`, clients) : « préviens-moi quand il y a du mil à Thiès » (10 alertes maximum). À chaque nouvelle récolte publiée, les clients dont une alerte correspond (même produit, localité facultative) reçoivent un e-mail et un SMS avec le lien de l'annonce.
 
+**Pré-commandes** : une récolte dont la date de disponibilité est future (jusqu'à un an) apparaît « 🌱 À venir » et se réserve dès maintenant ; filtre « Disponible maintenant / À venir » dans le catalogue, mention « Pré-commande » dans les commandes du client et de l'agriculteur.
+
 **Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Moyen-Orient et Afrique » (pays : Sénégal), achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR` (en général `2210000`, sauf numéro dédié fourni par Orange). Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
 
 ## Revenus : commission et Premium

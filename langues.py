@@ -76,6 +76,8 @@ WOLOF = {
     "Quantité minimum pour le prix en gros (ex: à partir de 50 kg)":
         "Lim bu gën a tuuti ngir njëg googu (ex: 50 kg ba ci kaw)",
     "Date de disponibilité": "Bés bi mu nekk",
+    "Pas encore récoltée ? Mets la date prévue : les clients pourront la réserver.":
+        "Góobagoo ko ba leegi ? Bind bés bi nga ko xaar : jëndkat yi mën nañu ko denc.",
     "Localité de production (ex: Thiès)": "Dëkk bi mu bayu (ex: Thiès)",
     "Description (optionnel)": "Leeral (bu la neexee)",
     "Photo du produit (optionnel)": "Nataalu meññeef mi (bu la neexee)",
