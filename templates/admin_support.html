@@ -17,7 +17,7 @@
             {% if d.statut == 'ouverte' %}
                 <form method="POST" action="{{ url_for('repondre_support', demande_id=d.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <textarea name="reponse" rows="3" placeholder="Ta réponse (envoyée par e-mail). Laisser vide pour classer sans réponse."></textarea>
+                    <textarea data-sans-dictee name="reponse" rows="3" placeholder="Ta réponse (envoyée par e-mail). Laisser vide pour classer sans réponse."></textarea>
                     <button type="submit" style="width:auto;">Répondre et classer</button>
                 </form>
             {% elif d.reponse %}

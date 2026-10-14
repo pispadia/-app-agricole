@@ -76,6 +76,7 @@
         </div>
     </footer>
     {% if session.get('role') == 'agriculteur' %}<script src="{{ url_for('static', filename='hors_ligne.js') }}" defer></script>{% endif %}
+    <script src="{{ url_for('static', filename='dictee.js') }}" defer></script>
     <script>
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("{{ url_for('service_worker') }}");
