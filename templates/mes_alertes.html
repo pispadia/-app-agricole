@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>🔔 Mes alertes produits</h2>
+    <p style="color:#666;">Sois prévenu par e-mail (et SMS si ton téléphone est renseigné) dès qu'un agriculteur publie le produit que tu cherches.</p>
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="produit" placeholder="Produit recherché (ex: mil, oignon)" maxlength="60" required>
+        <input type="text" name="localite" placeholder="Localité (optionnel, ex: Thiès)" maxlength="60">
+        <button type="submit">Créer l'alerte</button>
+    </form>
+
+    <h3>Mes alertes ({{ alertes | length }}/{{ maximum }})</h3>
+    {% for alerte in alertes %}
+        <div class="carte-recolte" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><strong>{{ alerte.libelle }}</strong> — {{ alerte.localite or "partout" }}</div>
+            <form method="POST" action="{{ url_for('supprimer_alerte', alerte_id=alerte.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; background-color:#a94442;">Supprimer</button>
+            </form>
+        </div>
+    {% else %}
+        <p>Aucune alerte pour le moment.</p>
+    {% endfor %}
+
+    <p><a href="{{ url_for('espace_client') }}">← Retour au catalogue</a></p>
+{% endblock %}
