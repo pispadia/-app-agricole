@@ -62,7 +62,7 @@ def test_parcours_de_verification(client, sms_envoyes):
 
     connecter(client, 1, "client")
     page = client.get("/admin").get_data(as_text=True)
-    assert "✅ Vérifications" in page
+    assert "Pièces d'identité à contrôler" in page
     assert "Fatou" in client.get("/admin/verifications").get_data(as_text=True)
     reponse = client.get("/admin/verifications/2/piece")
     assert reponse.data == PNG and reponse.headers["Cache-Control"] == "no-store"

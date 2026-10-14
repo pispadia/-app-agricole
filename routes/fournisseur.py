@@ -16,9 +16,16 @@ def espace_fournisseur():
         f"SELECT {COLONNES_PRODUIT} FROM produits_fournisseur WHERE fournisseur_id = ? ORDER BY date_creation DESC",
         (session["utilisateur_id"],)
     ).fetchall()
+    messages = connexion_bd.execute(
+        """SELECT COUNT(*) AS total, SUM(CASE WHEN contacts_fournisseur.lu = 0 THEN 1 ELSE 0 END) AS non_lus
+           FROM contacts_fournisseur
+           JOIN produits_fournisseur ON contacts_fournisseur.produit_id = produits_fournisseur.id
+           WHERE produits_fournisseur.fournisseur_id = ?""", (session["utilisateur_id"],)
+    ).fetchone()
     connexion_bd.close()
 
-    return render_template("espace_fournisseur.html", nom=session["nom"], produits=produits)
+    return render_template("espace_fournisseur.html", nom=session["nom"], produits=produits,
+                           messages_total=messages["total"], messages_non_lus=messages["non_lus"] or 0)
 
 
 @app.route("/espace-fournisseur/nouveau-produit", methods=["GET", "POST"])
