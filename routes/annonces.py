@@ -43,17 +43,19 @@ def voir_annonce(recolte_id):
         connexion_bd.close()
         abort(404)
     prix_courant = prix_du_marche(connexion_bd).get(produit_cle(recolte["nom"]))
+    photos = connexion_bd.execute(
+        "SELECT id FROM photos_recolte WHERE recolte_id = ? ORDER BY id", (recolte_id,)).fetchall()
     connexion_bd.close()
     return render_template(
-        "annonce.html", recolte=recolte, prix_courant=prix_courant, aujourdhui=date.today().isoformat(),
+        "annonce.html", recolte=recolte, prix_courant=prix_courant, photos=photos, aujourdhui=date.today().isoformat(),
         role=session.get("role") if utilisateur_connecte() else None,
     )
 
 
-def reponse_photo(table, identifiant):
+def reponse_photo(requete, parametres):
     """La photo (stockée en base64) en tant que fichier image, mise en cache par le navigateur."""
     connexion_bd = get_connexion()
-    ligne = connexion_bd.execute(f"SELECT photo FROM {table} WHERE id = ?", (identifiant,)).fetchone()
+    ligne = connexion_bd.execute(requete, parametres).fetchone()
     connexion_bd.close()
     photo = ligne["photo"] if ligne else None
     if not photo or not photo.startswith("data:image/") or ";base64," not in photo:
@@ -69,9 +71,15 @@ def reponse_photo(table, identifiant):
 
 @app.route("/annonce/<int:recolte_id>/photo")
 def photo_annonce(recolte_id):
-    return reponse_photo("recoltes", recolte_id)
+    return reponse_photo("SELECT photo FROM recoltes WHERE id = ?", (recolte_id,))
+
+
+@app.route("/annonce/<int:recolte_id>/photo/<int:photo_id>")
+def photo_supplementaire(recolte_id, photo_id):
+    return reponse_photo("SELECT photo FROM photos_recolte WHERE id = ? AND recolte_id = ?",
+                         (photo_id, recolte_id))
 
 
 @app.route("/produit/<int:produit_id>/photo")
 def photo_produit(produit_id):
-    return reponse_photo("produits_fournisseur", produit_id)
+    return reponse_photo("SELECT photo FROM produits_fournisseur WHERE id = ?", (produit_id,))

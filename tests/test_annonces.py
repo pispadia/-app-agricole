@@ -97,3 +97,86 @@ def test_page_500_propre(client, monkeypatch):
     reponse = client.get("/annonce/1")
     assert reponse.status_code == 500 and "Un problème est survenu" in reponse.get_data(as_text=True)
     assert "base indisponible" not in reponse.get_data(as_text=True)
+
+
+def photo_envoyee(nom="p.png"):
+    import io
+    return (io.BytesIO(PNG), nom)
+
+
+def connecter_agriculteur(client):
+    with client.session_transaction() as s:
+        s["utilisateur_id"] = 1
+        s["role"] = "agriculteur"
+        s["nom"] = "Fatou"
+
+
+def nb_photos_supplementaires():
+    connexion = database.get_connexion()
+    n = connexion.execute("SELECT COUNT(*) AS n FROM photos_recolte WHERE recolte_id = 1").fetchone()["n"]
+    connexion.close()
+    return n
+
+
+def formulaire_modification(**extra):
+    return {"nom": "Mil", "quantite": "100 kg", "prix": "500 FCFA / kg", "date_disponibilite": "2026-11-01",
+            "localite": "Thiès", "statut": "disponible", **extra}
+
+
+def test_galerie_de_plusieurs_photos(client):
+    connecter_agriculteur(client)
+    client.post("/espace-agriculteur/modifier-recolte/1", content_type="multipart/form-data",
+                data=formulaire_modification(photos_supplementaires=[photo_envoyee(), photo_envoyee()]))
+    assert nb_photos_supplementaires() == 2
+
+    page = client.get("/annonce/1").get_data(as_text=True)
+    assert "📷 3 photos" in page
+    assert page.count('src="/annonce/1/photo') == 3
+    connexion = database.get_connexion()
+    photo_id = connexion.execute("SELECT id FROM photos_recolte ORDER BY id").fetchone()["id"]
+    connexion.close()
+    reponse = client.get(f"/annonce/1/photo/{photo_id}")
+    assert reponse.mimetype == "image/png" and reponse.data == PNG
+    # La photo n'est pas accessible via une autre annonce
+    assert client.get(f"/annonce/2/photo/{photo_id}").status_code == 404
+
+
+def test_quatre_photos_maximum_et_suppression(client):
+    connecter_agriculteur(client)
+    client.post("/espace-agriculteur/modifier-recolte/1", content_type="multipart/form-data",
+                data=formulaire_modification(photos_supplementaires=[photo_envoyee() for _ in range(5)]))
+    assert nb_photos_supplementaires() == 3  # + la photo principale = 4
+
+    connexion = database.get_connexion()
+    photo_id = connexion.execute("SELECT id FROM photos_recolte ORDER BY id").fetchone()["id"]
+    connexion.close()
+    client.post("/espace-agriculteur/modifier-recolte/1", content_type="multipart/form-data",
+                data=formulaire_modification(supprimer_photo=str(photo_id)))
+    assert nb_photos_supplementaires() == 2
+    assert client.get(f"/annonce/1/photo/{photo_id}").status_code == 404
+
+
+def test_un_autre_agriculteur_ne_supprime_pas_les_photos(client):
+    connexion = database.get_connexion()
+    connexion.execute("INSERT INTO utilisateurs (nom, email, mot_de_passe, role) VALUES ('Awa', 'a@x.sn', 'x', 'agriculteur')")
+    connexion.execute("INSERT INTO photos_recolte (recolte_id, photo) VALUES (1, 'data:image/png;base64,AA==')")
+    connexion.commit()
+    connexion.close()
+    with client.session_transaction() as s:
+        s["utilisateur_id"] = 2
+        s["role"] = "agriculteur"
+    client.post("/espace-agriculteur/modifier-recolte/1", content_type="multipart/form-data",
+                data=formulaire_modification(supprimer_photo="1"))
+    assert nb_photos_supplementaires() == 1
+
+
+def test_publication_avec_plusieurs_photos(client):
+    connecter_agriculteur(client)
+    client.post("/espace-agriculteur/nouvelle-recolte", content_type="multipart/form-data",
+                data={"nom": "Arachide", "quantite": "50 kg", "prix": "600 FCFA / kg",
+                      "date_disponibilite": "2026-11-01", "localite": "Kaolack",
+                      "photo": photo_envoyee(), "photos_supplementaires": [photo_envoyee(), photo_envoyee()]})
+    connexion = database.get_connexion()
+    n = connexion.execute("SELECT COUNT(*) AS n FROM photos_recolte WHERE recolte_id = 2").fetchone()["n"]
+    connexion.close()
+    assert n == 2

@@ -171,6 +171,7 @@ TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
+    "photos_recolte",
 )
 
 
@@ -485,6 +486,15 @@ def init_db():
             UNIQUE (recolte_id, auteur_id),
             FOREIGN KEY (recolte_id) REFERENCES recoltes (id),
             FOREIGN KEY (auteur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    # Photos en plus de la photo principale (recoltes.photo), pour la galerie de l'annonce
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS photos_recolte (
+            id {ID_AUTO},
+            recolte_id INTEGER NOT NULL,
+            photo TEXT NOT NULL,
+            FOREIGN KEY (recolte_id) REFERENCES recoltes (id)
         )
     """)
     connexion.commit()

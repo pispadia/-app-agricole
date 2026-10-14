@@ -29,7 +29,7 @@ app.config["WTF_CSRF_TIME_LIMIT"] = None
 csrf = CSRFProtect(app)
 
 # Taille maximale d'une requête (photos comprises) : au-delà, refusée avant d'être lue
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 9 * 1024 * 1024  # jusqu'à 4 photos de 2 Mo
 # Cookie de session : jamais lisible en JavaScript, pas envoyé par les autres sites,
 # et en ligne seulement en HTTPS
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -51,7 +51,7 @@ def entetes_de_securite(reponse):
 
 @app.errorhandler(413)
 def requete_trop_grosse(erreur):
-    flash("Le fichier envoyé est trop volumineux (5 Mo maximum).")
+    flash("Le fichier envoyé est trop volumineux (9 Mo maximum par envoi).")
     return redirect(request.referrer if request.referrer and request.referrer.startswith(request.host_url)
                     else url_for("accueil"))
 

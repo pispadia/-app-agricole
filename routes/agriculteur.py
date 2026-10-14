@@ -8,6 +8,30 @@ from core import (app, encoder_photo, masquer_coordonnees, date_disponibilite_va
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
                   planning_livraison_valide, date_fr, MODES_LIVRAISON, MODES_PAIEMENT)
 
+MAX_PHOTOS_SUPPLEMENTAIRES = 3  # en plus de la photo principale : 4 photos par annonce
+
+
+def photos_supplementaires(connexion_bd, recolte_id):
+    return connexion_bd.execute(
+        "SELECT id FROM photos_recolte WHERE recolte_id = ? ORDER BY id", (recolte_id,)).fetchall()
+
+
+def ajouter_photos_supplementaires(connexion_bd, recolte_id):
+    """Enregistre les photos en plus envoyées avec le formulaire, dans la limite de 3."""
+    deja = connexion_bd.execute(
+        "SELECT COUNT(*) AS n FROM photos_recolte WHERE recolte_id = ?", (recolte_id,)).fetchone()["n"]
+    fichiers = [f for f in request.files.getlist("photos_supplementaires") if f and f.filename]
+    places = MAX_PHOTOS_SUPPLEMENTAIRES - deja
+    if len(fichiers) > places:
+        flash(f"4 photos maximum par annonce : seules {max(places, 0)} photo(s) en plus ont été ajoutées.")
+        fichiers = fichiers[:max(places, 0)]
+    for fichier in fichiers:
+        photo = encoder_photo(fichier)
+        if photo:
+            connexion_bd.execute(
+                "INSERT INTO photos_recolte (recolte_id, photo) VALUES (?, ?)", (recolte_id, photo))
+
+
 
 @app.route("/espace-agriculteur/commandes")
 def commandes_recues():
@@ -188,6 +212,7 @@ def nouvelle_recolte():
             (session["utilisateur_id"], nom, quantite, prix, prix_gros, quantite_gros_min,
              date_disponibilite, localite, description, nom_photo)
         ).fetchone()["id"]
+        ajouter_photos_supplementaires(connexion_bd, recolte_id)
         connexion_bd.commit()
         prevenir_clients(connexion_bd, recolte_id, nom, localite, prix)
         connexion_bd.close()
@@ -225,8 +250,10 @@ def modifier_recolte(recolte_id):
             date_disponibilite = date_disponibilite_valide(request.form.get("date_disponibilite"))
         except ValueError as erreur:
             flash(str(erreur))
+            photos = photos_supplementaires(connexion_bd, recolte_id)
             connexion_bd.close()
-            return render_template("modifier_recolte.html", recolte={**dict(recolte), **request.form.to_dict()})
+            return render_template("modifier_recolte.html", recolte={**dict(recolte), **request.form.to_dict()},
+                                   photos=photos)
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         localite = request.form["localite"]
         # Pas de numéro ni d'e-mail dans l'annonce : les échanges passent par la plateforme
@@ -244,14 +271,20 @@ def modifier_recolte(recolte_id):
             (nom, quantite, prix, prix_gros, quantite_gros_min, date_disponibilite,
              localite, description, nom_photo, statut, recolte_id, session["utilisateur_id"])
         )
+        for photo_id in request.form.getlist("supprimer_photo"):
+            if photo_id.isdigit():
+                connexion_bd.execute("DELETE FROM photos_recolte WHERE id = ? AND recolte_id = ?",
+                                     (int(photo_id), recolte_id))
+        ajouter_photos_supplementaires(connexion_bd, recolte_id)
         connexion_bd.commit()
         connexion_bd.close()
 
         flash("Récolte mise à jour.")
         return redirect(url_for("espace_agriculteur"))
 
+    photos = photos_supplementaires(connexion_bd, recolte_id)
     connexion_bd.close()
-    return render_template("modifier_recolte.html", recolte=recolte)
+    return render_template("modifier_recolte.html", recolte=recolte, photos=photos)
 
 
 @app.route("/espace-agriculteur/basculer-statut/<int:recolte_id>", methods=["POST"])
