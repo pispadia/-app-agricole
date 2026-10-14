@@ -3,6 +3,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 import push
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
+from routes.avis import NOTES_AGRICULTEURS
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, encoder_photo, masquer_coordonnees, date_disponibilite_valide, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
@@ -175,10 +176,23 @@ def espace_agriculteur():
     ).fetchall()
     verification = connexion_bd.execute(
         "SELECT verification FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)).fetchone()["verification"]
+    chiffres = connexion_bd.execute(
+        """SELECT SUM(CASE WHEN commandes.statut = 'en_attente' THEN 1 ELSE 0 END) AS en_attente,
+                  COALESCE(SUM(CASE WHEN commandes.statut = 'livree' THEN commandes.montant END), 0) AS ventes
+           FROM commandes JOIN recoltes ON commandes.recolte_id = recoltes.id
+           WHERE recoltes.agriculteur_id = ?""", (session["utilisateur_id"],)
+    ).fetchone()
+    notes = connexion_bd.execute(
+        f"SELECT note_moyenne, nb_avis FROM {NOTES_AGRICULTEURS} notes WHERE agriculteur_id = ?",
+        (session["utilisateur_id"],)
+    ).fetchone()
     connexion_bd.close()
 
-    return render_template("espace_agriculteur.html", nom=session["nom"], recoltes=recoltes,
-                           verification=verification)
+    return render_template(
+        "espace_agriculteur.html", nom=session["nom"], recoltes=recoltes, verification=verification,
+        en_ligne=sum(1 for r in recoltes if r["statut"] == "disponible" and not r["masquee"]),
+        en_attente=chiffres["en_attente"] or 0, ventes=chiffres["ventes"], notes=notes,
+    )
 
 
 @app.route("/espace-agriculteur/nouvelle-recolte", methods=["GET", "POST"])

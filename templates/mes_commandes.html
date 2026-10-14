@@ -35,7 +35,7 @@
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
-                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Passée le {{ commande.date_creation }}</p>
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Passée le {{ commande.date_creation | date_fr }}</p>
                     <p style="margin: 8px 0 0;"><a href="{{ url_for('messages_commande', commande_id=commande.id) }}">💬 {{ "Discuter" | t }}{% if commande.messages_non_lus %} <span class="badge badge-epuise">{{ commande.messages_non_lus }} nouveau{{ 'x' if commande.messages_non_lus > 1 }}</span>{% endif %}</a></p>
 
                     {% if commande.statut == 'en_attente' %}

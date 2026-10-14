@@ -25,7 +25,7 @@ def client(tmp_path, monkeypatch):
 def test_accueil_vitrine(client):
     page = client.get("/").get_data(as_text=True)
     assert "Mil" in page and "Oignon" in page and "Arnaque" not in page
-    assert "<strong style=\"font-size:1.4em;\">11</strong>" in page  # agriculteurs non suspendus
+    assert "<div class=\"tuile-valeur\">11</div>" in page  # agriculteurs non suspendus
     assert "/inscription?role=agriculteur" in page and "/catalogue" in page
 
 

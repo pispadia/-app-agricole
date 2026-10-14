@@ -12,7 +12,7 @@
                 {% if un_avis.commentaire %}
                     <p style="margin: 5px 0 0;">{{ un_avis.commentaire }}</p>
                 {% endif %}
-                <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Le {{ un_avis.date_creation }}</p>
+                <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Le {{ un_avis.date_creation | date_fr }}</p>
             </div>
         {% endfor %}
     {% else %}

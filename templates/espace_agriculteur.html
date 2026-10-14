@@ -1,18 +1,57 @@
 {% extends "base.html" %}
+{% from "_etoiles.html" import etoiles %}
+{% block mise_en_page %}large{% endblock %}
 {% block contenu %}
-    <h2>{{ "Espace Agriculteur" | t }}</h2>
-    <p><a href="{{ url_for('prix_marche') }}">📈 {{ "Voir les prix du marché" | t }}</a></p>
-    <p>{{ "Bienvenue" | t }} {{ nom }} 👋</p>
+    <div class="entete-page">
+        <div>
+            <div class="surtitre">{{ "Espace Agriculteur" | t }}</div>
+            <h1>{{ "Bonjour" | t }} {{ nom.split(' ')[0] }} 👋</h1>
+            <p>{{ "Voici tes ventes et tes récoltes en ligne." | t }}</p>
+        </div>
+        <div class="groupe-boutons">
+            <a class="btn btn-clair" href="{{ url_for('commandes_recues') }}">📦 {{ "Commandes reçues" | t }}</a>
+            <a class="btn" href="{{ url_for('nouvelle_recolte') }}">＋ {{ "Publier une récolte" | t }}</a>
+        </div>
+    </div>
 
-    <a href="{{ url_for('nouvelle_recolte') }}"><button>{{ "+ Publier une récolte" | t }}</button></a>
-    <a href="{{ url_for('commandes_recues') }}"><button>📦 {{ "Voir mes commandes reçues" | t }}</button></a>
-    <a href="{{ url_for('statistiques_agriculteur') }}"><button>📊 {{ "Mes statistiques" | t }}</button></a>
-    <a href="{{ url_for('parrainage') }}"><button>🎁 {{ "Inviter et gagner du Premium" | t }}</button></a>
-    {% if verification != 'verifie' %}<a href="{{ url_for('demande_verification') }}"><button>✅ {{ "Faire vérifier mon compte" | t }}</button></a>{% endif %}
-    <a href="{{ url_for('semences_pepinieres') }}"><button>🌱 {{ "Acheter semences / pépinières" | t }}</button></a>
-    <a href="{{ url_for('espace_financement_agriculteur') }}"><button>💰 {{ "Financement" | t }}</button></a>
+    {% if en_attente %}
+        <div class="bandeau">
+            <div>
+                <strong>📦 {{ en_attente }} {{ "commande(s) en attente de ta réponse" | t }}</strong>
+                <p>{{ "Réponds vite : les clients achètent plus aux agriculteurs qui confirment rapidement." | t }}</p>
+            </div>
+            <a class="btn" href="{{ url_for('commandes_recues') }}">{{ "Répondre" | t }}</a>
+        </div>
+    {% elif verification != 'verifie' %}
+        <div class="bandeau">
+            <div>
+                <strong>✅ {{ "Fais vérifier ton compte" | t }}</strong>
+                <p>{% if verification == 'en_attente' %}{{ "Ta pièce est en cours de vérification." | t }}{% else %}{{ "Le badge « Vérifié » rassure les clients et fait vendre plus." | t }}{% endif %}</p>
+            </div>
+            {% if verification != 'en_attente' %}<a class="btn" href="{{ url_for('demande_verification') }}">{{ "Faire vérifier mon compte" | t }}</a>{% endif %}
+        </div>
+    {% endif %}
 
-    <h3 style="margin-top: 30px;">{{ "Mes récoltes publiées" | t }}</h3>
+    <div class="tuiles">
+        <div class="tuile"><div class="tuile-icone">🌾</div><div class="tuile-valeur">{{ en_ligne }}</div><div class="tuile-libelle">{{ "Annonces en ligne" | t }}</div></div>
+        <a class="tuile" href="{{ url_for('commandes_recues') }}"><div class="tuile-icone icone-ambre">📦</div><div class="tuile-valeur">{{ en_attente }}</div><div class="tuile-libelle">{{ "Commandes en attente" | t }}</div></a>
+        <a class="tuile" href="{{ url_for('statistiques_agriculteur') }}"><div class="tuile-icone icone-bleu">💰</div><div class="tuile-valeur">{{ "{:,}".format(ventes | int).replace(",", " ") }}</div><div class="tuile-libelle">{{ "FCFA de ventes livrées" | t }}</div></a>
+        <div class="tuile"><div class="tuile-icone icone-rose">⭐</div><div class="tuile-valeur">{% if notes and notes.nb_avis %}{{ "%.1f" | format(notes.note_moyenne) }}{% else %}–{% endif %}</div><div class="tuile-libelle">{% if notes and notes.nb_avis %}{{ notes.nb_avis }} {{ "avis clients" | t }}{% else %}{{ "Pas encore d'avis" | t }}{% endif %}</div></div>
+    </div>
+
+    <div class="actions">
+        <a class="action" href="{{ url_for('statistiques_agriculteur') }}"><span class="tuile-icone icone-bleu">📊</span><div><strong>{{ "Mes statistiques" | t }}</strong><span>{{ "Ventes, produits les plus demandés" | t }}</span></div></a>
+        <a class="action" href="{{ url_for('prix_marche') }}"><span class="tuile-icone">📈</span><div><strong>{{ "Prix du marché" | t }}</strong><span>{{ "Fixe le bon prix" | t }}</span></div></a>
+        <a class="action" href="{{ url_for('parrainage') }}"><span class="tuile-icone icone-ambre">🎁</span><div><strong>{{ "Inviter et gagner du Premium" | t }}</strong><span>{{ "1 mois offert par filleul" | t }}</span></div></a>
+        <a class="action" href="{{ url_for('semences_pepinieres') }}"><span class="tuile-icone">🌱</span><div><strong>{{ "Semences et pépinières" | t }}</strong><span>{{ "Acheter auprès des fournisseurs" | t }}</span></div></a>
+        <a class="action" href="{{ url_for('espace_financement_agriculteur') }}"><span class="tuile-icone icone-ambre">💰</span><div><strong>{{ "Financement" | t }}</strong><span>{{ "Crédits et aides agricoles" | t }}</span></div></a>
+        {% if verification != 'verifie' %}<a class="action" href="{{ url_for('demande_verification') }}"><span class="tuile-icone icone-rose">✅</span><div><strong>{{ "Faire vérifier mon compte" | t }}</strong><span>{{ "Badge de confiance" | t }}</span></div></a>{% endif %}
+    </div>
+
+    <div class="titre-section">
+        <h2>{{ "Mes récoltes publiées" | t }}</h2>
+        <a href="{{ url_for('nouvelle_recolte') }}">＋ {{ "Publier" | t }}</a>
+    </div>
 
     {% if recoltes %}
         {% for recolte in recoltes %}
@@ -21,29 +60,25 @@
                     <img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}" loading="lazy">
                 {% endif %}
                 <div>
-                    <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
+                    <strong style="font-size:1.05em;">{{ recolte.nom }}</strong> · {{ recolte.quantite }}
                     {% if recolte.masquee %}<span class="badge badge-epuise">{{ "Masquée par la modération" | t }}</span>{% endif %}
                     {% if recolte.statut == 'disponible' %}
                         <span class="badge badge-dispo">{{ "Disponible" | t }}</span>
                     {% else %}
                         <span class="badge badge-epuise">{{ "Épuisé" | t }}</span>
                     {% endif %}
-                    <br>
-                    {{ "Détail" | t }} : {{ recolte.prix }}<br>
-                    {% if recolte.prix_gros %}
-                        {{ "Gros" | t }} : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>
-                    {% endif %}
-                    📍 {{ recolte.localite }} · {{ "Disponible le" | t }} {{ recolte.date_disponibilite }}
-                    {% if recolte.description %}
-                        <p style="margin: 5px 0 0; color: #666;">{{ recolte.description }}</p>
-                    {% endif %}
-                    <div style="margin-top: 8px;">
-                        <a href="{{ lien_partage_whatsapp(recolte) }}" target="_blank" rel="noopener"><button type="button" style="background-color:#25d366;">📤 {{ "Partager sur WhatsApp" | t }}</button></a>
-                        <a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}"><button type="button">{{ "Voir l'annonce" | t }}</button></a>
-                        <a href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}"><button type="button">{{ "Modifier" | t }}</button></a>
-                        <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}" style="display:inline;">
+                    <div style="color:#3d4b44; margin-top:4px;">
+                        <strong style="color:var(--vert-fonce);">{{ recolte.prix }}</strong>
+                        {% if recolte.prix_gros %} · {{ "Gros" | t }} : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}{% endif %}
+                    </div>
+                    <div style="color:var(--discret); font-size:0.9em;">📍 {{ recolte.localite }} · {{ "Disponible le" | t }} {{ recolte.date_disponibilite | date_fr }}</div>
+                    <div class="groupe-boutons">
+                        <a class="btn btn-whatsapp btn-petit" href="{{ lien_partage_whatsapp(recolte) }}" target="_blank" rel="noopener">📤 {{ "Partager sur WhatsApp" | t }}</a>
+                        <a class="btn btn-clair btn-petit" href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}">{{ "Voir l'annonce" | t }}</a>
+                        <a class="btn btn-clair btn-petit" href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}">{{ "Modifier" | t }}</a>
+                        <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit">
+                            <button type="submit" class="btn-clair">
                                 {% if recolte.statut == 'disponible' %}{{ "Marquer épuisé" | t }}{% else %}{{ "Marquer disponible" | t }}{% endif %}
                             </button>
                         </form>
@@ -52,6 +87,10 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>{{ "Tu n'as encore publié aucune récolte." | t }}</p>
+        <div class="vide">
+            <p style="font-size:2em; margin:0;">🌾</p>
+            <p>{{ "Tu n'as encore publié aucune récolte." | t }}</p>
+            <a class="btn" href="{{ url_for('nouvelle_recolte') }}">＋ {{ "Publier une récolte" | t }}</a>
+        </div>
     {% endif %}
 {% endblock %}

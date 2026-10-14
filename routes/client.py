@@ -86,8 +86,11 @@ def espace_client():
 
     connexion_bd = get_connexion()
     donnees = donnees_catalogue(connexion_bd)
+    en_cours = connexion_bd.execute(
+        "SELECT COUNT(*) AS n FROM commandes WHERE client_id = ? AND statut IN ('en_attente', 'confirmee')",
+        (session["utilisateur_id"],)).fetchone()["n"]
     connexion_bd.close()
-    return render_template("espace_client.html", nom=session["nom"],
+    return render_template("espace_client.html", nom=session["nom"], commandes_en_cours=en_cours,
                            taille_panier=len(session.get("panier", [])), **donnees)
 
 
