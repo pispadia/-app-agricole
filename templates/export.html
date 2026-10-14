@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Comptabilité {{ annee }}</h2>
+    <p><a href="{{ url_for('admin') }}">← Administration</a></p>
+
+    <form method="GET" style="display:flex; gap:8px; align-items:center;">
+        <input type="number" name="annee" value="{{ annee }}" min="2020" max="2100" style="width:auto; margin:0;">
+        <button type="submit" style="width:auto;">Changer d'année</button>
+    </form>
+
+    <p>
+        <a href="{{ url_for('export_ventes', annee=annee) }}"><button type="button" style="width:auto;">⬇️ Ventes et commissions {{ annee }} (Excel / CSV)</button></a>
+        <a href="{{ url_for('export_premium', annee=annee) }}"><button type="button" style="width:auto;">⬇️ Abonnements Premium {{ annee }} (Excel / CSV)</button></a>
+    </p>
+
+    <h3>Revenus de la plateforme par mois</h3>
+    <div style="overflow-x:auto;">
+        <table class="tableau">
+            <tr><th>Mois</th><th>Ventes livrées</th><th>Montant des ventes</th><th>Commissions encaissées</th><th>Premium</th><th>Total encaissé</th></tr>
+            {% for m in mois %}
+                <tr>
+                    <td>{{ m.mois }}</td><td>{{ m.ventes }}</td><td>{{ m.ventes_montant }} F</td>
+                    <td>{{ m.commissions }} F</td><td>{{ m.premium }} F</td><td><strong>{{ m.commissions + m.premium }} F</strong></td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <th>Total</th><th>{{ totaux.ventes }}</th><th>{{ totaux.ventes_montant }} F</th>
+                <th>{{ totaux.commissions }} F</th><th>{{ totaux.premium }} F</th><th>{{ totaux.commissions + totaux.premium }} F</th>
+            </tr>
+        </table>
+    </div>
+    <p style="font-size:0.85em; color:#666;">Les mois sont ceux de la commande et du paiement Premium. Les commissions comptées sont celles marquées réglées.</p>
+{% endblock %}

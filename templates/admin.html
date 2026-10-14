@@ -10,7 +10,8 @@
         <strong>Commandes :</strong>
         {{ commandes.get('en_attente', 0) }} en attente · {{ commandes.get('confirmee', 0) }} confirmées ·
         {{ commandes.get('livree', 0) }} livrées · {{ commandes.get('annulee', 0) }} annulées<br>
-        <a href="{{ url_for('admin_utilisateurs') }}">👥 Gérer les comptes (rechercher, suspendre)</a>
+        <a href="{{ url_for('admin_utilisateurs') }}">👥 Gérer les comptes (rechercher, suspendre)</a> ·
+        <a href="{{ url_for('export_comptable') }}">📒 Comptabilité et export Excel</a>
     </div>
 
     <h3>Revenus</h3>
