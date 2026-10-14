@@ -71,7 +71,7 @@ def test_livraison_invalide_refusee(client, donnees):
     page = client.post("/commander/1", data={"quantite_demandee": "20 kg", **donnees},
                        follow_redirects=True).get_data(as_text=True)
     assert commandes() == []
-    assert "Commander" in page
+    assert "quantite_demandee" in page  # le formulaire de commande est réaffiché
 
 
 def test_panier_avec_livraison(client):

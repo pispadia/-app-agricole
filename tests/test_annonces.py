@@ -29,7 +29,7 @@ def test_annonce_publique_sans_compte(client):
     assert "Mil" in page and "500 FCFA / kg" in page and "Fatou" in page
     assert 'property="og:title" content="Mil — 500 FCFA / kg (Thiès)"' in page
     assert 'property="og:image" content="http://localhost/annonce/1/photo"' in page
-    assert "Créer un compte pour commander" in page
+    assert "Créer un compte pour réserver" in page  # récolte du 01/11/2026 : à venir
     assert "f@x.sn" not in page  # aucune coordonnée
 
 

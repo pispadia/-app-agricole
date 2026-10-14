@@ -31,6 +31,9 @@
                     {{ badge_statut(commande.statut) }}<br>
                     Client : {{ commande.nom_client }}<br>
                     {{ infos_livraison(commande, modes_livraison) }}
+                    {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
+                        <br><span class="badge badge-attente">🌱 Pré-commande : récolte prévue le {{ commande.date_disponibilite | date_fr }}</span>
+                    {% endif %}
                     {% if commande.mode_paiement == 'wave' %}
                         <br>💳 Paiement en ligne avec Wave :
                         {% if commande.paye_en_ligne %}

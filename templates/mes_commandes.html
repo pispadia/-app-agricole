@@ -15,6 +15,9 @@
                     Agriculteur : <a href="{{ url_for('avis_agriculteur', agriculteur_id=commande.agriculteur_id) }}">{{ commande.nom_agriculteur }}</a><br>
                     Prix affiché : {{ commande.prix }}<br>
                     {{ infos_livraison(commande, modes_livraison) }}
+                    {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
+                        <br><span class="badge badge-attente">🌱 Pré-commande : récolte prévue le {{ commande.date_disponibilite | date_fr }}</span>
+                    {% endif %}
                     {% if commande.mode_paiement == 'wave' %}
                         <br>💳 Paiement en ligne avec Wave
                         {% if commande.paye_en_ligne %}

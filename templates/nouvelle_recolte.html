@@ -14,6 +14,7 @@
         <input type="text" name="quantite_gros_min" value="{{ saisie.get('quantite_gros_min', '') }}" placeholder="{{ "Quantité minimum pour le prix en gros (ex: à partir de 50 kg)" | t }}">
 
         <label>{{ "Date de disponibilité" | t }}</label>
+        <p style="margin:0; font-size:0.85em; color:#666;">{{ "Pas encore récoltée ? Mets la date prévue : les clients pourront la réserver." | t }}</p>
         <input type="date" name="date_disponibilite" value="{{ saisie.get('date_disponibilite', '') }}" required>
 
         <input type="text" name="localite" value="{{ saisie.get('localite', '') }}" placeholder="{{ "Localité de production (ex: Thiès)" | t }}" required>

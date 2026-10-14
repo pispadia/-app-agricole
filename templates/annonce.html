@@ -24,6 +24,7 @@
             {% if recolte.prix_gros %}Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>{% endif %}
             Quantité : {{ recolte.quantite }}<br>
             📍 {{ recolte.localite }} · disponible le {{ recolte.date_disponibilite | date_fr }}
+            {% if a_venir(recolte.date_disponibilite) %}<br><span class="badge badge-attente">🌱 Récolte à venir : réserve-la dès maintenant</span>{% endif %}
         </p>
         {% if recolte.description %}<p style="color:#555;">{{ recolte.description }}</p>{% endif %}
         <p>
@@ -34,9 +35,9 @@
 
         {% if recolte.statut == 'disponible' %}
             {% if role == 'client' %}
-                <a href="{{ url_for('commander', recolte_id=recolte.id) }}"><button type="button">Commander</button></a>
+                <a href="{{ url_for('commander', recolte_id=recolte.id) }}"><button type="button">{{ "Réserver" if a_venir(recolte.date_disponibilite) else "Commander" }}</button></a>
             {% elif role is none %}
-                <a href="{{ url_for('inscription', suivant=url_for('commander', recolte_id=recolte.id)) }}"><button type="button">Créer un compte pour commander</button></a>
+                <a href="{{ url_for('inscription', suivant=url_for('commander', recolte_id=recolte.id)) }}"><button type="button">Créer un compte pour {{ "réserver" if a_venir(recolte.date_disponibilite) else "commander" }}</button></a>
                 <p style="text-align:center;"><a href="{{ url_for('connexion', suivant=url_for('commander', recolte_id=recolte.id)) }}">J'ai déjà un compte</a></p>
             {% endif %}
         {% endif %}

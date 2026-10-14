@@ -4,7 +4,7 @@ import sms
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
 from database import get_connexion, COLONNES_RECOLTE
-from core import (app, encoder_photo, masquer_coordonnees, quantite_valide, prix_valide, utilisateur_connecte,
+from core import (app, encoder_photo, masquer_coordonnees, date_disponibilite_valide, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
                   planning_livraison_valide, date_fr, MODES_LIVRAISON, MODES_PAIEMENT)
 
@@ -16,7 +16,7 @@ def commandes_recues():
 
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
-        """SELECT commandes.*, recoltes.nom AS nom_recolte,
+        """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.date_disponibilite,
                   utilisateurs.nom AS nom_client,
                   (SELECT COUNT(*) FROM messages_commande
                    WHERE messages_commande.commande_id = commandes.id
@@ -167,11 +167,11 @@ def nouvelle_recolte():
             prix_gros = request.form.get("prix_gros", "").strip() or None
             if prix_gros:
                 prix_gros = prix_valide(prix_gros)
+            date_disponibilite = date_disponibilite_valide(request.form.get("date_disponibilite"))
         except ValueError as erreur:
             flash(str(erreur))
             return render_template("nouvelle_recolte.html", saisie=request.form)
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
-        date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
         # Pas de numéro ni d'e-mail dans l'annonce : les échanges passent par la plateforme
         description = masquer_coordonnees(request.form.get("description", ""))
@@ -222,12 +222,12 @@ def modifier_recolte(recolte_id):
             prix_gros = request.form.get("prix_gros", "").strip() or None
             if prix_gros:
                 prix_gros = prix_valide(prix_gros)
+            date_disponibilite = date_disponibilite_valide(request.form.get("date_disponibilite"))
         except ValueError as erreur:
             flash(str(erreur))
             connexion_bd.close()
             return render_template("modifier_recolte.html", recolte={**dict(recolte), **request.form.to_dict()})
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
-        date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
         # Pas de numéro ni d'e-mail dans l'annonce : les échanges passent par la plateforme
         description = masquer_coordonnees(request.form.get("description", ""))

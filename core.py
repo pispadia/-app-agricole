@@ -291,6 +291,28 @@ def date_fr(valeur):
         return valeur
 
 
+HORIZON_PRECOMMANDE_JOURS = 365  # une récolte peut être annoncée jusqu'à un an à l'avance
+
+
+def date_disponibilite_valide(texte):
+    """AAAA-MM-JJ ; une date future fait de l'annonce une récolte « à venir » (pré-commandes)."""
+    from datetime import date, timedelta
+    try:
+        jour = date.fromisoformat((texte or "").strip())
+    except ValueError:
+        raise ValueError("Indique la date de disponibilité de la récolte.")
+    if jour > date.today() + timedelta(days=HORIZON_PRECOMMANDE_JOURS):
+        raise ValueError("La récolte ne peut pas être annoncée plus d'un an à l'avance.")
+    return jour.isoformat()
+
+
+@app.template_global()
+def a_venir(date_disponibilite):
+    """Vrai si la récolte n'est pas encore prête : elle se réserve (pré-commande)."""
+    from datetime import date
+    return str(date_disponibilite or "")[:10] > date.today().isoformat()
+
+
 def date_fin_premium(utilisateur):
     """Date de fin d'abonnement (objet date) si l'utilisateur est Premium aujourd'hui, sinon None."""
     from datetime import date

@@ -18,6 +18,7 @@ def espace_client():
     recherche = request.args.get("recherche", "").strip()
     localite = request.args.get("localite", "").strip()
     tri = request.args.get("tri", "recent")
+    periode = request.args.get("periode", "")
 
     requete = """
         SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
@@ -38,6 +39,14 @@ def espace_client():
     if localite:
         requete += " AND recoltes.localite LIKE ?"
         parametres.append(f"%{localite}%")
+
+    # Disponible maintenant, ou à venir (pré-commande : la date de disponibilité est future)
+    if periode == "maintenant":
+        requete += " AND recoltes.date_disponibilite <= ?"
+        parametres.append(date.today().isoformat())
+    elif periode == "a_venir":
+        requete += " AND recoltes.date_disponibilite > ?"
+        parametres.append(date.today().isoformat())
 
     ordres = {
         "recent": "recoltes.date_creation DESC",
@@ -63,6 +72,7 @@ def espace_client():
     return render_template(
         "espace_client.html", nom=session["nom"], recoltes=recoltes,
         localites=localites, recherche=recherche, localite_choisie=localite, tri_choisi=tri,
+        periode_choisie=periode,
         taille_panier=len(session.get("panier", [])), aujourdhui=aujourdhui, prix_courants=prix_courants
     )
 
@@ -246,6 +256,7 @@ def mes_commandes():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.prix, recoltes.agriculteur_id,
+                  recoltes.date_disponibilite,
                   utilisateurs.nom AS nom_agriculteur, avis.note AS note_avis,
                   (SELECT COUNT(*) FROM messages_commande
                    WHERE messages_commande.commande_id = commandes.id

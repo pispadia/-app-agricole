@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% from "_livraison.html" import choix_livraison, choix_paiement %}
 {% block contenu %}
-    <h2>Commander : {{ recolte.nom }}</h2>
+    <h2>{{ "Réserver" if a_venir(recolte.date_disponibilite) else "Commander" }} : {{ recolte.nom }}</h2>
+    {% if a_venir(recolte.date_disponibilite) %}
+        <p class="flash">🌱 Pré-commande : cette récolte sera prête le <strong>{{ recolte.date_disponibilite | date_fr }}</strong>. L'agriculteur confirme ta réservation et te livre à cette date.</p>
+    {% endif %}
     <p style="color:#666;">Vendu par {{ recolte.nom_agriculteur }} — {{ recolte.localite }}</p>
     <p>Détail : {{ recolte.prix }}
         {% if recolte.prix_gros %}
