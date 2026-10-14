@@ -2,6 +2,13 @@
 {% from "_etoiles.html" import etoiles %}
 {% block contenu %}
     <h2>Avis sur {{ agriculteur.nom }}</h2>
+    {% if session.get('role') == 'client' %}
+        <form method="POST" action="{{ url_for('suivre_agriculteur', agriculteur_id=agriculteur.id) }}" style="margin-bottom:12px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="retour" value="agriculteur">
+            <button type="submit" class="btn-clair btn-petit">{% if suivi %}✔️ Tu suis {{ agriculteur.nom }}{% else %}➕ Suivre : être prévenu de ses nouvelles récoltes{% endif %}</button>
+        </form>
+    {% endif %}
     {% if agriculteur.verification == 'verifie' %}<p><span class="badge badge-livree">✅ Agriculteur vérifié</span> : identité contrôlée par App Agricole.</p>{% endif %}
 
     {% if avis %}

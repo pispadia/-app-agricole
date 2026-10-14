@@ -57,6 +57,20 @@
                 </div>
             </div>
 
+            {% if role == 'client' %}
+                <div class="groupe-boutons" style="margin-top:12px;">
+                    <form method="POST" action="{{ url_for('basculer_favori', recolte_id=recolte.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clair btn-petit">{% if favori %}❤️ Dans mes favoris{% else %}🤍 Ajouter aux favoris{% endif %}</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('suivre_agriculteur', agriculteur_id=recolte.agriculteur_id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="recolte_id" value="{{ recolte.id }}">
+                        <button type="submit" class="btn-clair btn-petit">{% if suivi %}✔️ Agriculteur suivi{% else %}➕ Suivre cet agriculteur{% endif %}</button>
+                    </form>
+                </div>
+            {% endif %}
+
             {% if recolte.statut == 'disponible' %}
                 {% if role == 'client' %}
                     <a class="btn" style="width:100%; margin-top:14px;" href="{{ url_for('commander', recolte_id=recolte.id) }}">{{ "Réserver" if a_venir(recolte.date_disponibilite) else "Commander" }}</a>

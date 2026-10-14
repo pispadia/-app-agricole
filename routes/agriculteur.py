@@ -243,7 +243,7 @@ def nouvelle_recolte():
         ).fetchone()["id"]
         ajouter_photos_supplementaires(connexion_bd, recolte_id)
         connexion_bd.commit()
-        prevenir_clients(connexion_bd, recolte_id, nom, localite, prix)
+        prevenir_clients(connexion_bd, recolte_id, nom, localite, prix, session["utilisateur_id"])
         connexion_bd.close()
 
         if hors_ligne:

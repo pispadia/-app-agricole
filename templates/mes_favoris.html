@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_etoiles.html" import etoiles %}
+{% block mise_en_page %}large{% endblock %}
+{% block contenu %}
+    <div class="entete-page">
+        <div>
+            <div class="surtitre">{{ "Espace Client" | t }}</div>
+            <h1>❤️ {{ "Mes favoris" | t }}</h1>
+            <p>{{ "Les annonces que tu as gardées et les agriculteurs que tu suis." | t }}</p>
+        </div>
+        <a class="btn btn-clair" href="{{ url_for('espace_client') }}">← {{ "Catalogue" | t }}</a>
+    </div>
+
+    <div class="titre-section"><h2>{{ "Agriculteurs suivis" | t }} ({{ suivis | length }})</h2></div>
+    {% if suivis %}
+        <p style="color:var(--discret); margin-top:0;">{{ "Tu es prévenu dès qu'un agriculteur suivi publie une nouvelle récolte." | t }}</p>
+        {% for agriculteur in suivis %}
+            <div class="carte-recolte" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <div>
+                    <strong><a href="{{ url_for('avis_agriculteur', agriculteur_id=agriculteur.id) }}">👩🏾‍🌾 {{ agriculteur.nom }}</a></strong>
+                    {% if agriculteur.verification == 'verifie' %}<span class="badge badge-livree">✅ Vérifié</span>{% endif %}
+                    <div style="color:var(--discret); font-size:0.9em;">{{ etoiles(agriculteur.note_moyenne, agriculteur.nb_avis) }} · {{ agriculteur.nb_annonces }} {{ "annonce(s) en ligne" | t }}</div>
+                </div>
+                <form method="POST" action="{{ url_for('suivre_agriculteur', agriculteur_id=agriculteur.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="retour" value="favoris">
+                    <button type="submit" class="btn-clair btn-petit">{{ "Ne plus suivre" | t }}</button>
+                </form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="vide">{{ "Tu ne suis encore aucun agriculteur. Sur une annonce, touche « Suivre cet agriculteur »." | t }}</p>
+    {% endif %}
+
+    <div class="titre-section"><h2>{{ "Annonces gardées" | t }} ({{ favoris | length }})</h2></div>
+    {% for recolte in favoris %}
+        <div class="carte-recolte">
+            {% if recolte.a_photo %}<img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}" loading="lazy">{% endif %}
+            <div>
+                <strong style="font-size:1.05em;"><a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}">{{ recolte.nom }}</a></strong> · {{ recolte.quantite }}
+                {% if recolte.statut != 'disponible' %}<span class="badge badge-epuise">{{ "Plus disponible" | t }}</span>{% endif %}
+                <div><strong style="color:var(--vert-fonce);">{{ recolte.prix }}</strong></div>
+                <div style="color:var(--discret); font-size:0.9em;">📍 {{ recolte.localite }} · {{ recolte.nom_agriculteur }}</div>
+                <div class="groupe-boutons">
+                    {% if recolte.statut == 'disponible' %}<a class="btn btn-petit" href="{{ url_for('commander', recolte_id=recolte.id) }}">{{ "Commander" | t }}</a>{% endif %}
+                    <form method="POST" action="{{ url_for('basculer_favori', recolte_id=recolte.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="retour" value="favoris">
+                        <button type="submit" class="btn-clair btn-petit">{{ "Retirer" | t }}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p class="vide">{{ "Aucune annonce gardée. Sur une annonce, touche « Ajouter aux favoris »." | t }}</p>
+    {% endfor %}
+{% endblock %}

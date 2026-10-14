@@ -17,6 +17,7 @@
 
     <div class="actions">
         <a class="action" href="{{ url_for('mes_commandes') }}"><span class="tuile-icone icone-bleu">📦</span><div><strong>{{ "Mes commandes" | t }}</strong><span>{% if commandes_en_cours %}{{ commandes_en_cours }} {{ "en cours" | t }}{% else %}{{ "Suivi, reçus et avis" | t }}{% endif %}</span></div></a>
+        <a class="action" href="{{ url_for('mes_favoris') }}"><span class="tuile-icone icone-rose">❤️</span><div><strong>{{ "Mes favoris" | t }}</strong><span>{{ "Annonces gardées et agriculteurs suivis" | t }}</span></div></a>
         <a class="action" href="{{ url_for('mes_alertes') }}"><span class="tuile-icone icone-ambre">🔔</span><div><strong>{{ "Mes alertes produits" | t }}</strong><span>{{ "Prévenu dès qu'un produit arrive" | t }}</span></div></a>
         <a class="action" href="{{ url_for('prix_marche') }}"><span class="tuile-icone">📈</span><div><strong>{{ "Prix du marché" | t }}</strong><span>{{ "Compare avant d'acheter" | t }}</span></div></a>
         <a class="action" href="{{ url_for('parrainage') }}"><span class="tuile-icone icone-rose">🎁</span><div><strong>{{ "Inviter et gagner du Premium" | t }}</strong><span>{{ "Invite un agriculteur" | t }}</span></div></a>

@@ -68,38 +68,57 @@ def supprimer_alerte(alerte_id):
     return redirect(url_for("mes_alertes"))
 
 
-def prevenir_clients(connexion_bd, recolte_id, nom, localite, prix):
-    """Après la publication d'une récolte : prévient (e-mail + SMS) les clients dont une alerte correspond.
-    Les envois partent en arrière-plan pour ne pas faire attendre l'agriculteur."""
-    produit = produit_cle(nom)
-    if not produit:
-        return
+def prevenir_clients(connexion_bd, recolte_id, nom, localite, prix, agriculteur_id=None):
+    """Après la publication d'une récolte : prévient (e-mail + SMS/push) les clients dont une alerte
+    correspond et ceux qui suivent l'agriculteur. Les envois partent en arrière-plan pour ne pas
+    faire attendre l'agriculteur."""
     clients = {}
-    for alerte in connexion_bd.execute(
-        """SELECT alertes_produit.localite, utilisateurs.id, utilisateurs.nom, utilisateurs.email,
-                  utilisateurs.telephone
-           FROM alertes_produit JOIN utilisateurs ON alertes_produit.client_id = utilisateurs.id
-           WHERE alertes_produit.produit = ? AND utilisateurs.suspendu = 0""",
-        (produit,)
-    ).fetchall():
-        if meme_localite(alerte["localite"], localite):
-            clients[alerte["id"]] = alerte  # un seul message par client, même s'il a plusieurs alertes
+    produit = produit_cle(nom)
+    if produit:
+        for alerte in connexion_bd.execute(
+            """SELECT alertes_produit.localite, utilisateurs.id, utilisateurs.nom, utilisateurs.email,
+                      utilisateurs.telephone
+               FROM alertes_produit JOIN utilisateurs ON alertes_produit.client_id = utilisateurs.id
+               WHERE alertes_produit.produit = ? AND utilisateurs.suspendu = 0""",
+            (produit,)
+        ).fetchall():
+            if meme_localite(alerte["localite"], localite):
+                clients[alerte["id"]] = (alerte, None)  # un seul message par client, même s'il a plusieurs alertes
+
+    vendeur = None
+    if agriculteur_id:
+        vendeur = connexion_bd.execute("SELECT nom FROM utilisateurs WHERE id = ?", (agriculteur_id,)).fetchone()
+        for abonne in connexion_bd.execute(
+            """SELECT utilisateurs.id, utilisateurs.nom, utilisateurs.email, utilisateurs.telephone
+               FROM agriculteurs_suivis JOIN utilisateurs ON agriculteurs_suivis.client_id = utilisateurs.id
+               WHERE agriculteurs_suivis.agriculteur_id = ? AND utilisateurs.suspendu = 0""",
+            (agriculteur_id,)
+        ).fetchall():
+            clients.setdefault(abonne["id"], (abonne, vendeur["nom"] if vendeur else None))
 
     if not clients:
         return
     lien = url_for("voir_annonce", recolte_id=recolte_id, _external=True)
 
     def envoyer():
-        for client in clients.values():
+        for client, suivi in clients.values():
+            if suivi:
+                sujet = f"{suivi} a publié : {nom} à {localite}"
+                raison = f"<strong>{escape(suivi)}</strong>, que tu suis, vient de publier une récolte"
+                texte = f"App Agricole : {suivi} a publié {nom} à {localite} ({prix}). {lien}"
+                gerer = "Tu peux gérer les agriculteurs que tu suis dans « Mes favoris » sur App Agricole."
+            else:
+                sujet = f"Nouvelle annonce : {nom} à {localite}"
+                raison = "Une récolte qui correspond à ton alerte vient d'être publiée"
+                texte = f"App Agricole : {nom} disponible à {localite} ({prix}). {lien}"
+                gerer = "Tu peux gérer tes alertes dans « Mes alertes » sur App Agricole."
             envoyer_email(
-                client["email"], f"Nouvelle annonce : {nom} à {localite}",
+                client["email"], sujet,
                 f"<p>Bonjour {escape(client['nom'])},</p>"
-                f"<p>Une récolte qui correspond à ton alerte vient d'être publiée : "
-                f"<strong>{escape(nom)}</strong> à {escape(localite)}, {escape(prix)}.</p>"
+                f"<p>{raison} : <strong>{escape(nom)}</strong> à {escape(localite)}, {escape(prix)}.</p>"
                 f'<p><a href="{lien}">Voir l\'annonce et commander</a></p>'
-                f"<p>Tu peux gérer tes alertes dans « Mes alertes » sur App Agricole.</p>",
+                f"<p>{gerer}</p>",
             )
-            push.alerter(client["id"], client["telephone"],
-                         f"App Agricole : {nom} disponible à {localite} ({prix}). {lien}", lien)
+            push.alerter(client["id"], client["telephone"], texte, lien)
 
     threading.Thread(target=envoyer, daemon=True).start()

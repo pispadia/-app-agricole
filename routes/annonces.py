@@ -10,6 +10,7 @@ from database import get_connexion, COLONNES_RECOLTE
 from core import app, utilisateur_connecte
 from prix_marche import prix_du_marche, produit_cle
 from routes.avis import NOTES_AGRICULTEURS
+from routes.favoris import etat_client
 
 
 def recolte_publique(connexion_bd, recolte_id):
@@ -46,9 +47,11 @@ def voir_annonce(recolte_id):
     prix_courant = prix_du_marche(connexion_bd).get(produit_cle(recolte["nom"]))
     photos = connexion_bd.execute(
         "SELECT id FROM photos_recolte WHERE recolte_id = ? ORDER BY id", (recolte_id,)).fetchall()
+    favori, suivi = etat_client(connexion_bd, recolte_id, recolte["agriculteur_id"])
     connexion_bd.close()
     return render_template(
         "annonce.html", recolte=recolte, prix_courant=prix_courant, photos=photos, aujourdhui=date.today().isoformat(),
+        favori=favori, suivi=suivi,
         role=session.get("role") if utilisateur_connecte() else None,
     )
 
