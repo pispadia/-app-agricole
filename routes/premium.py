@@ -124,10 +124,12 @@ def admin():
     commandes = {ligne["statut"]: ligne["n"] for ligne in connexion_bd.execute(
         "SELECT statut, COUNT(*) AS n FROM commandes GROUP BY statut").fetchall()}
     suspendus = connexion_bd.execute("SELECT COUNT(*) AS n FROM utilisateurs WHERE suspendu = 1").fetchone()["n"]
+    signalements = connexion_bd.execute(
+        "SELECT COUNT(DISTINCT recolte_id) AS n FROM signalements WHERE statut = 'ouvert'").fetchone()["n"]
     connexion_bd.close()
     return render_template("admin.html", paiements=paiements_en_attente, commissions=commissions_dues,
                            totaux=totaux, taux_commission=TAUX_COMMISSION,
-                           comptes=comptes, commandes=commandes, suspendus=suspendus,
+                           comptes=comptes, commandes=commandes, suspendus=suspendus, signalements=signalements,
                            a_reverser=a_reverser, a_rembourser=a_rembourser)
 
 

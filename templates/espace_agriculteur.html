@@ -21,6 +21,7 @@
                 {% endif %}
                 <div>
                     <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
+                    {% if recolte.masquee %}<span class="badge badge-epuise">{{ "Masquée par la modération" | t }}</span>{% endif %}
                     {% if recolte.statut == 'disponible' %}
                         <span class="badge badge-dispo">{{ "Disponible" | t }}</span>
                     {% else %}

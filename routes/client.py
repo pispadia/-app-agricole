@@ -27,7 +27,7 @@ def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", p
         FROM recoltes
         JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
         LEFT JOIN """ + NOTES_AGRICULTEURS + """ notes ON notes.agriculteur_id = recoltes.agriculteur_id
-        WHERE recoltes.statut = 'disponible' AND utilisateurs.suspendu = 0
+        WHERE recoltes.statut = 'disponible' AND recoltes.masquee = 0 AND utilisateurs.suspendu = 0
     """
     parametres = []
 
@@ -105,7 +105,7 @@ def message_nouvelle_commande(produits):
 
 
 def recolte_commandable(recolte):
-    return recolte is not None and recolte["statut"] == "disponible"
+    return recolte is not None and recolte["statut"] == "disponible" and not recolte["masquee"]
 
 
 @app.route("/panier/ajouter/<int:recolte_id>", methods=["POST"])

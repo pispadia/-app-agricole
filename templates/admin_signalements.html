@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>🚩 Signalements</h2>
+    <p><a href="{{ url_for('admin') }}">← Administration</a></p>
+    {% for a in annonces %}
+        <div class="carte-recolte" style="display:block;">
+            <strong>{{ a.nom }}</strong> par {{ a.nom_agriculteur }}
+            <span class="badge badge-epuise">{{ a.nombre }} signalement{{ 's' if a.nombre > 1 }}</span>
+            {% if a.masquee %}<span class="badge badge-attente">Masquée</span>{% endif %}
+            {% if a.suspendu %}<span class="badge badge-epuise">Vendeur suspendu</span>{% endif %}
+            <ul style="margin:6px 0;">
+                {% for s in details.get(a.id, []) %}
+                    <li>{{ motifs.get(s.motif, s.motif) }} — {{ s.nom }}{% if s.commentaire %} : « {{ s.commentaire }} »{% endif %}</li>
+                {% endfor %}
+            </ul>
+            {% if not a.masquee %}<p><a href="{{ url_for('voir_annonce', recolte_id=a.id) }}" target="_blank" rel="noopener">Voir l'annonce</a></p>{% endif %}
+            {% for decision, libelle, couleur in [("masquer", "Masquer l'annonce", "background-color:#a94442;"), ("retablir", "Rétablir (signalements injustifiés)", "")] %}
+                <form method="POST" action="{{ url_for('decider_signalement', recolte_id=a.id, decision=decision) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; {{ couleur }}">{{ libelle }}</button>
+                </form>
+            {% endfor %}
+            {% if not a.suspendu %}
+                <form method="POST" action="{{ url_for('changer_suspension', utilisateur_id=a.agriculteur_id, action='suspendre') }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; background-color:#5a1f1e;" onclick="return confirm('Suspendre ce vendeur ?')">Suspendre le vendeur</button>
+                </form>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>Aucun signalement en attente. 👍</p>
+    {% endfor %}
+{% endblock %}

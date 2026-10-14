@@ -20,7 +20,7 @@ def recolte_publique(connexion_bd, recolte_id):
             FROM recoltes
             JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
             LEFT JOIN {NOTES_AGRICULTEURS} notes ON notes.agriculteur_id = recoltes.agriculteur_id
-            WHERE recoltes.id = ? AND utilisateurs.suspendu = 0""",
+            WHERE recoltes.id = ? AND recoltes.masquee = 0 AND utilisateurs.suspendu = 0""",
         (recolte_id,)
     ).fetchone()
 

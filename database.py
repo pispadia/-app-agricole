@@ -26,7 +26,8 @@ ID_AUTO = "SERIAL PRIMARY KEY" if UTILISE_POSTGRES else "INTEGER PRIMARY KEY AUT
 # pèse jusqu'à 2 Mo) : les pages l'affichent via /annonce/<id>/photo ou /produit/<id>/photo.
 COLONNES_RECOLTE = """recoltes.id, recoltes.agriculteur_id, recoltes.nom, recoltes.quantite, recoltes.prix,
     recoltes.prix_gros, recoltes.quantite_gros_min, recoltes.date_disponibilite, recoltes.localite,
-    recoltes.description, recoltes.statut, recoltes.date_creation, (recoltes.photo IS NOT NULL) AS a_photo"""
+    recoltes.description, recoltes.statut, recoltes.date_creation, recoltes.masquee,
+    (recoltes.photo IS NOT NULL) AS a_photo"""
 COLONNES_PRODUIT = """produits_fournisseur.id, produits_fournisseur.fournisseur_id, produits_fournisseur.nom,
     produits_fournisseur.type_produit, produits_fournisseur.variete, produits_fournisseur.duree_croissance,
     produits_fournisseur.quantite, produits_fournisseur.prix, produits_fournisseur.localite,
@@ -169,7 +170,7 @@ def colonnes_de_table(curseur, nom_table):
 TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
-    "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi",
+    "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
 )
 
 
@@ -471,6 +472,23 @@ def init_db():
     """)
     connexion.commit()
 
+    # Signalements d'annonces par les utilisateurs (un par personne et par annonce)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS signalements (
+            id {ID_AUTO},
+            recolte_id INTEGER NOT NULL,
+            auteur_id INTEGER NOT NULL,
+            motif TEXT NOT NULL,
+            commentaire TEXT,
+            statut TEXT NOT NULL DEFAULT 'ouvert',
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (recolte_id, auteur_id),
+            FOREIGN KEY (recolte_id) REFERENCES recoltes (id),
+            FOREIGN KEY (auteur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
     # En ligne (Supabase), active la protection RLS sur toutes les tables : l'API
     # publique de Supabase n'y a alors plus accès, l'application (propriétaire des
     # tables) continue de les utiliser normalement. Sans effet si déjà activée.
@@ -500,6 +518,8 @@ def init_db():
         ("utilisateurs", "suspendu", "INTEGER NOT NULL DEFAULT 0"),
         # Parrainage : code d'invitation, parrain, et date de la récompense versée au parrain
         ("utilisateurs", "code_parrainage", "TEXT"),
+        # Modération : annonce masquée (3 signalements, ou décision de l'admin)
+        ("recoltes", "masquee", "INTEGER NOT NULL DEFAULT 0"),
         ("utilisateurs", "parrain_id", "INTEGER"),
         ("utilisateurs", "parrainage_recompense_le", "TEXT"),
         ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),

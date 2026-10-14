@@ -73,6 +73,7 @@ WOLOF = {
     "Gros": "Ci kilo yu bare",
     "Disponible le": "Am na ci",
     "Modifier": "Soppi",
+    "Masquée par la modération": "Nëbbu nañu ko",
     "Partager sur WhatsApp": "Yónnee ci WhatsApp",
     "Voir l'annonce": "Xool yéenekaay bi",
     "Marquer épuisé": "Jeex na",
