@@ -1,6 +1,7 @@
 """Espace agriculteur : récoltes et commandes reçues."""
 from flask import render_template, request, redirect, url_for, session, flash
 import sms
+from routes.alertes import prevenir_clients
 from database import get_connexion
 from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
@@ -176,15 +177,16 @@ def nouvelle_recolte():
         nom_photo = encoder_photo(fichier)
 
         connexion_bd = get_connexion()
-        connexion_bd.execute(
+        recolte_id = connexion_bd.execute(
             """INSERT INTO recoltes
                (agriculteur_id, nom, quantite, prix, prix_gros, quantite_gros_min,
                 date_disponibilite, localite, description, photo)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id""",
             (session["utilisateur_id"], nom, quantite, prix, prix_gros, quantite_gros_min,
              date_disponibilite, localite, description, nom_photo)
-        )
+        ).fetchone()["id"]
         connexion_bd.commit()
+        prevenir_clients(connexion_bd, recolte_id, nom, localite, prix)
         connexion_bd.close()
 
         flash("Récolte publiée avec succès.")
