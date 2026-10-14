@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>📊 Statistiques de la plateforme</h2>
+
+    <div class="carte-recolte" style="display:block;">
+        Sur les 12 derniers mois :
+        <strong>{{ totaux.inscrits }}</strong> inscriptions ·
+        <strong>{{ totaux.annonces }}</strong> annonces ·
+        <strong>{{ totaux.commandes }}</strong> commandes ({{ totaux.livrees }} livrées)<br>
+        Ventes livrées : <strong>{{ totaux.ventes }} FCFA</strong> ·
+        revenus de la plateforme : <strong>{{ totaux.revenus }} FCFA</strong>
+        (commissions {{ totaux.commissions }} + Premium {{ totaux.premium }})<br>
+        En ce moment : <strong>{{ actifs.agriculteurs }}</strong> agriculteurs avec une annonce en ligne ·
+        <strong>{{ actifs.clients }}</strong> clients ont déjà commandé
+        {% if taux_livraison is not none %}· taux de livraison : <strong>{{ taux_livraison }} %</strong>{% endif %}
+    </div>
+
+    <h3>Revenus de la plateforme par mois</h3>
+    <div class="graphique">
+        {% for m in mois %}
+            <div class="graphique-ligne">
+                <span class="graphique-mois">{{ m.libelle }}</span>
+                <span class="graphique-barre"><span style="width: {{ m.pourcentage }}%;"></span></span>
+                <span class="graphique-valeur">{{ m.revenus }} F</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h3>Détail par mois</h3>
+    <div style="overflow-x:auto;">
+        <table class="tableau">
+            <tr><th>Mois</th><th>Inscrits</th><th>dont agri. / clients</th><th>Annonces</th><th>Commandes</th><th>Livrées</th><th>Ventes</th><th>Commissions</th><th>Premium</th></tr>
+            {% for m in mois | reverse %}
+                <tr>
+                    <td>{{ m.libelle }}</td><td>{{ m.inscrits }}</td><td>{{ m.agriculteurs }} / {{ m.clients }}</td>
+                    <td>{{ m.annonces }}</td><td>{{ m.commandes }}</td><td>{{ m.livrees }}</td>
+                    <td>{{ m.ventes }}</td><td>{{ m.commissions }}</td><td>{{ m.premium }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <p style="font-size:0.8em; color:#666;">Les commandes sont comptées au mois où elles ont été passées. Les inscriptions ne sont suivies que depuis la mise en place de cette page.</p>
+
+    {% for cle, titre, colonne in [("produits", "Produits les plus vendus", "Produit"), ("localites", "Localités qui vendent le plus", "Localité"), ("agriculteurs", "Meilleurs agriculteurs", "Agriculteur")] %}
+        <h3>{{ titre }}</h3>
+        {% if classements[cle] %}
+            <div style="overflow-x:auto;">
+                <table class="tableau">
+                    <tr><th>{{ colonne }}</th><th>Commandes livrées</th><th>Ventes</th></tr>
+                    {% for ligne in classements[cle] %}
+                        <tr><td>{{ ligne.libelle }}</td><td>{{ ligne.commandes }}</td><td>{{ ligne.ventes }} FCFA</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <p>Pas encore de commande livrée.</p>
+        {% endif %}
+    {% endfor %}
+
+    <p><a href="{{ url_for('admin') }}">← Retour à l'administration</a></p>
+{% endblock %}
