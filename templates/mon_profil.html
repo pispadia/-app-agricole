@@ -3,6 +3,18 @@
     <h2>Mon profil</h2>
     <p style="color:#888; text-transform: capitalize;">Rôle : {{ utilisateur.role }}</p>
 
+    {% if email_confirme %}
+        <p><span class="badge badge-dispo">✓ Adresse e-mail confirmée</span></p>
+    {% else %}
+        <div class="flash">
+            Ton adresse e-mail n'est pas encore confirmée.
+            <form method="POST" action="{{ url_for('renvoyer_confirmation_email') }}" style="margin-top:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Recevoir le lien de confirmation</button>
+            </form>
+        </div>
+    {% endif %}
+
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Nom</label>

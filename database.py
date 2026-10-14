@@ -335,6 +335,9 @@ def init_db():
         ("commandes", "commission_payee", "INTEGER NOT NULL DEFAULT 0"),
         # Livraison : retrait chez l'agriculteur ou livraison à l'adresse indiquée ;
         # date prévue et frais fixés par l'agriculteur à la confirmation
+        # Adresse e-mail confirmée par lien (vide tant que non confirmée) ; on garde
+        # l'adresse et non un simple drapeau pour qu'un changement d'e-mail l'invalide
+        ("utilisateurs", "email_confirme", "TEXT"),
         ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),
         ("commandes", "adresse_livraison", "TEXT"),
         ("commandes", "date_livraison_prevue", "TEXT"),

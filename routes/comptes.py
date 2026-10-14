@@ -7,7 +7,8 @@ from markupsafe import escape
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_connexion
 from emails import envoyer_email
-from core import app, utilisateur_connecte, mot_de_passe_valide, telephone_valide, ROLES
+from core import (app, utilisateur_connecte, mot_de_passe_valide, telephone_valide, ROLES,
+                  utilisateur_courant, email_confirme)
 
 
 @app.route("/")
@@ -45,12 +46,17 @@ def inscription():
             )
             connexion.commit()
         except Exception:
+            connexion.close()
             flash("Cet email est déjà utilisé.")
             return render_template("inscription.html", saisie=request.form)
-        finally:
-            connexion.close()
+        utilisateur = connexion.execute("SELECT * FROM utilisateurs WHERE email = ?", (email,)).fetchone()
+        connexion.close()
 
-        flash("Compte créé avec succès, tu peux te connecter.")
+        if envoyer_lien_confirmation(utilisateur):
+            flash("Compte créé avec succès, tu peux te connecter. "
+                  "Un lien pour confirmer ton adresse e-mail vient de t'être envoyé.")
+        else:
+            flash("Compte créé avec succès, tu peux te connecter.")
         return redirect(url_for("connexion"))
 
     return render_template("inscription.html")
@@ -148,6 +154,65 @@ def utilisateur_du_jeton(connexion_bd, jeton):
     if utilisateur is None or utilisateur["mot_de_passe"][-16:] != donnees["empreinte"]:
         return None
     return utilisateur
+
+
+# Confirmation de l'adresse e-mail : le lien porte l'adresse confirmée, il ne vaut
+# donc plus rien si l'utilisateur change d'adresse entre-temps.
+DUREE_LIEN_CONFIRMATION = 7 * 24 * 60 * 60
+
+
+def serialiseur_confirmation():
+    return URLSafeTimedSerializer(app.secret_key, salt="confirmation-email")
+
+
+def envoyer_lien_confirmation(utilisateur):
+    jeton = serialiseur_confirmation().dumps({"id": utilisateur["id"], "email": utilisateur["email"]})
+    lien = url_for("confirmer_email", jeton=jeton, _external=True)
+    return envoyer_email(
+        utilisateur["email"],
+        "Confirmez votre adresse e-mail",
+        f"<p>Bonjour {escape(utilisateur['nom'])},</p>"
+        f"<p>Pour confirmer votre adresse e-mail sur App Agricole, cliquez sur ce lien (valable 7 jours) :</p>"
+        f'<p><a href="{lien}">{lien}</a></p>'
+        f"<p>Si vous n'avez pas créé de compte, ignorez cet e-mail.</p>",
+    )
+
+
+@app.route("/confirmer-email", methods=["POST"])
+def renvoyer_confirmation_email():
+    utilisateur = utilisateur_courant()
+    if utilisateur is None:
+        return redirect(url_for("connexion"))
+    if email_confirme(utilisateur):
+        flash("Ton adresse e-mail est déjà confirmée.")
+    elif envoyer_lien_confirmation(utilisateur):
+        flash(f"Un lien de confirmation a été envoyé à {utilisateur['email']}.")
+    else:
+        flash("L'e-mail n'a pas pu être envoyé. Réessaie plus tard.")
+    return redirect(url_for("mon_profil"))
+
+
+@app.route("/confirmer-email/<jeton>")
+def confirmer_email(jeton):
+    try:
+        donnees = serialiseur_confirmation().loads(jeton, max_age=DUREE_LIEN_CONFIRMATION)
+    except BadSignature:
+        flash("Ce lien de confirmation est invalide ou a expiré.")
+        return redirect(url_for("accueil"))
+
+    connexion_bd = get_connexion()
+    # Seulement si le compte a toujours l'adresse à laquelle le lien a été envoyé
+    resultat = connexion_bd.execute(
+        "UPDATE utilisateurs SET email_confirme = email WHERE id = ? AND email = ?",
+        (donnees["id"], donnees["email"])
+    )
+    connexion_bd.commit()
+    connexion_bd.close()
+    if resultat.rowcount:
+        flash("Adresse e-mail confirmée, merci !")
+    else:
+        flash("Ce lien ne correspond plus à l'adresse de ton compte.")
+    return redirect(url_for("accueil"))
 
 
 @app.route("/mot-de-passe-oublie", methods=["GET", "POST"])
@@ -274,10 +339,18 @@ def mon_profil():
             flash("Cet email est déjà utilisé par un autre compte.")
             return redirect(url_for("mon_profil"))
 
+        if email != utilisateur["email"]:
+            # Nouvelle adresse : elle n'est plus confirmée, on envoie le lien tout de suite
+            nouvel_utilisateur = connexion_bd.execute(
+                "SELECT * FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)
+            ).fetchone()
+            envoyer_lien_confirmation(nouvel_utilisateur)
+            flash("Un lien pour confirmer ta nouvelle adresse e-mail vient de t'être envoyé.")
         connexion_bd.close()
         session["nom"] = nom
         flash("Profil mis à jour avec succès.")
         return redirect(url_for("mon_profil"))
 
     connexion_bd.close()
-    return render_template("mon_profil.html", utilisateur=utilisateur)
+    return render_template("mon_profil.html", utilisateur=utilisateur,
+                           email_confirme=email_confirme(utilisateur))

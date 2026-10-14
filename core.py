@@ -232,9 +232,21 @@ def est_premium():
     return date_fin_premium(utilisateur_courant()) is not None
 
 
-def est_admin():
-    utilisateur = utilisateur_courant()
+def email_confirme(utilisateur):
+    """Vrai si l'adresse actuelle du compte a été confirmée par le lien envoyé par e-mail."""
+    email = utilisateur["email"].strip().lower()
+    return (utilisateur["email_confirme"] or "").strip().lower() == email
+
+
+def adresse_admin(utilisateur):
     return bool(utilisateur) and utilisateur["email"].strip().lower() in EMAILS_ADMIN
+
+
+def est_admin(utilisateur=None):
+    """Administrateur : adresse listée dans ADMIN_EMAILS ET confirmée (sinon n'importe qui
+    pourrait s'inscrire, ou modifier son profil, avec une adresse admin)."""
+    utilisateur = utilisateur or utilisateur_courant()
+    return adresse_admin(utilisateur) and email_confirme(utilisateur)
 
 
 def premium_requis(vue):
@@ -254,5 +266,6 @@ def injecter_statut_compte():
     utilisateur = utilisateur_courant()
     return {
         "fin_premium": date_fin_premium(utilisateur),
-        "est_admin": bool(utilisateur) and utilisateur["email"].strip().lower() in EMAILS_ADMIN,
+        # Le lien Admin s'affiche aussi avant confirmation, pour guider vers la confirmation
+        "est_admin": adresse_admin(utilisateur),
     }

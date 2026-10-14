@@ -18,6 +18,7 @@ def client(tmp_path, monkeypatch):
                              ("Admin", "admin@x.sn", "client"), ("Moussa", "m@x.sn", "agriculteur")):
         connexion.execute("INSERT INTO utilisateurs (nom, email, mot_de_passe, role) VALUES (?, ?, ?, ?)",
                           (nom, email, "x", role))
+    connexion.execute("UPDATE utilisateurs SET email_confirme = email WHERE email = 'admin@x.sn'")
     for agriculteur_id, nom in ((1, "Mil"), (4, "Arachide")):
         connexion.execute(
             """INSERT INTO recoltes (agriculteur_id, nom, quantite, prix, date_disponibilite, localite)
