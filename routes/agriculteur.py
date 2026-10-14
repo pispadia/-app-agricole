@@ -1,5 +1,5 @@
 """Espace agriculteur : récoltes et commandes reçues."""
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import jsonify, render_template, request, redirect, url_for, session, flash
 import push
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
@@ -204,8 +204,11 @@ def espace_agriculteur():
 
 @app.route("/espace-agriculteur/nouvelle-recolte", methods=["GET", "POST"])
 def nouvelle_recolte():
+    # Annonce préparée hors connexion et envoyée plus tard par le téléphone (static/hors_ligne.js) :
+    # on répond en JSON pour que le script sache si elle est publiée
+    hors_ligne = request.headers.get("X-Hors-Ligne") == "1"
     if not utilisateur_connecte() or session["role"] != "agriculteur":
-        return redirect(url_for("connexion"))
+        return (jsonify({"erreur": "Connecte-toi pour publier."}), 401) if hors_ligne else redirect(url_for("connexion"))
 
     if request.method == "POST":
         nom = request.form["nom"]
@@ -217,6 +220,8 @@ def nouvelle_recolte():
                 prix_gros = prix_valide(prix_gros)
             date_disponibilite = date_disponibilite_valide(request.form.get("date_disponibilite"))
         except ValueError as erreur:
+            if hors_ligne:
+                return jsonify({"erreur": str(erreur)}), 400
             flash(str(erreur))
             return render_template("nouvelle_recolte.html", saisie=request.form)
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
@@ -241,6 +246,8 @@ def nouvelle_recolte():
         prevenir_clients(connexion_bd, recolte_id, nom, localite, prix)
         connexion_bd.close()
 
+        if hors_ligne:
+            return jsonify({"ok": True, "id": recolte_id})
         flash("Récolte publiée avec succès.")
         return redirect(url_for("espace_agriculteur"))
 

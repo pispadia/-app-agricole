@@ -1,7 +1,9 @@
 // Service worker d'App Agricole : rend l'application installable et affiche une
 // page « hors ligne » quand il n'y a pas de réseau. Les pages personnelles
-// (commandes, profil...) ne sont jamais mises en cache.
-const CACHE = "app-agricole-v1";
+// (commandes, profil...) ne sont jamais mises en cache, sauf le formulaire de
+// publication, gardé pour pouvoir préparer une annonce au champ sans réseau.
+const CACHE = "app-agricole-v2";
+const PAGES_HORS_LIGNE = ["/espace-agriculteur/nouvelle-recolte"];
 const FICHIERS = ["/hors-ligne", "/static/icones/icone-192.png"];
 
 self.addEventListener("install", (evenement) => {
@@ -18,9 +20,35 @@ self.addEventListener("activate", (evenement) => {
 });
 
 self.addEventListener("fetch", (evenement) => {
-    if (evenement.request.mode === "navigate") {
+    const requete = evenement.request;
+    const adresse = new URL(requete.url);
+    if (requete.method !== "GET" || adresse.origin !== self.location.origin) return;
+
+    if (requete.mode === "navigate") {
+        const aGarder = PAGES_HORS_LIGNE.includes(adresse.pathname);
         evenement.respondWith(
-            fetch(evenement.request).catch(() => caches.match("/hors-ligne"))
+            fetch(requete).then((reponse) => {
+                // Formulaire de publication : copie à jour gardée pour l'utiliser sans réseau
+                if (aGarder && reponse.ok && !reponse.redirected) {
+                    const copie = reponse.clone();
+                    caches.open(CACHE).then((cache) => cache.put(adresse.pathname, copie));
+                }
+                return reponse;
+            }).catch(() =>
+                (aGarder ? caches.match(adresse.pathname) : Promise.resolve(null))
+                    .then((enCache) => enCache || caches.match("/hors-ligne"))
+            )
+        );
+    } else if (adresse.pathname.startsWith("/static/")) {
+        // Feuille de style, scripts, icônes : servis du cache, mis à jour en arrière-plan
+        evenement.respondWith(
+            caches.open(CACHE).then((cache) => cache.match(requete).then((enCache) => {
+                const reseau = fetch(requete).then((reponse) => {
+                    if (reponse.ok) cache.put(requete, reponse.clone());
+                    return reponse;
+                }).catch(() => enCache);
+                return enCache || reseau;
+            }))
         );
     }
 });

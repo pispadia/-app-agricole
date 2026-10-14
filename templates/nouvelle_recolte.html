@@ -2,7 +2,8 @@
 {% block contenu %}
     {% set saisie = saisie or {} %}
     <h2>{{ "Publier une récolte" | t }}</h2>
-    <form method="POST" enctype="multipart/form-data">
+    <p style="margin:-6px 0 12px; font-size:0.85em; color:var(--discret);">📶 {{ "Pas de réseau au champ ? Remplis quand même : l'annonce partira toute seule dès que le réseau revient." | t }}</p>
+    <form method="POST" enctype="multipart/form-data" data-hors-ligne>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="{{ "Nom du produit (ex: Tomates)" | t }}" required>
         <input type="text" name="quantite" value="{{ saisie.get('quantite', '') }}" placeholder="{{ "Quantité (ex: 200 kg)" | t }}" required>
