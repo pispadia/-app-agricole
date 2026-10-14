@@ -173,9 +173,12 @@ def espace_agriculteur():
         f"SELECT {COLONNES_RECOLTE} FROM recoltes WHERE agriculteur_id = ? ORDER BY date_creation DESC",
         (session["utilisateur_id"],)
     ).fetchall()
+    verification = connexion_bd.execute(
+        "SELECT verification FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)).fetchone()["verification"]
     connexion_bd.close()
 
-    return render_template("espace_agriculteur.html", nom=session["nom"], recoltes=recoltes)
+    return render_template("espace_agriculteur.html", nom=session["nom"], recoltes=recoltes,
+                           verification=verification)
 
 
 @app.route("/espace-agriculteur/nouvelle-recolte", methods=["GET", "POST"])

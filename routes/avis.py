@@ -56,7 +56,7 @@ def avis_agriculteur(agriculteur_id):
 
     connexion_bd = get_connexion()
     agriculteur = connexion_bd.execute(
-        f"""SELECT utilisateurs.id, utilisateurs.nom, notes.note_moyenne, notes.nb_avis
+        f"""SELECT utilisateurs.id, utilisateurs.nom, utilisateurs.verification, notes.note_moyenne, notes.nb_avis
             FROM utilisateurs LEFT JOIN {NOTES_AGRICULTEURS} notes ON notes.agriculteur_id = utilisateurs.id
             WHERE utilisateurs.id = ? AND utilisateurs.role = 'agriculteur'""",
         (agriculteur_id,)

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>✅ Vérifications d'agriculteurs</h2>
+    <p style="font-size:0.85em; color:#666;">Compare le nom sur la pièce avec celui du compte. La pièce est supprimée dès ta décision.</p>
+
+    {% for d in demandes %}
+        <div class="carte-recolte" style="display:block;">
+            <strong>{{ d.nom }}</strong> ({{ d.email }}{% if d.telephone %}, {{ d.telephone }}{% endif %})
+            <p style="margin:5px 0; font-size:0.85em; color:#999;">Envoyée le {{ d.date_creation }}</p>
+            <a href="{{ url_for('piece_identite', utilisateur_id=d.utilisateur_id) }}" target="_blank" rel="noopener">
+                <img src="{{ url_for('piece_identite', utilisateur_id=d.utilisateur_id) }}" alt="Pièce d'identité de {{ d.nom }}" style="max-width:100%; max-height:260px; border-radius:5px;">
+            </a>
+            <div>
+                {% for decision, libelle, couleur in [("valider", "Valider", ""), ("refuser", "Refuser", "background-color:#a94442;")] %}
+                    <form method="POST" action="{{ url_for('decider_verification', utilisateur_id=d.utilisateur_id, decision=decision) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; margin-top:8px; {{ couleur }}">{{ libelle }}</button>
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <p>Aucune demande en attente.</p>
+    {% endfor %}
+
+    <p><a href="{{ url_for('admin') }}">← Retour à l'administration</a></p>
+{% endblock %}

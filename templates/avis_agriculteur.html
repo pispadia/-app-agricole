@@ -2,6 +2,7 @@
 {% from "_etoiles.html" import etoiles %}
 {% block contenu %}
     <h2>Avis sur {{ agriculteur.nom }}</h2>
+    {% if agriculteur.verification == 'verifie' %}<p><span class="badge badge-livree">✅ Agriculteur vérifié</span> : identité contrôlée par App Agricole.</p>{% endif %}
 
     {% if avis %}
         <p>{{ etoiles(agriculteur.note_moyenne, agriculteur.nb_avis) }}</p>

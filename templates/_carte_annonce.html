@@ -7,7 +7,7 @@
         {% endif %}
         <div>
             <strong><a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}" style="color:inherit;">{{ recolte.nom }}</a></strong> — {{ recolte.quantite }}
-            {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
+            {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}{% if recolte.verification_agriculteur == 'verifie' %}<span class="badge badge-livree" title="Identité vérifiée par App Agricole">✅ Vérifié</span>{% endif %}<br>
             {{ recolte.prix }}
             {% if prix_courant %}<span style="color:#666; font-size:0.85em;">(prix courant : {{ prix_courant.median }} FCFA/kg)</span>{% endif %}<br>
             Par {{ recolte.nom_agriculteur }} {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}<br>

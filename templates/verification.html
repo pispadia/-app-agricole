@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>✅ {{ "Badge « Agriculteur vérifié »" | t }}</h2>
+
+    {% if statut == 'verifie' %}
+        <div class="flash">{{ "Ton compte est vérifié : le badge apparaît sur toutes tes annonces." | t }}</div>
+    {% elif statut == 'en_attente' %}
+        <div class="flash">{{ "Ta pièce est en cours de vérification. Tu seras prévenu par SMS." | t }}</div>
+    {% else %}
+        {% if statut == 'refuse' %}
+            <div class="flash">{{ "Ta dernière pièce n'a pas pu être vérifiée. Envoie une photo plus lisible." | t }}</div>
+        {% endif %}
+        <p>{{ "Les clients font plus confiance aux agriculteurs vérifiés. Envoie une photo de ta carte d'identité (ou passeport) : le nom doit correspondre à celui de ton compte." | t }}</p>
+        <p style="font-size:0.85em; color:#666;">{{ "La photo est vue uniquement par l'équipe App Agricole et supprimée dès la vérification." | t }}</p>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="file" name="piece" accept="image/*" required>
+            <button type="submit">{{ "Envoyer" | t }}</button>
+        </form>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_agriculteur') }}">{{ "← Retour à mon espace" | t }}</a></p>
+{% endblock %}

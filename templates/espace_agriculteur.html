@@ -8,6 +8,7 @@
     <a href="{{ url_for('commandes_recues') }}"><button>📦 {{ "Voir mes commandes reçues" | t }}</button></a>
     <a href="{{ url_for('statistiques_agriculteur') }}"><button>📊 {{ "Mes statistiques" | t }}</button></a>
     <a href="{{ url_for('parrainage') }}"><button>🎁 {{ "Inviter et gagner du Premium" | t }}</button></a>
+    {% if verification != 'verifie' %}<a href="{{ url_for('demande_verification') }}"><button>✅ {{ "Faire vérifier mon compte" | t }}</button></a>{% endif %}
     <a href="{{ url_for('semences_pepinieres') }}"><button>🌱 {{ "Acheter semences / pépinières" | t }}</button></a>
     <a href="{{ url_for('espace_financement_agriculteur') }}"><button>💰 {{ "Financement" | t }}</button></a>
 
