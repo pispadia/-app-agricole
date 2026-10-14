@@ -19,7 +19,30 @@
 
         <input type="text" name="localite" value="{{ saisie.get('localite', '') }}" placeholder="{{ "Localité de production (ex: Thiès)" | t }}" required>
 
-        <textarea name="description" placeholder="{{ "Description (optionnel)" | t }}" rows="4">{{ saisie.get('description', '') }}</textarea>
+        <textarea name="description" id="description" placeholder="{{ "Description (optionnel)" | t }}" rows="4">{{ saisie.get('description', '') }}</textarea>
+        {% if ia_active %}
+            <button type="button" id="ia-annonce" class="btn-clair" style="width:auto;">✨ {{ "Écrire la description avec l'IA" | t }}</button>
+            <span id="ia-etat" style="font-size:0.85em; color:var(--discret); margin-left:6px;"></span>
+            <script>
+                document.getElementById("ia-annonce").addEventListener("click", async () => {
+                    const formulaire = document.getElementById("ia-annonce").form;
+                    const bouton = document.getElementById("ia-annonce"), etat = document.getElementById("ia-etat");
+                    bouton.disabled = true; etat.textContent = "⏳ Rédaction en cours...";
+                    try {
+                        const reponse = await fetch("{{ url_for('ia_rediger_annonce') }}", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token() }}"},
+                            body: JSON.stringify({nom: formulaire.nom.value, quantite: formulaire.quantite.value,
+                                                  localite: formulaire.localite.value, description: formulaire.description.value}),
+                        });
+                        const donnees = await reponse.json();
+                        if (donnees.texte) { formulaire.description.value = donnees.texte; etat.textContent = "✓ Relis et modifie si besoin."; }
+                        else { etat.textContent = donnees.erreur || "Erreur."; }
+                    } catch (e) { etat.textContent = "Impossible de joindre l'assistant."; }
+                    bouton.disabled = false;
+                });
+            </script>
+        {% endif %}
 
         <label>{{ "Photo du produit (optionnel)" | t }}</label>
         <input type="file" name="photo" accept="image/*">
