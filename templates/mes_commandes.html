@@ -45,6 +45,7 @@
                         </form>
                     {% endif %}
 
+                    <p style="margin: 6px 0 0; font-size:0.88em;"><a href="{{ url_for('contact', commande=commande.id) }}" style="color:var(--rouge);">⚠️ Signaler un problème</a></p>
                     {% if commande.statut == 'livree' %}
                         <p style="margin: 8px 0 0;"><a href="{{ url_for('recu_commande', commande_id=commande.id) }}">🧾 Reçu</a></p>
                         {% if commande.note_avis %}

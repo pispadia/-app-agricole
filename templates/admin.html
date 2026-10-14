@@ -13,6 +13,7 @@
         <a href="{{ url_for('admin_statistiques') }}">📊 Statistiques mois par mois</a> ·
         <a href="{{ url_for('admin_utilisateurs') }}">👥 Gérer les comptes (rechercher, suspendre)</a> ·
         <a href="{{ url_for('export_comptable') }}">📒 Comptabilité et export Excel</a> ·
+        <a href="{{ url_for('admin_support') }}">📨 Demandes{% if demandes_support %} <span class="badge badge-epuise">{{ demandes_support }}</span>{% endif %}</a> ·
         <a href="{{ url_for('admin_verifications') }}">✅ Vérifications{% if verifications %} <span class="badge badge-attente">{{ verifications }}</span>{% endif %}</a> ·
         <a href="{{ url_for('admin_signalements') }}">🚩 Signalements{% if signalements %} <span class="badge badge-epuise">{{ signalements }}</span>{% endif %}</a>
     </div>

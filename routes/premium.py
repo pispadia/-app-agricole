@@ -126,12 +126,14 @@ def admin():
     suspendus = connexion_bd.execute("SELECT COUNT(*) AS n FROM utilisateurs WHERE suspendu = 1").fetchone()["n"]
     signalements = connexion_bd.execute(
         "SELECT COUNT(DISTINCT recolte_id) AS n FROM signalements WHERE statut = 'ouvert'").fetchone()["n"]
+    demandes_support = connexion_bd.execute(
+        "SELECT COUNT(*) AS n FROM demandes_support WHERE statut = 'ouverte'").fetchone()["n"]
     verifications = connexion_bd.execute(
         "SELECT COUNT(*) AS n FROM utilisateurs WHERE verification = 'en_attente'").fetchone()["n"]
     connexion_bd.close()
     return render_template("admin.html", paiements=paiements_en_attente, commissions=commissions_dues,
                            totaux=totaux, taux_commission=TAUX_COMMISSION,
-                           comptes=comptes, commandes=commandes, suspendus=suspendus, signalements=signalements, verifications=verifications,
+                           comptes=comptes, commandes=commandes, suspendus=suspendus, signalements=signalements, verifications=verifications, demandes_support=demandes_support,
                            a_reverser=a_reverser, a_rembourser=a_rembourser)
 
 

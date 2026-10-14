@@ -61,7 +61,7 @@
     <p>La plateforme utilise uniquement un cookie de session, indispensable pour rester connecté et mémoriser ta langue et ton panier. Pas de cookie publicitaire ni de traceur de mesure d'audience.</p>
 
     <h2>8. Tes droits</h2>
-    <p>Tu peux à tout moment demander l'accès à tes données, leur correction, leur suppression, ou t'opposer à leur utilisation, {% if email_contact %}en écrivant à <a href="mailto:{{ email_contact }}">{{ email_contact }}</a>{% else %}en contactant l'équipe App Agricole{% endif %}. Tu peux modifier la plupart de tes informations et supprimer ton compte dans « Mon profil » et désactiver les notifications à tout moment. Tu peux aussi saisir la Commission de protection des données personnelles du Sénégal (CDP, <a href="https://www.cdp.sn" target="_blank" rel="noopener">cdp.sn</a>).</p>
+    <p>Tu peux à tout moment demander l'accès à tes données, leur correction, leur suppression, ou t'opposer à leur utilisation, {% if email_contact %}en écrivant à <a href="mailto:{{ email_contact }}">{{ email_contact }}</a>{% else %}via le <a href="{{ url_for('contact') }}">formulaire de contact</a>{% endif %}. Tu peux modifier la plupart de tes informations et supprimer ton compte dans « Mon profil » et désactiver les notifications à tout moment. Tu peux aussi saisir la Commission de protection des données personnelles du Sénégal (CDP, <a href="https://www.cdp.sn" target="_blank" rel="noopener">cdp.sn</a>).</p>
 
     <h2>9. Modifications</h2>
     <p>Cette politique peut évoluer ; la date de mise à jour figure en haut de la page. Voir aussi les <a href="{{ url_for('conditions') }}">conditions générales d'utilisation</a>.</p>

@@ -53,7 +53,7 @@
     <p>Un agriculteur peut demander le badge « Agriculteur vérifié » en envoyant la photo d'une pièce d'identité. Le badge signifie seulement que le nom du compte correspond à la pièce présentée ; il ne garantit pas les produits. La photo est supprimée dès la décision (voir la <a href="{{ url_for('confidentialite') }}">politique de confidentialité</a>).</p>
 
     <h2>9. Responsabilité</h2>
-    <p>La plateforme fait son possible pour rester disponible et sûre, sans pouvoir garantir l'absence d'interruption. Elle n'est pas responsable des litiges entre acheteurs et vendeurs, mais peut aider à les résoudre : écris-nous à l'adresse ci-dessous. Chaque utilisateur reste responsable de ses annonces, messages et engagements.</p>
+    <p>La plateforme fait son possible pour rester disponible et sûre, sans pouvoir garantir l'absence d'interruption. Elle n'est pas responsable des litiges entre acheteurs et vendeurs, mais peut aider à les résoudre : utilise « Signaler un problème » sur la commande ou le <a href="{{ url_for('contact') }}">formulaire de contact</a>. Chaque utilisateur reste responsable de ses annonces, messages et engagements.</p>
 
     <h2>10. Fin du compte</h2>
     <p>Tu peux supprimer ton compte à tout moment depuis « Mon profil ». Les commandes en cours doivent d'abord être terminées ou annulées, et les commissions dues réglées.</p>
@@ -65,6 +65,6 @@
     <p>Ces conditions sont soumises au droit sénégalais. En cas de litige, une solution amiable est recherchée en priorité ; à défaut, les tribunaux de Dakar sont compétents.</p>
 
     <h2>Contact</h2>
-    <p>{% if email_contact %}Pour toute question : <a href="mailto:{{ email_contact }}">{{ email_contact }}</a>.{% else %}Pour toute question, contacte l'équipe App Agricole.{% endif %}</p>
+    <p>{% if email_contact %}Pour toute question : <a href="{{ url_for('contact') }}">formulaire de contact</a> ou <a href="mailto:{{ email_contact }}">{{ email_contact }}</a>.{% else %}Pour toute question, utilise le <a href="{{ url_for('contact') }}">formulaire de contact</a>.{% endif %}</p>
 </article>
 {% endblock %}

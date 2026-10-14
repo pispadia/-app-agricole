@@ -171,7 +171,7 @@ TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
-    "photos_recolte", "verifications", "parametres", "abonnements_push",
+    "photos_recolte", "verifications", "parametres", "abonnements_push", "demandes_support",
 )
 
 
@@ -515,6 +515,23 @@ def init_db():
             p256dh TEXT NOT NULL,
             auth TEXT NOT NULL,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    # Demandes envoyées à l'équipe (questions, problèmes sur une commande...) et réponses
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS demandes_support (
+            id {ID_AUTO},
+            utilisateur_id INTEGER,
+            nom TEXT NOT NULL,
+            email TEXT NOT NULL,
+            commande_id INTEGER,
+            categorie TEXT NOT NULL,
+            message TEXT NOT NULL,
+            statut TEXT NOT NULL DEFAULT 'ouverte',
+            reponse TEXT,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            date_reponse TEXT,
             FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
         )
     """)

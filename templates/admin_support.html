@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h1>📨 Demandes et litiges</h1>
+    <p>
+        <a href="{{ url_for('admin_support') }}" class="btn btn-petit {{ '' if statut == 'ouverte' else 'btn-clair' }}">À traiter</a>
+        <a href="{{ url_for('admin_support', statut='traitee') }}" class="btn btn-petit {{ '' if statut == 'traitee' else 'btn-clair' }}">Traitées</a>
+        <a href="{{ url_for('admin') }}" style="margin-left:8px;">← Administration</a>
+    </p>
+    {% for d in demandes %}
+        <div class="carte-recolte" style="display:block;">
+            <strong>N°{{ d.id }} · {{ categories.get(d.categorie, d.categorie) }}</strong>
+            <p style="margin:2px 0; font-size:0.9em; color:var(--discret);">{{ d.nom }} · <a href="mailto:{{ d.email }}">{{ d.email }}</a> · {{ d.date_creation | date_fr }}{% if not d.utilisateur_id %} · visiteur sans compte{% endif %}</p>
+            {% if d.commande_id %}
+                <p style="margin:4px 0; font-size:0.9em;">📦 Commande n°{{ d.commande_id }} : {{ d.nom_recolte }} · client {{ d.nom_client }} · vendeur {{ d.nom_agriculteur }} · statut {{ d.statut_commande }}</p>
+            {% endif %}
+            <p style="margin:8px 0; white-space:pre-wrap;">{{ d.message }}</p>
+            {% if d.statut == 'ouverte' %}
+                <form method="POST" action="{{ url_for('repondre_support', demande_id=d.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <textarea name="reponse" rows="3" placeholder="Ta réponse (envoyée par e-mail). Laisser vide pour classer sans réponse."></textarea>
+                    <button type="submit" style="width:auto;">Répondre et classer</button>
+                </form>
+            {% elif d.reponse %}
+                <div class="bulle bulle-moi" style="max-width:100%;"><strong>Réponse ({{ d.date_reponse }}) :</strong><div class="bulle-texte">{{ d.reponse }}</div></div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="vide">Aucune demande {{ 'à traiter' if statut == 'ouverte' else 'traitée' }}.</div>
+    {% endfor %}
+{% endblock %}
