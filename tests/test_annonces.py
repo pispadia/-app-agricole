@@ -180,3 +180,19 @@ def test_publication_avec_plusieurs_photos(client):
     n = connexion.execute("SELECT COUNT(*) AS n FROM photos_recolte WHERE recolte_id = 2").fetchone()["n"]
     connexion.close()
     assert n == 2
+
+
+def test_publication_envoyee_apres_coupure_reseau_repond_en_json(client):
+    connecter_agriculteur(client)
+    entete = {"X-Hors-Ligne": "1"}
+    reponse = client.post("/espace-agriculteur/nouvelle-recolte", headers=entete, content_type="multipart/form-data",
+                          data={"nom": "Niébé", "quantite": "80 kg", "prix": "700 FCFA / kg",
+                                "date_disponibilite": "2026-10-01", "localite": "Louga", "photo": photo_envoyee()})
+    assert reponse.status_code == 200 and reponse.get_json()["ok"] is True
+    reponse = client.post("/espace-agriculteur/nouvelle-recolte", headers=entete,
+                          data={"nom": "Niébé", "quantite": "beaucoup", "prix": "700 FCFA / kg",
+                                "date_disponibilite": "2026-10-01", "localite": "Louga"})
+    assert reponse.status_code == 400 and "quantité" in reponse.get_json()["erreur"]
+    with client.session_transaction() as session:
+        session.clear()
+    assert client.post("/espace-agriculteur/nouvelle-recolte", headers=entete, data={}).status_code == 401

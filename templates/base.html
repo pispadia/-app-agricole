@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block titre %}App Agricole{% endblock %}</title>
     {% block meta %}{% endblock %}
+    {% if session.get('role') == 'agriculteur' %}<meta name="csrf-token" content="{{ csrf_token() }}">{% endif %}
     <link rel="manifest" href="{{ url_for('manifeste') }}">
     <meta name="theme-color" content="#1f7a4d">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icones/apple-touch-icon.png') }}">
@@ -74,6 +75,7 @@
             <div>🌾 App Agricole · Sénégal</div>
         </div>
     </footer>
+    {% if session.get('role') == 'agriculteur' %}<script src="{{ url_for('static', filename='hors_ligne.js') }}" defer></script>{% endif %}
     <script>
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("{{ url_for('service_worker') }}");
