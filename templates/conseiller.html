@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block contenu %}
-    <h1>🤖 Conseiller agricole</h1>
+    <h1>🤖 {{ "Conseiller agricole" | t }}</h1>
     {% if not ia_active %}
         <div class="flash">L'assistant IA n'est pas encore activé sur App Agricole.</div>
     {% else %}
-        <p style="color:var(--discret);">Pose ta question sur tes cultures : maladie d'une plante, engrais, arrosage, semis, conservation des récoltes... Ajoute une photo de la plante si tu veux.</p>
+        <p style="color:var(--discret);">{{ "Pose ta question sur tes cultures : maladie d'une plante, engrais, arrosage, semis, conservation des récoltes... Ajoute une photo de la plante si tu veux." | t }}</p>
         <form method="POST" enctype="multipart/form-data" id="form-conseiller">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <textarea name="question" rows="4" maxlength="1000" placeholder="Ex : les feuilles de mes tomates jaunissent et ont des taches noires, que faire ?" required>{{ question }}</textarea>
             <label>Photo de la plante (facultatif)</label>
             <input type="file" name="photo" accept="image/*">
-            <button type="submit" id="bouton-conseiller">Demander conseil</button>
+            <button type="submit" id="bouton-conseiller">{{ "Demander conseil" | t }}</button>
         </form>
         <script>
             document.getElementById("form-conseiller").addEventListener("submit", () => {
@@ -27,5 +27,5 @@
             <p style="font-size:0.8em; color:var(--discret);">Réponse générée par une intelligence artificielle : elle peut se tromper. En cas de doute, demande à un technicien agricole (ANCAR, ISRA).</p>
         {% endif %}
     {% endif %}
-    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+    <p><a href="{{ url_for('espace_agriculteur') }}">{{ "← Retour à mon espace" | t }}</a></p>
 {% endblock %}

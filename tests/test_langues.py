@@ -48,3 +48,16 @@ def test_espace_agriculteur_en_wolof_et_langue_gardee_apres_deconnexion(client):
 
 def test_traductions_non_vides():
     assert all(texte.strip() for texte in WOLOF.values())
+
+
+def test_toutes_les_phrases_marquees_sont_traduites():
+    """Chaque texte marqué « | t » dans les templates a sa traduction en wolof."""
+    import glob
+    import re
+    manquantes = {
+        texte
+        for fichier in glob.glob("templates/**/*.html", recursive=True)
+        for texte in re.findall(r'"((?:[^"\\]|\\.)*)"\s*\|\s*t\b', open(fichier, encoding="utf-8").read())
+        if texte not in WOLOF
+    }
+    assert manquantes == set()
