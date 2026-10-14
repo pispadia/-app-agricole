@@ -84,6 +84,26 @@ def enregistrer_echec(connexion_bd, email):
     connexion_bd.commit()
 
 
+MESSAGE_COMPTE_SUSPENDU = "Ce compte est suspendu. Contacte l'administrateur de la plateforme."
+
+
+@app.before_request
+def deconnecter_compte_suspendu():
+    """Un compte suspendu pendant qu'il est connecté est déconnecté à sa requête suivante."""
+    if not utilisateur_connecte() or request.endpoint in (None, "static"):
+        return None
+    connexion_bd = get_connexion()
+    utilisateur = connexion_bd.execute(
+        "SELECT suspendu FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)
+    ).fetchone()
+    connexion_bd.close()
+    if utilisateur is not None and utilisateur["suspendu"]:
+        session.clear()
+        flash(MESSAGE_COMPTE_SUSPENDU)
+        return redirect(url_for("connexion"))
+    return None
+
+
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
     if request.method == "POST":
@@ -110,6 +130,10 @@ def connexion():
         connexion_bd.execute("DELETE FROM echecs_connexion WHERE email = ?", (cle_echecs,))
         connexion_bd.commit()
         connexion_bd.close()
+
+        if utilisateur["suspendu"]:
+            flash(MESSAGE_COMPTE_SUSPENDU)
+            return redirect(url_for("connexion"))
 
         session["utilisateur_id"] = utilisateur["id"]
         session["nom"] = utilisateur["nom"]

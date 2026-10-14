@@ -98,9 +98,15 @@ def admin():
             "SELECT COUNT(*) AS n FROM utilisateurs WHERE premium_jusqu_au >= ?",
             (date.today().isoformat(),)).fetchone()["n"],
     }
+    comptes = {ligne["role"]: ligne["n"] for ligne in connexion_bd.execute(
+        "SELECT role, COUNT(*) AS n FROM utilisateurs GROUP BY role").fetchall()}
+    commandes = {ligne["statut"]: ligne["n"] for ligne in connexion_bd.execute(
+        "SELECT statut, COUNT(*) AS n FROM commandes GROUP BY statut").fetchall()}
+    suspendus = connexion_bd.execute("SELECT COUNT(*) AS n FROM utilisateurs WHERE suspendu = 1").fetchone()["n"]
     connexion_bd.close()
     return render_template("admin.html", paiements=paiements_en_attente, commissions=commissions_dues,
-                           totaux=totaux, taux_commission=TAUX_COMMISSION)
+                           totaux=totaux, taux_commission=TAUX_COMMISSION,
+                           comptes=comptes, commandes=commandes, suspendus=suspendus)
 
 
 @app.route("/admin/paiements/<int:paiement_id>/<decision>", methods=["POST"])

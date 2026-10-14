@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Administration — comptes</h2>
+    <p><a href="{{ url_for('admin') }}">← Revenus et paiements</a></p>
+
+    <form method="GET" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" name="recherche" value="{{ recherche }}" placeholder="Nom, e-mail ou téléphone" style="flex:2; min-width:180px; margin:0;">
+        <select name="role" style="flex:1; min-width:120px; margin:0;">
+            <option value="">Tous les rôles</option>
+            {% for r in roles %}<option value="{{ r }}" {% if r == role_choisi %}selected{% endif %}>{{ r | capitalize }}</option>{% endfor %}
+        </select>
+        <button type="submit" style="width:auto;">Chercher</button>
+    </form>
+
+    <p style="color:#666;">{{ utilisateurs | length }} compte{{ 's' if utilisateurs | length > 1 }}{% if utilisateurs | length == limite %} (les {{ limite }} plus récents, affine ta recherche){% endif %}.</p>
+
+    {% for u in utilisateurs %}
+        <div class="carte-recolte" style="display:block;">
+            <strong>{{ u.nom }}</strong> — {{ u.role | capitalize }}
+            {% if u.suspendu %}<span class="badge badge-epuise">Suspendu</span>{% endif %}
+            {% if u.premium_jusqu_au and u.premium_jusqu_au >= aujourdhui %}<span class="badge badge-attente">⭐ Premium</span>{% endif %}<br>
+            {{ u.email }}{% if u.telephone %} · {{ u.telephone }}{% endif %}<br>
+            <span style="color:#666; font-size:0.9em;">
+                {% if u.role == 'client' %}{{ u.nb_achats }} commande{{ 's' if u.nb_achats > 1 }}{% endif %}
+                {% if u.role == 'agriculteur' %}{{ u.nb_ventes }} commande{{ 's' if u.nb_ventes > 1 }} reçue{{ 's' if u.nb_ventes > 1 }}{% endif %}
+            </span>
+            <form method="POST" action="{{ url_for('changer_suspension', utilisateur_id=u.id, action='reactiver' if u.suspendu else 'suspendre') }}" style="margin-top:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if u.suspendu %}
+                    <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em;">Réactiver</button>
+                {% else %}
+                    <button type="submit" style="width:auto; padding:6px 12px; font-size:0.85em; background-color:#a94442;" onclick="return confirm('Suspendre ce compte ?')">Suspendre</button>
+                {% endif %}
+            </form>
+        </div>
+    {% else %}
+        <p>Aucun compte trouvé.</p>
+    {% endfor %}
+{% endblock %}
