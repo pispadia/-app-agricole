@@ -1,0 +1,12 @@
+{% macro jours_meteo(jours, nombre=7) %}
+    <div class="meteo-jours">
+        {% for j in jours[:nombre] %}
+            <div class="meteo-jour">
+                <div class="meteo-nom">{{ "Auj." if loop.first else j.jour }}</div>
+                <div class="meteo-icone" title="{{ j.libelle }}">{{ j.icone }}</div>
+                <div><strong>{{ j.tmax }}°</strong> <span style="color:var(--discret);">{{ j.tmin }}°</span></div>
+                <div class="meteo-pluie">{% if j.pluie_mm %}💧 {{ j.pluie_mm }} mm{% else %}&nbsp;{% endif %}</div>
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}

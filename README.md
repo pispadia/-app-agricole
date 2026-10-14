@@ -61,6 +61,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 - **Carte des producteurs** : `/carte` place les annonces sur une carte du Sénégal (Leaflet, embarqué dans `static/leaflet`, fond OpenStreetMap) d'après leur localité (`localites.py`, ~80 villes et zones) ; bouton « Près de chez moi » qui liste les annonces les plus proches.
 - **Stock automatique** (`stock.py`) : à chaque livraison, la quantité livrée est retirée de l'annonce (kg, tonnes, grammes convertis ; sacs, pièces...) ; à zéro, l'annonce passe « épuisée ». Une commande plus grande que le stock est refusée. Si les unités ne se comparent pas, rien n'est modifié.
 - **Proposer un prix** : à la commande, le client peut proposer un prix ; l'agriculteur accepte ou fait une contre-offre, le client accepte ou propose à nouveau (notifications à chaque étape). La commande ne peut être confirmée qu'une fois le prix convenu, affiché sur le reçu.
+- **Météo agricole** (`meteo.py`, Open-Meteo gratuit et sans clé) : 7 jours de prévisions pour la localité de l'agriculteur (celle de sa dernière annonce, ou au choix) avec conseils (pluie, chaleur, vent), dans son espace et sur `/espace-agriculteur/meteo`. Gardée 3 h en mémoire.
 - **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`, une fois l'adresse confirmée par le lien reçu par e-mail : « Mon profil » > « Recevoir le lien de confirmation ») : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
 
 ## Organisation du code

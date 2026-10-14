@@ -1,0 +1,9 @@
+{% from "_meteo_jours.html" import jours_meteo %}
+<div class="carte" style="padding:16px 18px;">
+    <div class="titre-section" style="margin:0 0 8px;">
+        <h2 style="font-size:1.05em;">🌦️ Météo à {{ lieu }}</h2>
+        <a href="{{ url_for('meteo_agriculteur') }}">Détails et conseils →</a>
+    </div>
+    {{ jours_meteo(jours) }}
+    {% if conseils %}<p style="margin:10px 0 0; font-size:0.9em; color:#3d4b44;">{{ conseils[0] }}</p>{% endif %}
+</div>
