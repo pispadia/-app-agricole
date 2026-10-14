@@ -32,3 +32,13 @@ def test_accueil_redirige_un_utilisateur_connecte():
         session.update(utilisateur_id=1, nom="Test", role="client")
     reponse = client.get("/")
     assert reponse.status_code == 302 and reponse.headers["Location"].endswith("/tableau-de-bord")
+
+
+def test_dictee_vocale_chargee_partout(tmp_path, monkeypatch):
+    import database
+    from app import app
+    monkeypatch.setattr(database, "DB_NAME", str(tmp_path / "test.db"))
+    database.init_db()
+    page = app.test_client().get("/connexion").get_data(as_text=True)
+    assert "/static/dictee.js" in page
+    assert app.test_client().get("/static/dictee.js").status_code == 200
