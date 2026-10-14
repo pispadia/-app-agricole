@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h1>💾 Sauvegardes</h1>
+    <h3>Télécharger une copie maintenant</h3>
+    <p>Un fichier ZIP avec toutes les données (comptes, annonces, commandes, messages, paiements...). Garde-le en lieu sûr : il contient des données personnelles.</p>
+    <form method="POST" action="{{ url_for('telecharger_sauvegarde') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="case-a-cocher"><input type="checkbox" name="photos" value="1"> <span>Inclure les photos (fichier beaucoup plus lourd)</span></label>
+        <button type="submit">Télécharger la sauvegarde</button>
+    </form>
+
+    <h3>Sauvegarde automatique chaque nuit</h3>
+    <p>Une copie complète et chiffrée de la base est faite chaque nuit par GitHub Actions et gardée 30 jours
+       (onglet <em>Actions</em> du dépôt → « Sauvegarde de la base » → fichier en bas de la page).
+       Elle n'est active que si les secrets <code>DATABASE_URL</code> et <code>SAUVEGARDE_MOT_DE_PASSE</code> sont définis dans GitHub.</p>
+    <p><a href="{{ url_for('admin') }}">← Administration</a></p>
+{% endblock %}

@@ -1,0 +1,61 @@
+name: Sauvegarde de la base
+
+# Chaque nuit à 2 h (heure de Dakar = UTC) : copie complète de la base PostgreSQL (pg_dump),
+# chiffrée avec un mot de passe, gardée 30 jours dans l'onglet Actions du dépôt.
+# Le dépôt est public : la sauvegarde est TOUJOURS chiffrée, sinon n'importe qui pourrait la lire.
+# Secrets à définir dans GitHub (Settings > Secrets and variables > Actions) :
+# - DATABASE_URL : même valeur que sur Render (adresse de la base Supabase)
+# - SAUVEGARDE_MOT_DE_PASSE : long mot de passe, à garder aussi en lieu sûr (sans lui, la
+#   sauvegarde est illisible)
+# Restaurer : gpg --decrypt sauvegarde.dump.gpg > sauvegarde.dump
+#             pg_restore --no-owner --no-privileges -d "<adresse de la base>" sauvegarde.dump
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier les secrets
+        id: secrets
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SAUVEGARDE_MOT_DE_PASSE: ${{ secrets.SAUVEGARDE_MOT_DE_PASSE }}
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$SAUVEGARDE_MOT_DE_PASSE" ]; then
+            echo "Secrets DATABASE_URL et SAUVEGARDE_MOT_DE_PASSE non définis : rien à faire."
+            echo "actif=non" >> "$GITHUB_OUTPUT"
+          else
+            echo "actif=oui" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Installer pg_dump 17 (compatible avec les versions récentes de PostgreSQL)
+        if: steps.secrets.outputs.actif == 'oui'
+        run: |
+          sudo apt-get install -y -q postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -q postgresql-client-17
+
+      - name: Sauvegarder et chiffrer
+        if: steps.secrets.outputs.actif == 'oui'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SAUVEGARDE_MOT_DE_PASSE: ${{ secrets.SAUVEGARDE_MOT_DE_PASSE }}
+        run: |
+          set -o pipefail
+          FICHIER="sauvegarde-$(date -u +%Y-%m-%d).dump.gpg"
+          /usr/lib/postgresql/17/bin/pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL" \
+            | gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase-fd 3 -o "$FICHIER" 3<<< "$SAUVEGARDE_MOT_DE_PASSE"
+          ls -lh "$FICHIER"
+          echo "FICHIER=$FICHIER" >> "$GITHUB_ENV"
+
+      - name: Garder la sauvegarde 30 jours
+        if: steps.secrets.outputs.actif == 'oui'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FICHIER }}
+          path: ${{ env.FICHIER }}
+          retention-days: 30
+          if-no-files-found: error
