@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_etoiles.html" import etoiles %}
+{% block contenu %}
+    <h2>📊 Mes statistiques</h2>
+
+    <div class="carte-recolte" style="display:block;">
+        Chiffre d'affaires (commandes livrées) : <strong>{{ ventes.chiffre_affaires }} FCFA</strong><br>
+        Commandes reçues : <strong>{{ total }}</strong>
+        — {{ par_statut.get('livree', 0) }} livrées · {{ par_statut.get('confirmee', 0) }} confirmées ·
+        {{ par_statut.get('en_attente', 0) }} en attente · {{ par_statut.get('annulee', 0) }} annulées<br>
+        {% if taux_acceptation is not none %}Taux d'acceptation : <strong>{{ taux_acceptation }} %</strong><br>{% endif %}
+        Note des clients :
+        {% if notes and notes.nb_avis %}{{ etoiles(notes.note_moyenne, notes.nb_avis) }}{% else %}pas encore d'avis{% endif %}
+    </div>
+
+    {% if premium %}
+        <h3>Ventes des 12 derniers mois</h3>
+        <div class="graphique">
+            {% for m in mois %}
+                <div class="graphique-ligne">
+                    <span class="graphique-mois">{{ m.libelle }}</span>
+                    <span class="graphique-barre"><span style="width: {{ m.pourcentage }}%;"></span></span>
+                    <span class="graphique-valeur">{{ m.montant }} F{% if m.ventes %} · {{ m.ventes }}{% endif %}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <h3>Produits les plus demandés</h3>
+        {% if produits %}
+            <div style="overflow-x:auto;">
+                <table class="tableau">
+                    <tr><th>Produit</th><th>Commandes</th><th>Livrées</th><th>Ventes</th></tr>
+                    {% for p in produits %}
+                        <tr><td>{{ p.nom }}</td><td>{{ p.commandes }}</td><td>{{ p.livrees }}</td><td>{{ p.montant }} FCFA</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% else %}
+            <p>Pas encore de commande.</p>
+        {% endif %}
+    {% else %}
+        <div class="flash">
+            ⭐ Avec <strong>Premium</strong>, vois tes ventes mois par mois et tes produits les plus demandés.
+            <a href="{{ url_for('premium') }}">Passer Premium</a>
+        </div>
+    {% endif %}
+
+    <p><a href="{{ url_for('espace_agriculteur') }}">{{ "← Retour à mon espace" | t }}</a></p>
+{% endblock %}

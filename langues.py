@@ -51,6 +51,7 @@ WOLOF = {
     "Voir mes commandes reçues": "Xool ndigal yi ma jot",
     "Acheter semences / pépinières": "Jënd jiwu",
     "Financement": "Xaalis",
+    "Mes statistiques": "Samay limu jaay",
     "Mes récoltes publiées": "Samay ngóob yi ma siiwal",
     "Disponible": "Am na",
     "Épuisé": "Jeex na",
