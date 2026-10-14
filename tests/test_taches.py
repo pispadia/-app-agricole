@@ -57,13 +57,13 @@ def appeler(client, jeton="secret"):
 
 def test_rappels_envoyes_une_seule_fois(client, envois):
     reponse = appeler(client)
-    assert reponse.get_json() == {"rappels": 3}
+    assert reponse.get_json()["rappels"] == 3
     sujets = sorted(sujet for _, sujet in envois)
     assert sujets == ["Ta réservation de Arachide est prête", "Ton abonnement Premium se termine bientôt",
                       "Une commande de Arachide attend ta réponse"]
     assert sorted(dest for dest, _ in envois) == ["a@x.sn", "a@x.sn", "f@x.sn"]
     envois.clear()
-    assert appeler(client).get_json() == {"rappels": 0}
+    assert appeler(client).get_json()["rappels"] == 0
     assert envois == []
 
 

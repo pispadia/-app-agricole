@@ -697,6 +697,9 @@ def init_db():
         ("recoltes", "promo_pourcent", "INTEGER"),
         ("recoltes", "promo_jusqu_au", "TEXT"),
         ("commandes", "prix_promo", "TEXT"),
+        # Rapport mensuel de l'agriculteur : envoyé par e-mail (désactivable), dernier mois envoyé
+        ("utilisateurs", "rapport_mensuel", "INTEGER NOT NULL DEFAULT 1"),
+        ("utilisateurs", "rapport_envoye_pour", "TEXT"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:
