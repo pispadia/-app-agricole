@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block titre %}Politique de confidentialité · App Agricole{% endblock %}
+{% block contenu %}
+<article class="texte-legal">
+    <h1>Politique de confidentialité</h1>
+    <p class="sous-titre">Dernière mise à jour : {{ mise_a_jour }}</p>
+
+    <p>Cette politique explique quelles données personnelles App Agricole{% if editeur %} (éditée par {{ editeur }}){% endif %} collecte, pourquoi, avec qui elles sont partagées et quels sont tes droits, conformément à la loi sénégalaise n° 2008-12 du 25 janvier 2008 sur la protection des données à caractère personnel.</p>
+
+    <h2>1. Données collectées</h2>
+    <ul>
+        <li><strong>Compte</strong> : nom, adresse e-mail, mot de passe (enregistré chiffré, jamais lisible), rôle, numéro de téléphone (facultatif), date d'inscription.</li>
+        <li><strong>Annonces et produits</strong> : description, prix, quantités, localité, photos.</li>
+        <li><strong>Commandes</strong> : produits commandés, quantités, mode et adresse de livraison, montants, statut, reçus.</li>
+        <li><strong>Messages</strong> échangés sur la plateforme, <strong>avis</strong> et <strong>signalements</strong>.</li>
+        <li><strong>Paiements</strong> : référence et montant des paiements Wave. Nous ne recevons ni ne conservons jamais ton code Wave ou tes données bancaires.</li>
+        <li><strong>Vérification d'identité</strong> (agriculteurs volontaires) : photo de la pièce d'identité, <strong>supprimée dès que la vérification est validée ou refusée</strong>. Seul le résultat (vérifié ou non) est conservé.</li>
+        <li><strong>Notifications</strong> : si tu les actives, l'adresse technique de ton téléphone ou navigateur fournie par son service de notifications.</li>
+        <li><strong>Sécurité</strong> : adresse IP et tentatives de connexion, conservées peu de temps pour bloquer les abus.</li>
+    </ul>
+
+    <h2>2. Pourquoi nous les utilisons</h2>
+    <ul>
+        <li>Faire fonctionner la plateforme : comptes, annonces, commandes, livraison, paiements, messagerie, reçus.</li>
+        <li>Te prévenir : e-mails, SMS ou notifications (nouvelle commande, changement de statut, alertes produits que tu as créées, rappels).</li>
+        <li>Assurer la confiance et la sécurité : avis, modération, vérification d'identité, lutte contre la fraude.</li>
+        <li>Tenir la comptabilité de la plateforme (commissions, abonnements) et établir des statistiques globales.</li>
+    </ul>
+    <p>Nous ne vendons pas tes données et n'en faisons pas de publicité ciblée.</p>
+
+    <h2>3. Ce que voient les autres utilisateurs</h2>
+    <ul>
+        <li>Les annonces (avec le nom du vendeur, sa note et son badge) sont publiques.</li>
+        <li>Ton numéro de téléphone et ton e-mail <strong>ne sont pas montrés</strong> aux autres utilisateurs : les échanges passent par la messagerie de la plateforme.</li>
+        <li>Pour une commande, l'agriculteur voit le nom du client et, en cas de livraison, l'adresse indiquée.</li>
+    </ul>
+
+    <h2>4. Prestataires</h2>
+    <p>Pour fonctionner, la plateforme fait appel à des prestataires qui traitent certaines données pour notre compte, uniquement pour ce service :</p>
+    <ul>
+        <li>Render (hébergement de l'application) et Supabase (base de données) ;</li>
+        <li>Brevo (envoi des e-mails) ;</li>
+        <li>Orange Sénégal / Sonatel (envoi des SMS) ;</li>
+        <li>Wave (paiements en ligne) ;</li>
+        <li>les services de notification de Google, Apple, Mozilla ou Microsoft, selon ton téléphone ou navigateur.</li>
+    </ul>
+    <p>Certains de ces prestataires hébergent les données hors du Sénégal ; nous choisissons des prestataires qui offrent des garanties de sécurité et de confidentialité.</p>
+
+    <h2>5. Durée de conservation</h2>
+    <ul>
+        <li>Données du compte : tant que le compte existe ; supprimées à ta demande.</li>
+        <li>Pièce d'identité : supprimée dès la décision de vérification.</li>
+        <li>Commandes, paiements et commissions : durée légale de conservation des pièces comptables (10 ans).</li>
+        <li>Données de sécurité (tentatives de connexion, limites d'envoi) : quelques heures à quelques jours.</li>
+    </ul>
+
+    <h2>6. Sécurité</h2>
+    <p>Connexion chiffrée (HTTPS), mots de passe chiffrés, accès à l'administration réservé à une équipe identifiée, protection contre les attaques courantes. Aucun système n'est infaillible : si une fuite de données te concernant survenait, tu en serais informé.</p>
+
+    <h2>7. Cookies</h2>
+    <p>La plateforme utilise uniquement un cookie de session, indispensable pour rester connecté et mémoriser ta langue et ton panier. Pas de cookie publicitaire ni de traceur de mesure d'audience.</p>
+
+    <h2>8. Tes droits</h2>
+    <p>Tu peux à tout moment demander l'accès à tes données, leur correction, leur suppression, ou t'opposer à leur utilisation, {% if email_contact %}en écrivant à <a href="mailto:{{ email_contact }}">{{ email_contact }}</a>{% else %}en contactant l'équipe App Agricole{% endif %}. Tu peux modifier la plupart de tes informations dans « Mon profil » et désactiver les notifications à tout moment. Tu peux aussi saisir la Commission de protection des données personnelles du Sénégal (CDP, <a href="https://www.cdp.sn" target="_blank" rel="noopener">cdp.sn</a>).</p>
+
+    <h2>9. Modifications</h2>
+    <p>Cette politique peut évoluer ; la date de mise à jour figure en haut de la page. Voir aussi les <a href="{{ url_for('conditions') }}">conditions générales d'utilisation</a>.</p>
+</article>
+{% endblock %}

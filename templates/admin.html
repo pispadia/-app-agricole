@@ -69,7 +69,7 @@
                 <div>
                     <strong>{{ p.nom }}</strong> ({{ p.role }}, {{ p.email }}) — {{ p.montant }} FCFA<br>
                     Référence : <strong>{{ p.reference }}</strong>
-                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation }}</p>
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation | date_fr }}</p>
                     {% for decision, libelle, couleur in [("valider", "Valider", ""), ("refuser", "Refuser", "background-color:#a94442;")] %}
                         <form method="POST" action="{{ url_for('traiter_paiement', paiement_id=p.id, decision=decision) }}" style="display:inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

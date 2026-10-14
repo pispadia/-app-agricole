@@ -17,6 +17,11 @@
             <option value="financeur" {% if saisie.get('role') == 'financeur' %}selected{% endif %}>{{ "Organisme de financement" | t }}</option>
         </select>
 
+        <label class="case-a-cocher">
+            <input type="checkbox" name="conditions" required>
+            <span>J'accepte les <a href="{{ url_for('conditions') }}" target="_blank">conditions d'utilisation</a> et la <a href="{{ url_for('confidentialite') }}" target="_blank">politique de confidentialité</a>.</span>
+        </label>
+
         <button type="submit">{{ "S'inscrire" | t }}</button>
     </form>
 {% endblock %}

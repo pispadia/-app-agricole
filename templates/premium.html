@@ -1,40 +1,56 @@
 {% extends "base.html" %}
 {% block contenu %}
-    <h2>⭐ Premium</h2>
-
-    {% if fin_premium %}
-        <div class="carte-recolte" style="display:block;">
-            Tu es membre <strong>Premium</strong> jusqu'au <strong>{{ fin_premium.strftime('%d/%m/%Y') }}</strong>.
-            Tu peux renouveler à l'avance : les jours s'ajoutent à ton abonnement en cours.
+    <div class="entete-page">
+        <div>
+            <h1>⭐ Premium</h1>
+            <p>Paiement par Wave, sans abonnement automatique : tu prolonges quand tu veux.</p>
         </div>
-    {% endif %}
+    </div>
 
-    <h3>Ce que Premium t'apporte</h3>
-    <ul>
-        <li>💰 <strong>Financement</strong> : publier des demandes de financement et contacter les organismes (agriculteurs).</li>
-        <li>⭐ Un badge <strong>Pro</strong> sur tes annonces.</li>
-        <li>🔝 Tes annonces apparaissent <strong>en premier</strong> dans le catalogue.</li>
-    </ul>
+    <div class="carte" style="box-shadow:none;">
+        {% if fin_premium %}
+            ✅ Tu es membre <strong>Premium</strong> jusqu'au <strong>{{ fin_premium.strftime('%d/%m/%Y') }}</strong>.
+            Tu peux renouveler à l'avance : les jours s'ajoutent à ton abonnement en cours.
+        {% else %}
+            Tu es sur l'offre gratuite : annonces, commandes et messagerie sans limite.
+        {% endif %}
+    </div>
 
-    <h3>S'abonner : {{ prix }} FCFA pour {{ duree }} jours</h3>
-    {% if wave_actif %}
-        <form method="POST" action="{{ url_for('payer_premium_wave') }}">
+    <div class="offre" style="border:2px solid var(--vert);">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+            <strong style="font-size:1.15em; color:var(--sombre);">Premium</strong>
+            <span class="etiquette">{{ duree }} jours</span>
+        </div>
+        <ul>
+            <li>Tes annonces apparaissent <strong>en premier</strong> dans le catalogue</li>
+            <li>Un badge <strong>⭐ Pro</strong> sur tes annonces</li>
+            <li><strong>Statistiques détaillées</strong> : ventes mois par mois, produits les plus demandés</li>
+            <li><strong>Financement</strong> : demandes de financement et contact des organismes</li>
+        </ul>
+        <div class="prix-offre">{{ "{:,}".format(prix).replace(",", " ") }} FCFA <small>/ {{ duree }} jours</small></div>
+        {% if wave_actif %}
+            <form method="POST" action="{{ url_for('payer_premium_wave') }}" style="margin-top:14px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit">Payer avec Wave</button>
+            </form>
+            <p style="color:var(--discret); font-size:0.88em; margin:4px 0 0;">Activation immédiate après le paiement.</p>
+        {% endif %}
+    </div>
+
+    <details class="carte" style="box-shadow:none; margin-top:16px;" {% if not wave_actif %}open{% endif %}>
+        <summary style="cursor:pointer; font-weight:600;">{% if wave_actif %}Payer autrement (Orange Money, Wave manuel){% else %}Comment payer{% endif %}</summary>
+        <ol>
+            <li>Envoie <strong>{{ prix }} FCFA</strong> par Wave ou Orange Money
+                {% if numero_paiement %}au <strong>{{ numero_paiement }}</strong>{% else %}(numéro communiqué par l'équipe){% endif %}.</li>
+            <li>Indique ci-dessous la <strong>référence de la transaction</strong> reçue par SMS.</li>
+            <li>Ton abonnement est activé dès vérification du paiement.</li>
+        </ol>
+        <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" style="background-color:#1dc8f2;">Payer {{ prix }} FCFA avec Wave</button>
+            <input type="text" name="reference" placeholder="Référence du paiement (ex: WAVE-123456)" maxlength="100" required>
+            <button type="submit" class="btn-sombre">J'ai payé, activer mon abonnement</button>
         </form>
-        <p style="color:#666; font-size:0.9em;">Activation immédiate après le paiement. Autre moyen de paiement (Orange Money…) :</p>
-    {% endif %}
-    <ol>
-        <li>Envoie <strong>{{ prix }} FCFA</strong> par Wave ou Orange Money
-            {% if numero_paiement %}au <strong>{{ numero_paiement }}</strong>{% else %}(numéro communiqué par l'équipe){% endif %}.</li>
-        <li>Indique ci-dessous la <strong>référence de la transaction</strong> reçue par SMS.</li>
-        <li>Ton abonnement est activé dès vérification du paiement.</li>
-    </ol>
-    <form method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="text" name="reference" placeholder="Référence du paiement (ex: WAVE-123456)" maxlength="100" required>
-        <button type="submit">J'ai payé, activer mon abonnement</button>
-    </form>
+    </details>
 
     {% if paiements %}
         <h3>Mes paiements</h3>
@@ -45,7 +61,7 @@
                     {% if p.statut == 'valide' %}<span class="badge badge-dispo">Validé</span>
                     {% elif p.statut == 'refuse' %}<span class="badge badge-epuise">Refusé</span>
                     {% else %}<span class="badge badge-attente">En vérification</span>{% endif %}
-                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation }}</p>
+                    <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation | date_fr }}</p>
                 </div>
             </div>
         {% endfor %}

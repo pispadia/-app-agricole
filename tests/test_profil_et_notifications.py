@@ -105,18 +105,18 @@ def test_client_notifie_quand_le_statut_change(client):
 
     en_tant_que(client, 2, "client")
     client.post("/commander/1", data={"quantite_demandee": "20 kg"})
-    assert "badge-epuise\" style=\"margin-left:2px;\">" not in client.get("/espace-client").get_data(as_text=True)
+    assert "badge badge-epuise badge-menu\">" not in client.get("/espace-client").get_data(as_text=True)
 
     en_tant_que(client, 1, "agriculteur")
     client.post("/espace-agriculteur/commandes/1/statut", data={"statut": "confirmee"})
 
     en_tant_que(client, 2, "client")
     page = client.get("/espace-client").get_data(as_text=True)
-    assert "badge-epuise\" style=\"margin-left:2px;\">1<" in page  # badge 🔔 du menu
+    assert "badge badge-epuise badge-menu\">1<" in page  # badge 🔔 du menu
     page = client.get("/notifications").get_data(as_text=True)
     assert "Confirmée" in page and "Nouveau" in page
     # Une fois vue, la notification disparaît
-    assert "badge-epuise\" style=\"margin-left:2px;\">" not in client.get("/espace-client").get_data(as_text=True)
+    assert "badge badge-epuise badge-menu\">" not in client.get("/espace-client").get_data(as_text=True)
 
 
 def test_agriculteur_notifie_quand_le_client_annule(client):
@@ -135,4 +135,4 @@ def test_agriculteur_notifie_quand_le_client_annule(client):
     en_tant_que(client, 2, "client")
     client.post("/mes-commandes/1/annuler")
     en_tant_que(client, 1, "agriculteur")
-    assert "badge-epuise\" style=\"margin-left:2px;\">1<" in client.get("/espace-agriculteur").get_data(as_text=True)
+    assert "badge badge-epuise badge-menu\">1<" in client.get("/espace-agriculteur").get_data(as_text=True)

@@ -187,6 +187,9 @@ def tableau_de_bord():
         return redirect(url_for("connexion"))
 
     role = session["role"]
+    # Agriculteurs et clients : leur espace sert de tableau de bord (chiffres et raccourcis)
+    if role in ("agriculteur", "client"):
+        return redirect(url_for(f"espace_{role}"))
     utilisateur_id = session["utilisateur_id"]
     connexion_bd = get_connexion()
     stats = {}

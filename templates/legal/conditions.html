@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titre %}Conditions d'utilisation · App Agricole{% endblock %}
+{% block contenu %}
+<article class="texte-legal">
+    <h1>Conditions générales d'utilisation</h1>
+    <p class="sous-titre">Dernière mise à jour : {{ mise_a_jour }}</p>
+
+    <h2>1. Objet</h2>
+    <p>App Agricole (ci-après « la plateforme »){% if editeur %}, éditée par {{ editeur }},{% endif %} met en relation au Sénégal des agriculteurs qui vendent leurs récoltes, des clients qui les achètent, des fournisseurs de semences et de plants, et des organismes de financement. Les présentes conditions fixent les règles d'utilisation de la plateforme. En créant un compte, tu les acceptes.</p>
+
+    <h2>2. Rôle de la plateforme</h2>
+    <p>App Agricole est un <strong>intermédiaire</strong> : la vente est conclue directement entre l'agriculteur (vendeur) et le client (acheteur). La plateforme n'est ni propriétaire ni vendeur des produits. Elle ne garantit pas la qualité, la quantité ou la conformité des produits, qui relèvent de la responsabilité du vendeur. Elle agit toutefois pour la confiance de tous : avis clients, badge « Agriculteur vérifié », signalements et modération.</p>
+
+    <h2>3. Compte</h2>
+    <ul>
+        <li>L'inscription est gratuite. Tu dois fournir des informations exactes et garder ton mot de passe secret.</li>
+        <li>Un compte est personnel. Tu es responsable de ce qui est fait avec ton compte.</li>
+        <li>Tu dois avoir au moins 18 ans, ou l'accord de ton représentant légal.</li>
+    </ul>
+
+    <h2>4. Annonces des agriculteurs</h2>
+    <ul>
+        <li>L'annonce doit décrire honnêtement le produit : nom, quantité, prix, localité, date de disponibilité, photos réelles.</li>
+        <li>Une récolte « à venir » (pré-commande) doit être réellement prévue à la date indiquée.</li>
+        <li>Sont interdits : produits illégaux ou dangereux, produits qui ne t'appartiennent pas, fausses annonces, prix trompeurs, numéros de téléphone ou adresses e-mail dans les annonces et messages (les échanges passent par la plateforme).</li>
+        <li>L'agriculteur s'engage à répondre aux commandes dans un délai raisonnable et à prévenir le client en cas d'empêchement.</li>
+    </ul>
+
+    <h2>5. Commandes, livraison et paiement</h2>
+    <ul>
+        <li>Le client passe commande sur la plateforme ; l'agriculteur la confirme ou la refuse. Le client peut annuler tant que la commande est en attente.</li>
+        <li>Retrait chez le producteur ou livraison : les frais et la date de livraison sont fixés par l'agriculteur à la confirmation.</li>
+        <li><strong>Paiement à la livraison</strong> : le client paie directement l'agriculteur.</li>
+        <li><strong>Paiement en ligne avec Wave</strong> : le client paie la plateforme, qui conserve la commission et reverse le reste à l'agriculteur après la livraison. Si la commande est annulée après paiement, le client est remboursé.</li>
+        <li>Un reçu est disponible pour chaque commande livrée.</li>
+    </ul>
+
+    <h2>6. Commission et Premium</h2>
+    <ul>
+        <li>Sur chaque vente livrée, la plateforme perçoit une commission de <strong>{{ taux_commission }} %</strong> du montant de la vente, à la charge de l'agriculteur. Elle est retenue d'office en cas de paiement en ligne ; sinon l'agriculteur la règle à la plateforme.</li>
+        <li>L'abonnement Premium coûte <strong>{{ prix_premium }} FCFA pour {{ duree_premium }} jours</strong>, sans renouvellement automatique. Il donne accès à des fonctions supplémentaires (mise en avant, statistiques détaillées...). Un abonnement commencé n'est pas remboursable, sauf erreur de la plateforme.</li>
+        <li>Le parrainage peut offrir des mois de Premium selon les règles affichées dans l'application.</li>
+    </ul>
+
+    <h2>7. Avis, signalements et modération</h2>
+    <ul>
+        <li>Seul un client ayant reçu sa commande peut laisser un avis. L'avis doit être sincère et respectueux.</li>
+        <li>Tout utilisateur peut signaler une annonce. Une annonce signalée plusieurs fois est masquée en attendant l'examen de l'équipe.</li>
+        <li>La plateforme peut retirer un contenu, masquer une annonce ou suspendre un compte qui ne respecte pas ces conditions ou la loi, en particulier en cas de fraude.</li>
+    </ul>
+
+    <h2>8. Vérification d'identité</h2>
+    <p>Un agriculteur peut demander le badge « Agriculteur vérifié » en envoyant la photo d'une pièce d'identité. Le badge signifie seulement que le nom du compte correspond à la pièce présentée ; il ne garantit pas les produits. La photo est supprimée dès la décision (voir la <a href="{{ url_for('confidentialite') }}">politique de confidentialité</a>).</p>
+
+    <h2>9. Responsabilité</h2>
+    <p>La plateforme fait son possible pour rester disponible et sûre, sans pouvoir garantir l'absence d'interruption. Elle n'est pas responsable des litiges entre acheteurs et vendeurs, mais peut aider à les résoudre : écris-nous à l'adresse ci-dessous. Chaque utilisateur reste responsable de ses annonces, messages et engagements.</p>
+
+    <h2>10. Fin du compte</h2>
+    <p>Tu peux demander la suppression de ton compte à tout moment en nous écrivant. Les commandes en cours doivent d'abord être terminées ou annulées, et les commissions dues réglées.</p>
+
+    <h2>11. Modification des conditions</h2>
+    <p>Ces conditions peuvent évoluer. La date de mise à jour figure en haut de la page ; en cas de changement important, les utilisateurs en sont informés.</p>
+
+    <h2>12. Droit applicable</h2>
+    <p>Ces conditions sont soumises au droit sénégalais. En cas de litige, une solution amiable est recherchée en priorité ; à défaut, les tribunaux de Dakar sont compétents.</p>
+
+    <h2>Contact</h2>
+    <p>{% if email_contact %}Pour toute question : <a href="mailto:{{ email_contact }}">{{ email_contact }}</a>.{% else %}Pour toute question, contacte l'équipe App Agricole.{% endif %}</p>
+</article>
+{% endblock %}

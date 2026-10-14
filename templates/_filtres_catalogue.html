@@ -1,6 +1,6 @@
 {# Filtres du catalogue (espace client et catalogue public) #}
-    <form method="GET">
-        <input type="text" name="recherche" placeholder="Rechercher un produit ou mot-clé" value="{{ recherche }}">
+    <form method="GET" class="filtres">
+        <input type="text" name="recherche" placeholder="🔍 Rechercher un produit (mil, oignon...)" value="{{ recherche }}">
         <select name="localite">
             <option value="">Toutes les localités</option>
             {% for l in localites %}

@@ -1,27 +1,34 @@
 {% extends "base.html" %}
-{% from "_carte_annonce.html" import carte_annonce %}
+{% from "_carte_annonce.html" import carte_annonce with context %}
 {% block titre %}Récoltes à vendre au Sénégal · App Agricole{% endblock %}
 {% block meta %}
     <meta name="description" content="Achetez directement aux agriculteurs du Sénégal : mil, arachide, oignon, maïs... Prix du marché, livraison ou retrait, paiement Wave.">
 {% endblock %}
+{% block mise_en_page %}large{% endblock %}
 {% block contenu %}
-    <h2>🌾 Récoltes à vendre</h2>
-    <p style="color:#666;">Directement des agriculteurs du Sénégal. <a href="{{ url_for('prix_marche') }}">📈 Prix du marché</a></p>
+    <div class="entete-page">
+        <div>
+            <h1>🌾 Récoltes à vendre</h1>
+            <p>Directement des agriculteurs du Sénégal{% if recoltes %} · {{ recoltes | length }} annonce{{ 's' if recoltes | length > 1 }}{% endif %}</p>
+        </div>
+        <a class="btn btn-clair" href="{{ url_for('prix_marche') }}">📈 Prix du marché</a>
+    </div>
     {% include "_filtres_catalogue.html" %}
 
     {% if recoltes %}
-        <p style="color:#666;">{{ recoltes | length }} annonce{{ 's' if recoltes | length > 1 }}</p>
-        {% for recolte in recoltes %}
-            {{ carte_annonce(recolte, prix_courants.get(recolte.id)) }}
-        {% endfor %}
+        <div class="grille-annonces">
+            {% for recolte in recoltes %}
+                {{ carte_annonce(recolte, prix_courants.get(recolte.id), client=session.get('role') == 'client') }}
+            {% endfor %}
+        </div>
     {% else %}
-        <p>Aucune récolte ne correspond à ta recherche.</p>
+        <div class="vide">Aucune récolte ne correspond à ta recherche.</div>
     {% endif %}
 
     {% if not session.get('utilisateur_id') %}
-        <div class="carte-recolte" style="display:block; text-align:center;">
-            <strong>Tu es agriculteur ?</strong> Publie tes récoltes gratuitement.<br>
-            <a href="{{ url_for('inscription', role='agriculteur') }}"><button type="button" style="width:auto; margin-top:8px;">Je vends mes récoltes</button></a>
+        <div class="bandeau">
+            <div><strong>Tu es agriculteur ?</strong><p>Publie tes récoltes gratuitement et vends sans intermédiaire.</p></div>
+            <a class="btn" href="{{ url_for('inscription', role='agriculteur') }}">Je vends mes récoltes</a>
         </div>
     {% endif %}
 {% endblock %}

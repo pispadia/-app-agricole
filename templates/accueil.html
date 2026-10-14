@@ -1,37 +1,45 @@
 {% extends "base.html" %}
-{% from "_carte_annonce.html" import carte_annonce %}
+{% from "_carte_annonce.html" import carte_annonce with context %}
 {% block meta %}
     <meta name="description" content="App Agricole : les agriculteurs du Sénégal vendent leurs récoltes directement aux acheteurs. Prix du marché, livraison, paiement Wave.">
 {% endblock %}
+{% block mise_en_page %}large{% endblock %}
 {% block contenu %}
-    <h1>{{ "Bienvenue sur l'App Agricole" | t }}</h1>
-    <p>{{ "La plateforme qui connecte agriculteurs, clients et fournisseurs." | t }}</p>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="{{ url_for('inscription', role='agriculteur') }}" style="flex:1; min-width:150px;"><button>🌾 {{ "Je vends mes récoltes" | t }}</button></a>
-        <a href="{{ url_for('catalogue_public') }}" style="flex:1; min-width:150px;"><button>🛒 {{ "J'achète" | t }}</button></a>
-    </div>
-    <p style="text-align:center;">{{ "Déjà inscrit ?" | t }} <a href="{{ url_for('connexion') }}">{{ "Se connecter" | t }}</a></p>
+    <section class="hero">
+        <h1>{{ "Bienvenue sur l'App Agricole" | t }}</h1>
+        <p>{{ "La plateforme qui connecte agriculteurs, clients et fournisseurs." | t }} {{ "Achetez directement aux producteurs du Sénégal, au juste prix." | t }}</p>
+        <div class="groupe-boutons">
+            <a class="btn" href="{{ url_for('inscription', role='agriculteur') }}">🌾 {{ "Je vends mes récoltes" | t }}</a>
+            <a class="btn btn-clair" href="{{ url_for('catalogue_public') }}">🛒 {{ "J'achète" | t }}</a>
+        </div>
+        <p style="margin:16px 0 0; font-size:0.95em;">{{ "Déjà inscrit ?" | t }} <a href="{{ url_for('connexion') }}" style="color:#fff;">{{ "Se connecter" | t }}</a></p>
+    </section>
 
     {# Chiffres affichés seulement quand ils rassurent (au lancement, « 1 agriculteur » fait fuir) #}
     {% if chiffres.agriculteurs >= 10 %}
-    <div class="carte-recolte" style="display:flex; flex-direction:row; justify-content:space-around; text-align:center;">
-        <div><strong style="font-size:1.4em;">{{ chiffres.agriculteurs }}</strong><br>{{ "agriculteurs" | t }}</div>
-        <div><strong style="font-size:1.4em;">{{ chiffres.annonces }}</strong><br>{{ "annonces" | t }}</div>
-        <div><strong style="font-size:1.4em;">{{ chiffres.livraisons }}</strong><br>{{ "commandes livrées" | t }}</div>
+    <div class="tuiles">
+        <div class="tuile"><div class="tuile-icone">👩🏾‍🌾</div><div class="tuile-valeur">{{ chiffres.agriculteurs }}</div><div class="tuile-libelle">{{ "agriculteurs" | t }}</div></div>
+        <div class="tuile"><div class="tuile-icone icone-ambre">🌾</div><div class="tuile-valeur">{{ chiffres.annonces }}</div><div class="tuile-libelle">{{ "annonces" | t }}</div></div>
+        <div class="tuile"><div class="tuile-icone icone-bleu">🚚</div><div class="tuile-valeur">{{ chiffres.livraisons }}</div><div class="tuile-libelle">{{ "commandes livrées" | t }}</div></div>
     </div>
     {% endif %}
 
     {% if recoltes %}
-        <h3>{{ "Dernières récoltes" | t }}</h3>
-        {% for recolte in recoltes %}
-            {{ carte_annonce(recolte) }}
-        {% endfor %}
-        <p style="text-align:center;"><a href="{{ url_for('catalogue_public') }}">{{ "Voir toutes les récoltes" | t }} →</a></p>
+        <div class="titre-section">
+            <h2>{{ "Dernières récoltes" | t }}</h2>
+            <a href="{{ url_for('catalogue_public') }}">{{ "Voir toutes les récoltes" | t }} →</a>
+        </div>
+        <div class="grille-annonces">
+            {% for recolte in recoltes %}
+                {{ carte_annonce(recolte) }}
+            {% endfor %}
+        </div>
     {% endif %}
 
-    <h3>{{ "Comment ça marche" | t }}</h3>
-    <p>1. {{ "L'agriculteur publie sa récolte (gratuit)." | t }}<br>
-       2. {{ "Le client commande ou réserve, en retrait ou en livraison." | t }}<br>
-       3. {{ "Paiement à la livraison ou avec Wave." | t }}</p>
+    <div class="titre-section"><h2>{{ "Comment ça marche" | t }}</h2></div>
+    <div class="etapes">
+        <div class="etape"><div class="etape-numero">1</div><strong>{{ "Publication" | t }}</strong><p style="margin:4px 0 0; color:var(--discret);">{{ "L'agriculteur publie sa récolte (gratuit)." | t }}</p></div>
+        <div class="etape"><div class="etape-numero">2</div><strong>{{ "Commande" | t }}</strong><p style="margin:4px 0 0; color:var(--discret);">{{ "Le client commande ou réserve, en retrait ou en livraison." | t }}</p></div>
+        <div class="etape"><div class="etape-numero">3</div><strong>{{ "Paiement" | t }}</strong><p style="margin:4px 0 0; color:var(--discret);">{{ "Paiement à la livraison ou avec Wave." | t }}</p></div>
+    </div>
 {% endblock %}

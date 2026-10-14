@@ -6,271 +6,49 @@
     <title>{% block titre %}App Agricole{% endblock %}</title>
     {% block meta %}{% endblock %}
     <link rel="manifest" href="{{ url_for('manifeste') }}">
-    <meta name="theme-color" content="#2e7d32">
+    <meta name="theme-color" content="#1f7a4d">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icones/apple-touch-icon.png') }}">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-            background-color: #f4f7f2;
-            margin: 0;
-            padding: 0;
-            color: #222;
-            line-height: 1.5;
-        }
-        header {
-            background-color: #2e7d32;
-            color: white;
-            padding: 14px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-        }
-        header .logo {
-            font-size: 1.1em;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        header nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        header a {
-            color: white;
-            text-decoration: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.95em;
-            white-space: nowrap;
-        }
-        header a:hover {
-            background-color: rgba(255,255,255,0.15);
-        }
-        main {
-            padding: 20px 16px 60px;
-        }
-        .conteneur {
-            max-width: 640px;
-            margin: 0 auto;
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-        h1, h2, h3 {
-            color: #1b4d1e;
-            margin-top: 0;
-        }
-        input, select, textarea, button {
-            width: 100%;
-            padding: 12px;
-            margin: 6px 0;
-            border-radius: 8px;
-            border: 1px solid #d0d0d0;
-            font-family: inherit;
-            font-size: 1em;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #2e7d32;
-        }
-        label {
-            font-size: 0.9em;
-            color: #555;
-            margin-top: 10px;
-            display: block;
-        }
-        .carte-recolte {
-            border: 1px solid #e2e2e2;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 14px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            background: #fcfdfc;
-        }
-        .carte-recolte img {
-            width: 90px;
-            height: 90px;
-            object-fit: cover;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-        .carte-recolte > div {
-            flex: 1;
-            min-width: 200px;
-        }
-        .carte-recolte button {
-            width: auto;
-            padding: 8px 14px;
-            font-size: 0.85em;
-            margin: 4px 4px 0 0;
-        }
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.72em;
-            font-weight: bold;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
-        .conversation {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 15px 0;
-        }
-        .bulle {
-            align-self: flex-start;
-            max-width: 80%;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 8px 12px;
-            overflow-wrap: anywhere;
-        }
-        .bulle-texte {
-            white-space: pre-wrap;
-        }
-        .bulle-moi {
-            align-self: flex-end;
-            background-color: #dff0d8;
-            border-color: #c5e1b9;
-        }
-        .bulle-date {
-            font-size: 0.75em;
-            color: #999;
-            margin-top: 2px;
-        }
-        .tableau {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-        }
-        .tableau th, .tableau td {
-            text-align: left;
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        .graphique-ligne {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 4px 0;
-            font-size: 0.9em;
-        }
-        .graphique-mois {
-            width: 62px;
-            color: #666;
-        }
-        .graphique-barre {
-            flex: 1;
-            background-color: #eef3ec;
-            border-radius: 4px;
-            height: 14px;
-        }
-        .graphique-barre span {
-            display: block;
-            height: 100%;
-            background-color: #2e7d32;
-            border-radius: 4px;
-        }
-        .graphique-valeur {
-            width: 100px;
-            text-align: right;
-        }
-        .etoiles {
-            color: #f0a500;
-            letter-spacing: 1px;
-        }
-        .badge-dispo {
-            background-color: #dff0d8;
-            color: #2e7d32;
-        }
-        .badge-epuise {
-            background-color: #f8d7da;
-            color: #a94442;
-        }
-        .badge-attente {
-            background-color: #fff3cd;
-            color: #8a6d3b;
-        }
-        .badge-livree {
-            background-color: #d9edf7;
-            color: #31708f;
-        }
-        button {
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.15s;
-        }
-        button:hover {
-            background-color: #256428;
-        }
-        .flash {
-            background: #fff3cd;
-            color: #6d5300;
-            padding: 12px 14px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 0.95em;
-        }
-        a {
-            color: #2e7d32;
-        }
-        @media (max-width: 480px) {
-            header {
-                justify-content: center;
-                text-align: center;
-            }
-            .conteneur {
-                padding: 18px;
-                border-radius: 8px;
-            }
-            main {
-                padding: 14px 10px 50px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
 </head>
 <body>
-    <header>
-        <div class="logo">🌾 App Agricole</div>
-        <nav>
-            <a href="{{ url_for('accueil') }}">{{ "Accueil" | t }}</a>
+    {% set page = request.endpoint or '' %}
+    <header class="entete">
+        <div class="entete-interieur">
+            <a class="logo" href="{{ url_for('accueil') }}"><span class="logo-icone">🌾</span><span class="logo-texte">App Agricole</span></a>
+            <nav class="nav">
+                {% if session.get('utilisateur_id') %}
+                    {% set espaces = {'agriculteur': 'espace_agriculteur', 'client': 'espace_client', 'fournisseur': 'espace_fournisseur', 'financeur': 'espace_financeur'} %}
+                    <a href="{{ url_for('tableau_de_bord') }}" class="{{ 'actif' if page in ('tableau_de_bord', espaces.get(session.get('role'))) }}">{{ "Accueil" | t }}</a>
+                    {% if session.get('role') == 'agriculteur' %}<a href="{{ url_for('commandes_recues') }}" class="{{ 'actif' if page == 'commandes_recues' }}">{{ "Commandes" | t }}</a>{% endif %}
+                    {% if session.get('role') == 'client' %}<a href="{{ url_for('mes_commandes') }}" class="{{ 'actif' if page == 'mes_commandes' }}">{{ "Commandes" | t }}</a>{% endif %}
+                    <a href="{{ url_for('catalogue_public') }}" class="{{ 'actif' if page == 'catalogue_public' }}">{{ "Récoltes" | t }}</a>
+                    <a href="{{ url_for('prix_marche') }}" class="{{ 'actif' if page == 'prix_marche' }}">{{ "Prix du marché" | t }}</a>
+                    <a href="{{ url_for('notifications') }}" class="{{ 'actif' if page == 'notifications' }}">{{ "Notifications" | t }}{% if nb_notifications %}<span class="badge badge-epuise badge-menu">{{ nb_notifications }}</span>{% endif %}</a>
+                    <a href="{{ url_for('premium') }}" class="{{ 'actif' if page == 'premium' }}">{% if fin_premium %}⭐ Premium{% else %}{{ "Premium" | t }}{% endif %}</a>
+                    {% if est_admin %}<a href="{{ url_for('admin') }}" class="{{ 'actif' if page.startswith('admin') }}">Admin</a>{% endif %}
+                    <a href="{{ url_for('mon_profil') }}" class="{{ 'actif' if page == 'mon_profil' }}">{{ "Mon profil" | t }}</a>
+                {% else %}
+                    <a href="{{ url_for('accueil') }}" class="{{ 'actif' if page == 'accueil' }}">{{ "Accueil" | t }}</a>
+                    <a href="{{ url_for('catalogue_public') }}" class="{{ 'actif' if page == 'catalogue_public' }}">{{ "Récoltes" | t }}</a>
+                    <a href="{{ url_for('prix_marche') }}" class="{{ 'actif' if page == 'prix_marche' }}">{{ "Prix du marché" | t }}</a>
+                    <a href="{{ url_for('connexion') }}" class="{{ 'actif' if page == 'connexion' }}">{{ "Connexion" | t }}</a>
+                {% endif %}
+                <a href="#" id="installer-app" hidden>📲 {{ "Installer l'app" | t }}</a>
+                <a href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}">🌍 {{ "Wolof" if langue == "fr" else "Français" }}</a>
+            </nav>
             {% if session.get('utilisateur_id') %}
-                <a href="{{ url_for('tableau_de_bord') }}">{{ "Tableau de bord" | t }}</a>
-                <a href="{{ url_for('notifications') }}">🔔 {{ "Notifications" | t }}{% if nb_notifications %} <span class="badge badge-epuise" style="margin-left:2px;">{{ nb_notifications }}</span>{% endif %}</a>
-                <a href="{{ url_for('premium') }}">{% if fin_premium %}⭐ Premium{% else %}⭐ {{ "Passer Premium" | t }}{% endif %}</a>
-                {% if est_admin %}<a href="{{ url_for('admin') }}">Admin</a>{% endif %}
-                <a href="{{ url_for('mon_profil') }}">{{ "Mon profil" | t }}</a>
-                <a href="{{ url_for('deconnexion') }}">{{ "Déconnexion" | t }}</a>
+                <a class="bouton-quitter" href="{{ url_for('deconnexion') }}">{{ "Déconnexion" | t }}</a>
             {% else %}
-                <a href="{{ url_for('catalogue_public') }}">{{ "Récoltes" | t }}</a>
-                <a href="{{ url_for('connexion') }}">{{ "Connexion" | t }}</a>
-                <a href="{{ url_for('inscription') }}">{{ "Inscription" | t }}</a>
+                <a class="btn btn-petit" href="{{ url_for('inscription') }}">{{ "Inscription" | t }}</a>
             {% endif %}
-            <a href="#" id="installer-app" hidden>📲 {{ "Installer l'app" | t }}</a>
-            <a href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}">🌍 {{ "Wolof" if langue == "fr" else "Français" }}</a>
-        </nav>
+        </div>
     </header>
 
     <main>
-        <div class="conteneur">
+        <div class="conteneur {% block mise_en_page %}{% endblock %}">
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
                     {% for message in messages %}
@@ -282,6 +60,17 @@
             {% block contenu %}{% endblock %}
         </div>
     </main>
+
+    <footer class="pied">
+        <div class="pied-interieur">
+            <div>
+                <a href="{{ url_for('conditions') }}">{{ "Conditions d'utilisation" | t }}</a>
+                <a href="{{ url_for('confidentialite') }}">{{ "Confidentialité" | t }}</a>
+                <a href="{{ url_for('prix_marche') }}">{{ "Prix du marché" | t }}</a>
+            </div>
+            <div>🌾 App Agricole · Sénégal</div>
+        </div>
+    </footer>
     <script>
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("{{ url_for('service_worker') }}");
