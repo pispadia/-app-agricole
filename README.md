@@ -35,6 +35,8 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 **Vitrine publique** : la page d'accueil montre les dernières récoltes et des boutons « Je vends / J'achète » ; le catalogue (`/catalogue`) et les prix du marché sont visibles sans compte ; `robots.txt` et `sitemap.xml` aident Google à référencer les annonces.
 
+**Rappels quotidiens** : chaque matin (8 h, heure de Dakar), GitHub Actions (`.github/workflows/taches.yml`) appelle `/taches/quotidiennes`, qui prévient par e-mail et SMS : le client dont la pré-commande est prête, l'agriculteur dont une commande attend depuis plus de 48 h, et le membre dont le Premium finit dans 3 jours (une seule fois chacun). À configurer : une valeur secrète `TACHES_TOKEN` sur Render, et dans GitHub (Settings > Secrets and variables > Actions) les secrets `TACHES_TOKEN` (même valeur) et `APP_URL` (adresse du site).
+
 **Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Moyen-Orient et Afrique » (pays : Sénégal), achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR` (en général `2210000`, sauf numéro dédié fourni par Orange). Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
 
 ## Revenus : commission et Premium

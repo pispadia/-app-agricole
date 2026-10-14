@@ -1,0 +1,27 @@
+name: Rappels quotidiens
+
+# Chaque matin à 8 h (heure de Dakar = UTC), appelle la tâche de rappels de l'application.
+# Secrets à définir dans GitHub (Settings > Secrets and variables > Actions) :
+# - APP_URL : adresse du site (ex : https://app-agricole-0hif.onrender.com)
+# - TACHES_TOKEN : même valeur que la variable TACHES_TOKEN sur Render
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  rappels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déclencher les rappels
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          TACHES_TOKEN: ${{ secrets.TACHES_TOKEN }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$TACHES_TOKEN" ]; then
+            echo "Secrets APP_URL et TACHES_TOKEN non définis : rien à faire."
+            exit 0
+          fi
+          # Le site gratuit de Render peut dormir : on laisse le temps de se réveiller et on réessaie
+          curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 30 \
+            -X POST -H "Authorization: Bearer $TACHES_TOKEN" "$APP_URL/taches/quotidiennes"

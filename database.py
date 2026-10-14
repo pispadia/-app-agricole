@@ -520,6 +520,10 @@ def init_db():
         ("utilisateurs", "code_parrainage", "TEXT"),
         # Modération : annonce masquée (3 signalements, ou décision de l'admin)
         ("recoltes", "masquee", "INTEGER NOT NULL DEFAULT 0"),
+        # Rappels automatiques (tâche quotidienne) : déjà envoyés, pour ne jamais les répéter
+        ("commandes", "rappel_pret_envoye", "INTEGER NOT NULL DEFAULT 0"),
+        ("commandes", "relance_envoyee", "INTEGER NOT NULL DEFAULT 0"),
+        ("utilisateurs", "rappel_premium_pour", "TEXT"),
         ("utilisateurs", "parrain_id", "INTEGER"),
         ("utilisateurs", "parrainage_recompense_le", "TEXT"),
         ("commandes", "mode_livraison", "TEXT NOT NULL DEFAULT 'retrait'"),
