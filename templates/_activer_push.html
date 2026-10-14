@@ -1,0 +1,8 @@
+{# Bloc d'activation des notifications push (voir static/push.js) #}
+<div id="bloc-push" class="carte-recolte" style="display:block;" data-csrf="{{ csrf_token() }}">
+    <strong>📲 {{ "Notifications sur ton téléphone" | t }}</strong>
+    <p style="margin:5px 0; font-size:0.9em; color:#555;">{{ "Reçois les nouvelles commandes, messages et changements de statut directement sur ton téléphone, gratuitement." | t }}</p>
+    <button type="button" id="bouton-push">🔔 {{ "Activer les notifications sur cet appareil" | t }}</button>
+    <p id="etat-push" style="margin:5px 0 0; font-size:0.85em;"></p>
+</div>
+<script src="{{ url_for('static', filename='push.js') }}" defer></script>

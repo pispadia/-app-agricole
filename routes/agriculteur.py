@@ -1,6 +1,6 @@
 """Espace agriculteur : récoltes et commandes reçues."""
 from flask import render_template, request, redirect, url_for, session, flash
-import sms
+import push
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
 from database import get_connexion, COLONNES_RECOLTE
@@ -73,9 +73,9 @@ MESSAGES_STATUT = {"confirmee": "confirmée", "livree": "livrée", "annulee": "a
 
 
 def alerter_client(commande, statut, precision=""):
-    sms.alerter(commande["telephone_client"],
-                f"App Agricole : ta commande de {commande['nom_recolte']} a été {MESSAGES_STATUT[statut]} "
-                f"par {session['nom']}.{precision}")
+    push.alerter(commande["client_id"], commande["telephone_client"],
+                 f"App Agricole : ta commande de {commande['nom_recolte']} a été {MESSAGES_STATUT[statut]} "
+                 f"par {session['nom']}.{precision}", url_for("mes_commandes"))
 
 
 @app.route("/espace-agriculteur/commandes/<int:commande_id>/statut", methods=["POST"])
@@ -87,7 +87,7 @@ def changer_statut_commande(commande_id):
     connexion_bd = get_connexion()
     # Seulement les commandes portant sur une récolte de cet agriculteur
     commande = connexion_bd.execute(
-        """SELECT commandes.statut, commandes.mode_livraison, commandes.mode_paiement, commandes.paye_en_ligne,
+        """SELECT commandes.statut, commandes.client_id, commandes.mode_livraison, commandes.mode_paiement, commandes.paye_en_ligne,
                   recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id

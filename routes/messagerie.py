@@ -1,6 +1,8 @@
 """Messagerie d'une commande : le client et l'agriculteur échangent sur la plateforme,
 sans voir leurs numéros ni leurs e-mails."""
 from flask import render_template, request, redirect, url_for, session, flash
+
+import push
 from database import get_connexion
 from core import app, utilisateur_connecte, masquer_coordonnees
 
@@ -51,6 +53,9 @@ def messages_commande(commande_id):
                 (commande_id, utilisateur_id, interlocuteur_id, masquer_coordonnees(contenu))
             )
             connexion_bd.commit()
+            push.alerter(interlocuteur_id, None,
+                         f"App Agricole : nouveau message de {session['nom']} : {contenu[:100]}",
+                         url_for("messages_commande", commande_id=commande_id))
         connexion_bd.close()
         return redirect(url_for("messages_commande", commande_id=commande_id))
 

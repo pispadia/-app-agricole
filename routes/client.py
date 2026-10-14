@@ -2,7 +2,7 @@
 from datetime import date
 
 from flask import render_template, request, redirect, url_for, session, flash
-import sms
+import push
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
@@ -184,7 +184,7 @@ def valider_panier():
 
     connexion_bd = get_connexion()
     envoyees, indisponibles = 0, []
-    produits_par_telephone = {}  # un seul SMS par agriculteur
+    produits_par_agriculteur = {}  # un seul message par agriculteur
     for item in panier:
         recolte = get_recolte_avec_agriculteur(connexion_bd, item["recolte_id"])
         if not recolte_commandable(recolte):
@@ -198,13 +198,13 @@ def valider_panier():
              mode_livraison, adresse_livraison, mode_paiement)
         )
         envoyees += 1
-        if recolte["telephone_agriculteur"]:
-            produits_par_telephone.setdefault(recolte["telephone_agriculteur"], []).append(recolte["nom"])
+        produits_par_agriculteur.setdefault(
+            (recolte["agriculteur_id"], recolte["telephone_agriculteur"]), []).append(recolte["nom"])
     connexion_bd.commit()
     connexion_bd.close()
 
-    for telephone, produits in produits_par_telephone.items():
-        sms.alerter(telephone, message_nouvelle_commande(produits))
+    for (agriculteur_id, telephone), produits in produits_par_agriculteur.items():
+        push.alerter(agriculteur_id, telephone, message_nouvelle_commande(produits), url_for("commandes_recues"))
 
     session["panier"] = []
     if indisponibles:
@@ -252,7 +252,8 @@ def commander(recolte_id):
         )
         connexion_bd.commit()
         connexion_bd.close()
-        sms.alerter(recolte["telephone_agriculteur"], message_nouvelle_commande([recolte["nom"]]))
+        push.alerter(recolte["agriculteur_id"], recolte["telephone_agriculteur"],
+                     message_nouvelle_commande([recolte["nom"]]), url_for("commandes_recues"))
 
         flash(f"Ta commande a été envoyée à {recolte['nom_agriculteur']}. Il te contactera pour la suite.")
         return redirect(url_for("mes_commandes"))
@@ -306,13 +307,14 @@ def annuler_commande(commande_id):
     connexion_bd.commit()
     if resultat.rowcount:
         commande = connexion_bd.execute(
-            """SELECT recoltes.nom, utilisateurs.telephone FROM commandes
+            """SELECT recoltes.nom, recoltes.agriculteur_id, utilisateurs.telephone FROM commandes
                JOIN recoltes ON commandes.recolte_id = recoltes.id
                JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
                WHERE commandes.id = ?""", (commande_id,)
         ).fetchone()
-        sms.alerter(commande["telephone"],
-                    f"App Agricole : {session['nom']} a annulé sa commande de {commande['nom']}.")
+        push.alerter(commande["agriculteur_id"], commande["telephone"],
+                     f"App Agricole : {session['nom']} a annulé sa commande de {commande['nom']}.",
+                     url_for("commandes_recues"))
     connexion_bd.close()
 
     if resultat.rowcount:
