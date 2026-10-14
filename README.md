@@ -59,6 +59,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 - **Suppression de compte** : « Supprimer mon compte » dans le profil (mot de passe + mot SUPPRIMER). Nom, e-mail, téléphone, annonces, alertes et notifications effacés ; commandes terminées gardées sous « Compte supprimé ». Refusée tant qu'une commande est en cours ou qu'une commission est due.
 - **Contact et litiges** : formulaire `/contact` (lien en pied de page, « ⚠️ Signaler un problème » sur chaque commande), avec la commande concernée. Les admins sont prévenus par e-mail et répondent depuis `/admin/support` ; la réponse part par e-mail et notification, et reste visible sur `/contact`.
 - **Carte des producteurs** : `/carte` place les annonces sur une carte du Sénégal (Leaflet, embarqué dans `static/leaflet`, fond OpenStreetMap) d'après leur localité (`localites.py`, ~80 villes et zones) ; bouton « Près de chez moi » qui liste les annonces les plus proches.
+- **Stock automatique** (`stock.py`) : à chaque livraison, la quantité livrée est retirée de l'annonce (kg, tonnes, grammes convertis ; sacs, pièces...) ; à zéro, l'annonce passe « épuisée ». Une commande plus grande que le stock est refusée. Si les unités ne se comparent pas, rien n'est modifié.
 - **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`, une fois l'adresse confirmée par le lien reçu par e-mail : « Mon profil » > « Recevoir le lien de confirmation ») : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
 
 ## Organisation du code
