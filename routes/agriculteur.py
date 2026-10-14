@@ -4,7 +4,7 @@ import sms
 from database import get_connexion
 from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
-                  planning_livraison_valide, date_fr, MODES_LIVRAISON)
+                  planning_livraison_valide, date_fr, MODES_LIVRAISON, MODES_PAIEMENT)
 
 
 @app.route("/espace-agriculteur/commandes")
@@ -33,7 +33,7 @@ def commandes_recues():
     return render_template("commandes_recues.html", nom=session["nom"], commandes=commandes,
                            transitions=TRANSITIONS_COMMANDE, commission_due=commission_due,
                            taux_commission=TAUX_COMMISSION, numero_paiement=NUMERO_PAIEMENT,
-                           modes_livraison=MODES_LIVRAISON)
+                           modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT)
 
 
 # Changements de statut autorisés pour l'agriculteur : statut actuel -> statuts possibles
@@ -61,7 +61,8 @@ def changer_statut_commande(commande_id):
     connexion_bd = get_connexion()
     # Seulement les commandes portant sur une récolte de cet agriculteur
     commande = connexion_bd.execute(
-        """SELECT commandes.statut, commandes.mode_livraison, recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
+        """SELECT commandes.statut, commandes.mode_livraison, commandes.mode_paiement, commandes.paye_en_ligne,
+                  recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON commandes.client_id = utilisateurs.id
@@ -71,6 +72,12 @@ def changer_statut_commande(commande_id):
 
     if not (commande and nouveau_statut in TRANSITIONS_COMMANDE.get(commande["statut"], ())):
         flash("Ce changement de statut n'est pas possible.")
+    elif nouveau_statut == "livree" and commande["paye_en_ligne"]:
+        # Déjà payée en ligne : montant et commission sont connus, l'admin reversera la somme due
+        connexion_bd.execute("UPDATE commandes SET statut = 'livree', lu_client = 0 WHERE id = ?", (commande_id,))
+        connexion_bd.commit()
+        alerter_client(commande, "livree")
+        flash("Commande livrée. La plateforme va te reverser le montant de la vente (commission déduite).")
     elif nouveau_statut == "livree":
         # À la livraison, l'agriculteur indique le montant encaissé : la commission
         # de la plateforme est calculée dessus
@@ -91,13 +98,20 @@ def changer_statut_commande(commande_id):
         # À la confirmation, l'agriculteur peut fixer la date et les frais de livraison
         try:
             date_prevue, frais = planning_livraison_valide(request.form)
+            # Paiement en ligne : l'agriculteur fixe le prix, que le client paiera via Wave
+            montant = montant_a_payer = commission = None
+            if commande["mode_paiement"] == "wave":
+                montant = montant_valide(request.form.get("montant", ""))
+                commission = calculer_commission(montant)
+                montant_a_payer = montant + (frais or 0)
         except ValueError as erreur:
             flash(str(erreur))
         else:
             connexion_bd.execute(
                 """UPDATE commandes SET statut = 'confirmee', lu_client = 0,
-                          date_livraison_prevue = ?, frais_livraison = ? WHERE id = ?""",
-                (date_prevue, frais, commande_id)
+                          date_livraison_prevue = ?, frais_livraison = ?,
+                          montant = ?, commission = ?, montant_a_payer = ? WHERE id = ?""",
+                (date_prevue, frais, montant, commission, montant_a_payer, commande_id)
             )
             connexion_bd.commit()
             precision = ""
@@ -106,6 +120,8 @@ def changer_statut_commande(commande_id):
                 precision = f" {verbe} prévu(e) le {date_fr(date_prevue)}."
             if frais:
                 precision += f" Frais de livraison : {frais} FCFA."
+            if montant_a_payer:
+                precision += f" A payer avec Wave : {montant_a_payer} FCFA."
             alerter_client(commande, "confirmee", precision)
             flash("Commande confirmée.")
     else:

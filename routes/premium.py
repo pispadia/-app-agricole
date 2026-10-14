@@ -98,6 +98,27 @@ def admin():
             "SELECT COUNT(*) AS n FROM utilisateurs WHERE premium_jusqu_au >= ?",
             (date.today().isoformat(),)).fetchone()["n"],
     }
+    # Commandes payées en ligne : reverser à l'agriculteur après livraison (montant moins
+    # la commission), ou rembourser le client si la commande a été annulée
+    a_reverser = connexion_bd.execute(
+        """SELECT commandes.*, recoltes.nom AS nom_recolte, utilisateurs.nom AS nom_agriculteur,
+                  utilisateurs.telephone AS telephone_agriculteur
+           FROM commandes
+           JOIN recoltes ON commandes.recolte_id = recoltes.id
+           JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+           WHERE commandes.paye_en_ligne = 1 AND commandes.statut = 'livree'
+             AND commandes.reverse_agriculteur = 0
+           ORDER BY commandes.date_creation"""
+    ).fetchall()
+    a_rembourser = connexion_bd.execute(
+        """SELECT commandes.*, recoltes.nom AS nom_recolte, utilisateurs.nom AS nom_client,
+                  utilisateurs.telephone AS telephone_client
+           FROM commandes
+           JOIN recoltes ON commandes.recolte_id = recoltes.id
+           JOIN utilisateurs ON commandes.client_id = utilisateurs.id
+           WHERE commandes.paye_en_ligne = 1 AND commandes.statut = 'annulee' AND commandes.rembourse = 0
+           ORDER BY commandes.date_creation"""
+    ).fetchall()
     comptes = {ligne["role"]: ligne["n"] for ligne in connexion_bd.execute(
         "SELECT role, COUNT(*) AS n FROM utilisateurs GROUP BY role").fetchall()}
     commandes = {ligne["statut"]: ligne["n"] for ligne in connexion_bd.execute(
@@ -106,7 +127,28 @@ def admin():
     connexion_bd.close()
     return render_template("admin.html", paiements=paiements_en_attente, commissions=commissions_dues,
                            totaux=totaux, taux_commission=TAUX_COMMISSION,
-                           comptes=comptes, commandes=commandes, suspendus=suspendus)
+                           comptes=comptes, commandes=commandes, suspendus=suspendus,
+                           a_reverser=a_reverser, a_rembourser=a_rembourser)
+
+
+@app.route("/admin/commandes/<int:commande_id>/<action>", methods=["POST"])
+@admin_requis
+def regler_commande_payee(commande_id, action):
+    """L'admin a envoyé l'argent par Wave : reversement à l'agriculteur ou remboursement du client."""
+    requetes = {
+        "reversee": """UPDATE commandes SET reverse_agriculteur = 1
+                       WHERE id = ? AND paye_en_ligne = 1 AND statut = 'livree'""",
+        "remboursee": """UPDATE commandes SET rembourse = 1
+                         WHERE id = ? AND paye_en_ligne = 1 AND statut = 'annulee'""",
+    }
+    if action in requetes:
+        connexion_bd = get_connexion()
+        resultat = connexion_bd.execute(requetes[action], (commande_id,))
+        connexion_bd.commit()
+        connexion_bd.close()
+        if resultat.rowcount:
+            flash("Reversement enregistré." if action == "reversee" else "Remboursement enregistré.")
+    return redirect(url_for("admin"))
 
 
 @app.route("/admin/paiements/<int:paiement_id>/<decision>", methods=["POST"])

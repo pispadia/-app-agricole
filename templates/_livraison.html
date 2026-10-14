@@ -17,3 +17,16 @@
     {% if commande.date_livraison_prevue %}<br>📅 Prévue le {{ commande.date_livraison_prevue | date_fr }}{% endif %}
     {% if commande.frais_livraison %}<br>Frais de livraison : {{ commande.frais_livraison }} FCFA{% endif %}
 {% endmacro %}
+
+{# Choix du paiement : proposé seulement quand le paiement Wave est configuré #}
+{% macro choix_paiement(modes) %}
+    {% if wave_actif %}
+        <label>Paiement</label>
+        {% for valeur, libelle in modes.items() %}
+            <label style="display:block; font-weight:normal;">
+                <input type="radio" name="mode_paiement" value="{{ valeur }}" {% if loop.first %}checked{% endif %} style="width:auto;"> {{ libelle }}
+            </label>
+        {% endfor %}
+        <p style="font-size:0.85em; color:#666; margin-top:0;">Avec Wave, tu paies une fois que l'agriculteur a confirmé la commande et fixé le prix.</p>
+    {% endif %}
+{% endmacro %}

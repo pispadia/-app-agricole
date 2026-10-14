@@ -15,6 +15,20 @@
                     Agriculteur : <a href="{{ url_for('avis_agriculteur', agriculteur_id=commande.agriculteur_id) }}">{{ commande.nom_agriculteur }}</a><br>
                     Prix affiché : {{ commande.prix }}<br>
                     {{ infos_livraison(commande, modes_livraison) }}
+                    {% if commande.mode_paiement == 'wave' %}
+                        <br>💳 Paiement en ligne avec Wave
+                        {% if commande.paye_en_ligne %}
+                            <span class="badge badge-dispo">Payée{% if commande.montant_a_payer %} : {{ commande.montant_a_payer }} FCFA{% endif %}</span>
+                            {% if commande.statut == 'annulee' %}<span style="color:#666;">({{ 'remboursée' if commande.rembourse else 'remboursement en cours' }})</span>{% endif %}
+                        {% elif commande.statut == 'confirmee' and commande.montant_a_payer %}
+                            <form method="POST" action="{{ url_for('payer_commande_wave', commande_id=commande.id) }}" style="margin-top:6px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" style="width:auto; padding:6px 12px; background-color:#1dc8f2;">Payer {{ commande.montant_a_payer }} FCFA avec Wave</button>
+                            </form>
+                        {% elif commande.statut == 'en_attente' %}
+                            <span style="color:#666;">— tu pourras payer dès que l'agriculteur aura confirmé le prix.</span>
+                        {% endif %}
+                    {% endif %}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
