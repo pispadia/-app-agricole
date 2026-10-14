@@ -19,7 +19,7 @@ ORDRES_CATALOGUE = {
 }
 
 
-def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", periode="", limite=None):
+def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", periode="", limite=None, decalage=0):
     """Récoltes disponibles du catalogue (client connecté, catalogue public, page d'accueil)."""
     requete = """
         SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
@@ -55,8 +55,11 @@ def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", p
                 + ORDRES_CATALOGUE.get(tri, ORDRES_CATALOGUE["recent"]))
     parametres.append(date.today().isoformat())
     if limite:
-        requete += f" LIMIT {int(limite)}"
+        requete += f" LIMIT {int(limite)} OFFSET {int(decalage)}"
     return connexion_bd.execute(requete, parametres).fetchall()
+
+
+ANNONCES_PAR_PAGE = 24
 
 
 def donnees_catalogue(connexion_bd):
@@ -67,7 +70,12 @@ def donnees_catalogue(connexion_bd):
         "tri": request.args.get("tri", "recent"),
         "periode": request.args.get("periode", ""),
     }
-    recoltes = rechercher_recoltes(connexion_bd, **filtres)
+    # Par pages : une de plus que la taille de page, pour savoir s'il en reste après
+    page = max(int(request.args.get("page", "1")) if request.args.get("page", "").isdigit() else 1, 1)
+    recoltes = rechercher_recoltes(connexion_bd, **filtres, limite=ANNONCES_PAR_PAGE + 1,
+                                   decalage=(page - 1) * ANNONCES_PAR_PAGE)
+    page_suivante = page + 1 if len(recoltes) > ANNONCES_PAR_PAGE else None
+    recoltes = recoltes[:ANNONCES_PAR_PAGE]
     marche = prix_du_marche(connexion_bd)
     localites = connexion_bd.execute(
         "SELECT DISTINCT localite FROM recoltes WHERE statut = 'disponible' ORDER BY localite"
@@ -77,6 +85,7 @@ def donnees_catalogue(connexion_bd):
         "localite_choisie": filtres["localite"], "tri_choisi": filtres["tri"],
         "periode_choisie": filtres["periode"], "aujourdhui": date.today().isoformat(),
         "prix_courants": {r["id"]: marche.get(produit_cle(r["nom"])) for r in recoltes},
+        "numero_page": page, "page_suivante": page_suivante,
     }
 
 

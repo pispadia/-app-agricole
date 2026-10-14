@@ -53,6 +53,12 @@ def voir_annonce(recolte_id):
     )
 
 
+# Photos d'une annonce : visibles de tous, sauf annonce masquée par la modération ou vendeur
+# suspendu (alors seulement par l'agriculteur lui-même)
+VISIBLE = """JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+             WHERE ((recoltes.masquee = 0 AND utilisateurs.suspendu = 0) OR recoltes.agriculteur_id = ?)"""
+
+
 def reponse_photo(requete, parametres):
     """La photo (stockée en base64) en tant que fichier image, mise en cache par le navigateur."""
     connexion_bd = get_connexion()
@@ -72,13 +78,16 @@ def reponse_photo(requete, parametres):
 
 @app.route("/annonce/<int:recolte_id>/photo")
 def photo_annonce(recolte_id):
-    return reponse_photo("SELECT photo FROM recoltes WHERE id = ?", (recolte_id,))
+    return reponse_photo(f"SELECT recoltes.photo FROM recoltes {VISIBLE} AND recoltes.id = ?",
+                         (session.get("utilisateur_id", 0), recolte_id))
 
 
 @app.route("/annonce/<int:recolte_id>/photo/<int:photo_id>")
 def photo_supplementaire(recolte_id, photo_id):
-    return reponse_photo("SELECT photo FROM photos_recolte WHERE id = ? AND recolte_id = ?",
-                         (photo_id, recolte_id))
+    return reponse_photo(
+        f"""SELECT photos_recolte.photo FROM photos_recolte JOIN recoltes ON photos_recolte.recolte_id = recoltes.id
+            {VISIBLE} AND photos_recolte.id = ? AND recoltes.id = ?""",
+        (session.get("utilisateur_id", 0), photo_id, recolte_id))
 
 
 @app.route("/produit/<int:produit_id>/photo")

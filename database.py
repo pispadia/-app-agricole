@@ -175,6 +175,27 @@ TABLES = (
 )
 
 
+# Index : accélèrent les recherches fréquentes (annonces d'un agriculteur, commandes d'une
+# annonce ou d'un client, messages non lus...) quand les tables grossissent
+INDEX = (
+    ("idx_recoltes_agriculteur", "recoltes (agriculteur_id)"),
+    ("idx_recoltes_catalogue", "recoltes (statut, masquee)"),
+    ("idx_commandes_recolte", "commandes (recolte_id)"),
+    ("idx_commandes_client", "commandes (client_id)"),
+    ("idx_commandes_statut", "commandes (statut)"),
+    ("idx_messages_commande", "messages_commande (commande_id)"),
+    ("idx_messages_destinataire", "messages_commande (destinataire_id, lu)"),
+    ("idx_avis_agriculteur", "avis (agriculteur_id)"),
+    ("idx_photos_recolte", "photos_recolte (recolte_id)"),
+    ("idx_abonnements_push", "abonnements_push (utilisateur_id)"),
+    ("idx_alertes_produit", "alertes_produit (produit)"),
+    ("idx_limites_envoi", "limites_envoi (cle, instant)"),
+    ("idx_signalements_statut", "signalements (statut)"),
+    ("idx_paiements_wave_utilisateur", "paiements_wave (utilisateur_id, statut)"),
+    ("idx_produits_fournisseur", "produits_fournisseur (fournisseur_id)"),
+)
+
+
 def init_db():
     """Crée les tables si elles n'existent pas encore."""
     connexion = get_connexion()
@@ -630,6 +651,11 @@ def init_db():
             connexion.rollback()
             print(f"[migration] ERREUR sur {nom_table} : {erreur}")
 
+
+    # Index, une fois toutes les colonnes ajoutées (certains portent sur des colonnes récentes)
+    for nom_index, definition in INDEX:
+        connexion.execute(f"CREATE INDEX IF NOT EXISTS {nom_index} ON {definition}")
+    connexion.commit()
     connexion.close()
     print(f"Base de données initialisée ({'PostgreSQL' if UTILISE_POSTGRES else 'SQLite'}).")
 

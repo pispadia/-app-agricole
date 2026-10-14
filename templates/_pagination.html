@@ -1,0 +1,11 @@
+{# Pages du catalogue : liens précédent / suivant en gardant les filtres #}
+{% macro pagination(numero, page_suivante) %}
+    {% if numero > 1 or page_suivante %}
+        {% set filtres = request.args.to_dict() %}
+        <div class="groupe-boutons" style="justify-content:center; margin:6px 0 20px;">
+            {% if numero > 1 %}<a class="btn btn-clair" href="{{ url_for(request.endpoint, **dict(filtres, page=numero - 1)) }}">← Précédentes</a>{% endif %}
+            <span style="align-self:center; color:var(--discret);">Page {{ numero }}</span>
+            {% if page_suivante %}<a class="btn btn-clair" href="{{ url_for(request.endpoint, **dict(filtres, page=page_suivante)) }}">Suivantes →</a>{% endif %}
+        </div>
+    {% endif %}
+{% endmacro %}

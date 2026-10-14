@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_carte_annonce.html" import carte_annonce with context %}
+{% from "_pagination.html" import pagination with context %}
 {% block titre %}Récoltes à vendre au Sénégal · App Agricole{% endblock %}
 {% block meta %}
     <meta name="description" content="Achetez directement aux agriculteurs du Sénégal : mil, arachide, oignon, maïs... Prix du marché, livraison ou retrait, paiement Wave.">
@@ -9,7 +10,7 @@
     <div class="entete-page">
         <div>
             <h1>🌾 Récoltes à vendre</h1>
-            <p>Directement des agriculteurs du Sénégal{% if recoltes %} · {{ recoltes | length }} annonce{{ 's' if recoltes | length > 1 }}{% endif %}</p>
+            <p>Directement des agriculteurs du Sénégal{% if recoltes and numero_page == 1 and not page_suivante %} · {{ recoltes | length }} annonce{{ 's' if recoltes | length > 1 }}{% endif %}</p>
         </div>
         <div class="groupe-boutons">
             <a class="btn btn-clair" href="{{ url_for('carte_producteurs') }}">🗺️ Voir sur la carte</a>
@@ -24,6 +25,7 @@
                 {{ carte_annonce(recolte, prix_courants.get(recolte.id), client=session.get('role') == 'client') }}
             {% endfor %}
         </div>
+        {{ pagination(numero_page, page_suivante) }}
     {% else %}
         <div class="vide">Aucune récolte ne correspond à ta recherche.</div>
     {% endif %}

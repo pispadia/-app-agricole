@@ -49,3 +49,18 @@ def test_referencement(client):
     assert "Allow: /annonce/" in robots and "Disallow: /" in robots and "sitemap.xml" in robots
     plan = client.get("/sitemap.xml").get_data(as_text=True)
     assert "http://localhost/annonce/1" in plan and "http://localhost/annonce/3" not in plan
+
+
+def test_catalogue_par_pages(client):
+    from routes import client as module_client
+    connexion = database.get_connexion()
+    for i in range(30):
+        connexion.execute("""INSERT INTO recoltes (agriculteur_id, nom, quantite, prix, date_disponibilite, localite)
+                             VALUES (1, ?, '1 kg', '500 FCFA / kg', '2026-01-01', 'Thiès')""", (f"Produit{i:02d}",))
+    connexion.commit()
+    connexion.close()
+    page1 = client.get("/catalogue?tri=nom").get_data(as_text=True)
+    assert page1.count('class="fiche"') == module_client.ANNONCES_PAR_PAGE and "Suivantes" in page1
+    assert "tri=nom" in page1 and "page=2" in page1  # les filtres sont gardés
+    page2 = client.get("/catalogue?tri=nom&page=2").get_data(as_text=True)
+    assert "Précédentes" in page2 and "Produit29" in page2 and "Produit00" not in page2

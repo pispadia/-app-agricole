@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_carte_annonce.html" import carte_annonce with context %}
+{% from "_pagination.html" import pagination with context %}
 {% block mise_en_page %}large{% endblock %}
 {% block contenu %}
     <div class="entete-page">
@@ -30,6 +31,7 @@
                 {{ carte_annonce(recolte, prix_courants.get(recolte.id), client=true) }}
             {% endfor %}
         </div>
+        {{ pagination(numero_page, page_suivante) }}
     {% else %}
         <div class="vide">{{ "Aucune récolte ne correspond à ta recherche." | t }}</div>
     {% endif %}
