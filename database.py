@@ -547,6 +547,8 @@ def init_db():
         ("commandes", "adresse_livraison", "TEXT"),
         ("commandes", "date_livraison_prevue", "TEXT"),
         ("commandes", "frais_livraison", "INTEGER"),
+        # Date d'inscription (statistiques de l'admin) ; vide pour les comptes plus anciens
+        ("utilisateurs", "date_inscription", "TEXT"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

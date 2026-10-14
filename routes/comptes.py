@@ -1,5 +1,6 @@
 """Accueil, inscription, connexion et profil."""
 import time
+from datetime import date
 
 from flask import render_template, request, redirect, url_for, session, flash
 from itsdangerous import URLSafeTimedSerializer, BadSignature
@@ -67,8 +68,9 @@ def inscription():
         connexion = get_connexion()
         try:
             connexion.execute(
-                "INSERT INTO utilisateurs (nom, email, mot_de_passe, role, telephone) VALUES (?, ?, ?, ?, ?)",
-                (nom, email, mot_de_passe_hache, role, telephone)
+                """INSERT INTO utilisateurs (nom, email, mot_de_passe, role, telephone, date_inscription)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (nom, email, mot_de_passe_hache, role, telephone, date.today().isoformat())
             )
             connexion.commit()
         except Exception:
