@@ -19,7 +19,6 @@ def espace_client():
 
     requete = """
         SELECT recoltes.*, utilisateurs.nom AS nom_agriculteur,
-               utilisateurs.telephone AS telephone_agriculteur,
                utilisateurs.premium_jusqu_au AS premium_agriculteur,
                notes.note_moyenne, notes.nb_avis
         FROM recoltes
@@ -237,8 +236,7 @@ def mes_commandes():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.prix, recoltes.agriculteur_id,
-                  utilisateurs.nom AS nom_agriculteur, utilisateurs.email AS email_agriculteur,
-                  utilisateurs.telephone AS telephone_agriculteur, avis.note AS note_avis
+                  utilisateurs.nom AS nom_agriculteur, avis.note AS note_avis
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id

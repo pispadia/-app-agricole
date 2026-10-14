@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_etoiles.html" import etoiles %}
 {% block contenu %}
     <h2>Espace Client</h2>
@@ -52,7 +51,6 @@
                     <div style="margin-top: 8px;">
                         <a href="{{ url_for('commander', recolte_id=recolte.id) }}"><button type="button">Commander directement</button></a>
                     </div>
-                    {{ bouton_whatsapp(recolte.telephone_agriculteur, "Bonjour, je suis intéressé par votre récolte « " ~ recolte.nom ~ " » vue sur App Agricole.") }}
 
                     <form method="POST" action="{{ url_for('ajouter_au_panier', recolte_id=recolte.id) }}" style="display:flex; gap:6px; margin-top:8px; align-items:center;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
