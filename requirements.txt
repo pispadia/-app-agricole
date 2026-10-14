@@ -4,3 +4,4 @@ psycopg2-binary
 flask-wtf
 cryptography
 anthropic>=1.13
+segno

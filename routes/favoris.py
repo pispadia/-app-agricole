@@ -18,6 +18,8 @@ def retour(recolte_id=None, agriculteur_id=None):
     page = request.form.get("retour")
     if page == "favoris":
         return redirect(url_for("mes_favoris"))
+    if page == "boutique" and agriculteur_id:
+        return redirect(url_for("boutique", agriculteur_id=agriculteur_id))
     if page == "agriculteur" and agriculteur_id:
         return redirect(url_for("avis_agriculteur", agriculteur_id=agriculteur_id))
     if recolte_id:
