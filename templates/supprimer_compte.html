@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h1>Supprimer mon compte</h1>
+    <p>La suppression est <strong>définitive</strong> :</p>
+    <ul>
+        <li>ton nom, ton e-mail, ton téléphone et ton mot de passe sont effacés ;</li>
+        <li>tes annonces, alertes et notifications sont retirées ;</li>
+        <li>les commandes déjà terminées restent dans la comptabilité, sous le nom « Compte supprimé » ;</li>
+        <li>tu ne pourras plus te connecter (tu peux recréer un compte plus tard).</li>
+    </ul>
+
+    {% if obstacles %}
+        <div class="bandeau">
+            <div>
+                <strong>Impossible pour l'instant</strong>
+                {% for raison in obstacles %}<p>{{ raison }}</p>{% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label>Écris SUPPRIMER pour confirmer</label>
+            <input type="text" name="confirmation" autocomplete="off" required>
+            <label>Ton mot de passe</label>
+            <input type="password" name="mot_de_passe" required>
+            <button type="submit" class="btn-danger">Supprimer définitivement mon compte</button>
+        </form>
+    {% endif %}
+    <p><a href="{{ url_for('mon_profil') }}">← Retour à mon profil</a></p>
+{% endblock %}
