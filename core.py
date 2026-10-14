@@ -12,7 +12,7 @@ from database import UTILISE_POSTGRES, init_db
 app = Flask(__name__)
 # Derrière le proxy de Render : utilise https et le vrai nom de domaine dans les
 # liens absolus (ex. lien de réinitialisation du mot de passe envoyé par e-mail)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 # Clé secrète des sessions : lue dans la variable d'environnement SECRET_KEY.
 # En ligne (PostgreSQL), elle est obligatoire ; en local, une clé aléatoire est générée
 # à chaque démarrage (il faudra simplement se reconnecter après un redémarrage).
@@ -27,6 +27,51 @@ if not app.secret_key:
 # utilisateur connecté. Le jeton reste valable tant que la session est ouverte.
 app.config["WTF_CSRF_TIME_LIMIT"] = None
 csrf = CSRFProtect(app)
+
+# Taille maximale d'une requête (photos comprises) : au-delà, refusée avant d'être lue
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+# Cookie de session : jamais lisible en JavaScript, pas envoyé par les autres sites,
+# et en ligne seulement en HTTPS
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = UTILISE_POSTGRES
+
+
+@app.after_request
+def entetes_de_securite(reponse):
+    """En-têtes de sécurité : pas d'intégration du site dans une autre page (vol de clics),
+    pas de devinette du type de fichier, adresse des pages non transmise aux autres sites."""
+    reponse.headers.setdefault("X-Frame-Options", "DENY")
+    reponse.headers.setdefault("X-Content-Type-Options", "nosniff")
+    reponse.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if UTILISE_POSTGRES:  # en ligne, toujours en HTTPS
+        reponse.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+    return reponse
+
+
+@app.errorhandler(413)
+def requete_trop_grosse(erreur):
+    flash("Le fichier envoyé est trop volumineux (5 Mo maximum).")
+    return redirect(request.referrer if request.referrer and request.referrer.startswith(request.host_url)
+                    else url_for("accueil"))
+
+
+def limite_atteinte(cle, maximum, duree_secondes):
+    """Vrai si l'action `cle` a déjà eu lieu `maximum` fois pendant `duree_secondes` ; sinon
+    l'enregistre. Sert à limiter les envois d'e-mails (quota Brevo) et les inscriptions."""
+    import time
+    from database import get_connexion
+    maintenant = int(time.time())
+    connexion_bd = get_connexion()
+    connexion_bd.execute("DELETE FROM limites_envoi WHERE instant <= ?", (maintenant - 24 * 3600,))
+    nombre = connexion_bd.execute(
+        "SELECT COUNT(*) AS n FROM limites_envoi WHERE cle = ? AND instant > ?", (cle, maintenant - duree_secondes)
+    ).fetchone()["n"]
+    if nombre < maximum:
+        connexion_bd.execute("INSERT INTO limites_envoi (cle, instant) VALUES (?, ?)", (cle, maintenant))
+    connexion_bd.commit()
+    connexion_bd.close()
+    return nombre >= maximum
 
 
 @app.errorhandler(404)

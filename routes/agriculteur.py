@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from routes.alertes import prevenir_clients
 from database import get_connexion, COLONNES_RECOLTE
-from core import (app, encoder_photo, quantite_valide, prix_valide, utilisateur_connecte,
+from core import (app, encoder_photo, masquer_coordonnees, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
                   planning_livraison_valide, date_fr, MODES_LIVRAISON, MODES_PAIEMENT)
 
@@ -171,7 +171,8 @@ def nouvelle_recolte():
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
-        description = request.form.get("description", "")
+        # Pas de numéro ni d'e-mail dans l'annonce : les échanges passent par la plateforme
+        description = masquer_coordonnees(request.form.get("description", ""))
 
         fichier = request.files.get("photo")
         nom_photo = encoder_photo(fichier)
@@ -226,7 +227,8 @@ def modifier_recolte(recolte_id):
         quantite_gros_min = request.form.get("quantite_gros_min", "").strip() or None
         date_disponibilite = request.form["date_disponibilite"]
         localite = request.form["localite"]
-        description = request.form.get("description", "")
+        # Pas de numéro ni d'e-mail dans l'annonce : les échanges passent par la plateforme
+        description = masquer_coordonnees(request.form.get("description", ""))
         statut = request.form.get("statut", "disponible")
 
         fichier = request.files.get("photo")

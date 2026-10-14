@@ -203,6 +203,12 @@ def erreur_paiement_wave(paiement_id):
         return redirect(url_for("connexion"))
     connexion_bd = get_connexion()
     paiement = paiement_de_l_utilisateur(connexion_bd, paiement_id)
+    # On demande d'abord à Wave : ce lien peut être ouvert par erreur (ou par un lien piégé)
+    # alors que le paiement a bien eu lieu ; il ne doit jamais faire perdre un paiement.
+    if paiement and verifier_paiement(connexion_bd, paiement):
+        connexion_bd.close()
+        flash("Paiement Wave reçu, merci ! " + MESSAGES_PAIEMENT_RECU[paiement["objet"]])
+        return redirect(url_for(PAGES_APRES_PAIEMENT[paiement["objet"]]))
     if paiement and paiement["statut"] == "en_attente":
         connexion_bd.execute("UPDATE paiements_wave SET statut = 'echec' WHERE id = ?", (paiement_id,))
         connexion_bd.commit()
