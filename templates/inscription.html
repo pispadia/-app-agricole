@@ -6,7 +6,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom complet" required>
         <input type="email" name="email" value="{{ saisie.get('email', '') }}" placeholder="Email" required>
-        <input type="tel" name="telephone" value="{{ saisie.get('telephone', '') }}" placeholder="Téléphone / WhatsApp (optionnel, ex: 77 123 45 67)">
+        <input type="tel" name="telephone" value="{{ saisie.get('telephone', '') }}" placeholder="Téléphone pour les alertes SMS (optionnel, jamais affiché)">
         <input type="password" name="mot_de_passe" placeholder="Mot de passe (8 caractères minimum)" minlength="8" required>
 
         <select name="role" required>

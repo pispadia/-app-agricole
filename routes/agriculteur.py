@@ -15,8 +15,7 @@ def commandes_recues():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte,
-                  utilisateurs.nom AS nom_client, utilisateurs.email AS email_client,
-                  utilisateurs.telephone AS telephone_client
+                  utilisateurs.nom AS nom_client
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON commandes.client_id = utilisateurs.id

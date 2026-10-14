@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "_whatsapp.html" import bouton_whatsapp %}
 {% from "_statut_commande.html" import badge_statut %}
 {% from "_livraison.html" import infos_livraison %}
 {% block contenu %}
@@ -30,13 +29,12 @@
                 <div>
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
                     {{ badge_statut(commande.statut) }}<br>
-                    Client : {{ commande.nom_client }} ({{ commande.email_client }})<br>
+                    Client : {{ commande.nom_client }}<br>
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if commande.message %}
                         <p style="margin: 5px 0 0; color: #666;">« {{ commande.message }} »</p>
                     {% endif %}
                     <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">Reçue le {{ commande.date_creation }}</p>
-                    {{ bouton_whatsapp(commande.telephone_client, "Bonjour, je vous contacte au sujet de votre commande de « " ~ commande.nom_recolte ~ " » (" ~ commande.quantite_demandee ~ ") sur App Agricole.") }}
 
                     {% set actions = {"confirmee": "Confirmer", "livree": "Marquer livrée", "annulee": "Refuser / annuler"} %}
                     {% if commande.statut == 'livree' and commande.montant %}

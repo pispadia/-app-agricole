@@ -148,3 +148,14 @@ def test_envoyer_sms_sans_configuration_ou_en_erreur(monkeypatch):
 
     monkeypatch.setattr(sms.urllib.request, "urlopen", panne)
     assert sms.envoyer_sms("77 123 45 67", "Bonjour") is False
+
+
+def test_numeros_jamais_affiches_entre_client_et_agriculteur(client, envoyes):
+    en_tant_que(client, 2, "Awa", "client")
+    client.post("/commander/1", data={"quantite_demandee": "20 kg"})
+    for page in (client.get("/espace-client"), client.get("/mes-commandes")):
+        texte = page.get_data(as_text=True)
+        assert "77 111 22 33" not in texte and "f@x.sn" not in texte and "wa.me" not in texte
+    en_tant_que(client, 1, "Fatou", "agriculteur")
+    texte = client.get("/espace-agriculteur/commandes").get_data(as_text=True)
+    assert "78 444 55 66" not in texte and "a@x.sn" not in texte and "wa.me" not in texte

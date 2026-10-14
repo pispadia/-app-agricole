@@ -75,7 +75,8 @@ def test_lien_whatsapp():
     assert telephone_valide("") is None
 
 
-def test_bouton_whatsapp_dans_le_catalogue(client):
+def test_coordonnees_agriculteur_cachees_aux_clients(client):
+    # Les clients ne doivent pas pouvoir contourner la plateforme (et la commission)
     inscrire(client, email="f@x.sn", role="agriculteur", telephone="77 123 45 67")
     inscrire(client, email="m@x.sn", nom="Moussa", role="agriculteur")  # sans téléphone
     connexion = database.get_connexion()
@@ -87,8 +88,7 @@ def test_bouton_whatsapp_dans_le_catalogue(client):
     connexion.close()
     en_tant_que(client, 3, "client")
     page = client.get("/espace-client").get_data(as_text=True)
-    assert page.count("https://wa.me/") == 1
-    assert "https://wa.me/221771234567?text=" in page
+    assert "wa.me" not in page and "77 123 45 67" not in page and "f@x.sn" not in page
 
 
 # --- Notifications client
