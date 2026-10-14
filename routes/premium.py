@@ -185,6 +185,8 @@ def commission_reglee(commande_id):
         "UPDATE commandes SET commission_payee = 1 WHERE id = ? AND statut = 'livree'", (commande_id,)
     )
     connexion_bd.commit()
+    from routes.parrainage import recompenser_parrainage  # import local : parrainage importe ce module
+    recompenser_parrainage(connexion_bd, commande_id)
     connexion_bd.close()
     flash("Commission marquée comme réglée.")
     return redirect(url_for("admin"))

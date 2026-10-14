@@ -6,6 +6,7 @@ from core import app, utilisateur_connecte, PRIX_PREMIUM_MENSUEL
 import sms
 import wave
 from routes.premium import prolonger_premium
+from routes.parrainage import recompenser_parrainage
 
 
 def commissions_dues(connexion_bd, agriculteur_id):
@@ -89,6 +90,7 @@ def verifier_paiement(connexion_bd, paiement):
                 if commande_id:
                     connexion_bd.execute("UPDATE commandes SET commission_payee = 1 WHERE id = ?",
                                          (int(commande_id),))
+                    recompenser_parrainage(connexion_bd, int(commande_id))
     connexion_bd.commit()
     return True
 

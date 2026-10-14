@@ -41,6 +41,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 - **Paiement des commandes via Wave** (au choix du client, si `WAVE_API_KEY` est définie) : l'agriculteur fixe le prix en confirmant, le client paie la plateforme avec Wave, la commission est retenue d'office ; après livraison, l'admin reverse le reste à l'agriculteur (ou rembourse le client si la commande est annulée) puis le marque dans `/admin`.
 - **Statistiques agriculteur** (`/espace-agriculteur/statistiques`) : chiffre d'affaires, commandes par statut, taux d'acceptation et note pour tous ; ventes des 12 derniers mois et produits les plus demandés pour les membres Premium.
 - **Comptabilité** (`/admin/export`) : revenus de la plateforme par mois (commissions réglées + Premium) et export Excel/CSV des ventes, commissions, reversements et abonnements, par année.
+- **Parrainage** (`/parrainage`) : chaque utilisateur a un lien d'invitation. Quand un filleul réalise sa première vente ou son premier achat (livré, ≥ 5 000 FCFA, commission réglée, sans que le parrain soit l'acheteur ou le vendeur), le parrain reçoit 1 mois de Premium (6 au plus par an).
 - **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`, une fois l'adresse confirmée par le lien reçu par e-mail : « Mon profil » > « Recevoir le lien de confirmation ») : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
 
 ## Organisation du code
