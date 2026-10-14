@@ -58,6 +58,9 @@
                         <p style="margin: 5px 0 0;">Vente : {{ commande.montant }} FCFA — commission : {{ commande.commission }} FCFA
                             {% if commande.commission_payee %}<span class="badge badge-dispo">Réglée</span>{% else %}<span class="badge badge-attente">À régler</span>{% endif %}</p>
                     {% endif %}
+                    {% if commande.statut == 'livree' %}
+                        <p style="margin: 5px 0 0;"><a href="{{ url_for('recu_commande', commande_id=commande.id) }}">🧾 Reçu</a></p>
+                    {% endif %}
 
                     {% for statut_suivant in transitions.get(commande.statut, ()) %}
                         <form method="POST" action="{{ url_for('changer_statut_commande', commande_id=commande.id) }}" style="display:inline;">

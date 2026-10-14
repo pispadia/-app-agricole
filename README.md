@@ -53,6 +53,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 - **Modération** : « 🚩 Signaler cette annonce » (utilisateur connecté, un signalement par personne). Au 3e signalement, l'annonce est masquée automatiquement ; dans `/admin/signalements`, l'admin la masque définitivement, la rétablit ou suspend le vendeur.
 - **Statistiques de la plateforme** : `/admin/statistiques` montre mois par mois les inscriptions, annonces, commandes, ventes et revenus (commissions + Premium), et les produits, localités et agriculteurs qui vendent le plus.
 - **Agriculteur vérifié** : l'agriculteur envoie une photo de sa pièce d'identité (`/espace-agriculteur/verification`) ; l'admin compare le nom dans `/admin/verifications` et valide ou refuse (SMS envoyé). La pièce est effacée dès la décision ; le badge « ✅ Vérifié » apparaît sur les annonces, le catalogue et la page d'avis.
+- **Reçus de commande** : pour chaque commande livrée, un reçu imprimable `/commande/<id>/recu` (lien « 🧾 Reçu » côté client et agriculteur), à enregistrer en PDF depuis le navigateur. La commission n'apparaît que sur le reçu de l'agriculteur.
 - **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`, une fois l'adresse confirmée par le lien reçu par e-mail : « Mon profil » > « Recevoir le lien de confirmation ») : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
 
 ## Organisation du code
