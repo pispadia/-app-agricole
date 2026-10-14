@@ -4,7 +4,8 @@ from functools import wraps
 
 from flask import render_template, request, redirect, url_for, session, flash
 from database import get_connexion
-from core import (app, utilisateur_connecte, date_fin_premium, est_admin,
+from core import (app, utilisateur_connecte, date_fin_premium, est_admin, adresse_admin, email_confirme,
+                  utilisateur_courant,
                   PRIX_PREMIUM_MENSUEL, DUREE_PREMIUM_JOURS, NUMERO_PAIEMENT, TAUX_COMMISSION)
 
 
@@ -55,7 +56,11 @@ def premium():
 def admin_requis(vue):
     @wraps(vue)
     def vue_protegee(*args, **kwargs):
-        if not est_admin():
+        utilisateur = utilisateur_courant()
+        if adresse_admin(utilisateur) and not email_confirme(utilisateur):
+            flash("Confirme ton adresse e-mail pour accéder à l'administration.")
+            return redirect(url_for("mon_profil"))
+        if not est_admin(utilisateur):
             return redirect(url_for("accueil"))
         return vue(*args, **kwargs)
     return vue_protegee

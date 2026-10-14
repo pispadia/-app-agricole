@@ -28,7 +28,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 - **Commission** : quand l'agriculteur marque une commande « livrée », il indique le montant encaissé ; la plateforme calcule sa commission (`TAUX_COMMISSION`, 5 % par défaut). L'agriculteur voit ce qu'il doit et le numéro où payer.
 - **Premium** (`PRIX_PREMIUM_MENSUEL` FCFA pour 30 jours) : badge ⭐ Pro, annonces en tête du catalogue, et accès au financement (publier une demande, contacter un organisme). L'utilisateur paie par Wave / Orange Money au `NUMERO_PAIEMENT` puis déclare la référence sur `/premium`.
 - **Paiement Wave** : avec `WAVE_API_KEY` (clé d'un compte Wave Business autorisée pour l'API Checkout), un bouton « Payer avec Wave » active le Premium et règle les commissions automatiquement : le site vérifie auprès de Wave que la session est payée (au retour de l'utilisateur, ou à sa prochaine visite) avant d'appliquer le paiement, une seule fois. Sans clé, le paiement manuel reste proposé.
-- **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`) : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
+- **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`, une fois l'adresse confirmée par le lien reçu par e-mail : « Mon profil » > « Recevoir le lien de confirmation ») : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
 
 ## Organisation du code
 

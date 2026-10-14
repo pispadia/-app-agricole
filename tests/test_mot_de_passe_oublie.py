@@ -24,6 +24,7 @@ def client(tmp_path, monkeypatch, emails):
     client.post("/inscription", data={
         "nom": "Awa", "email": "awa@exemple.sn", "mot_de_passe": "ancien-mdp", "role": "client",
     })
+    emails.clear()  # e-mail de confirmation de l'inscription
     return client
 
 
