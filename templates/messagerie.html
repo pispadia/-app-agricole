@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_statut_commande.html" import badge_statut %}
 {% block contenu %}
-    <h2>💬 Discussion avec {{ interlocuteur }}</h2>
+    <h2>💬 {{ "Discussion avec" | t }} {{ interlocuteur }}</h2>
     <p style="color:#666;">Commande : <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }} {{ badge_statut(commande.statut) }}</p>
 
     <div class="conversation">
@@ -17,10 +17,10 @@
 
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <textarea name="contenu" rows="3" maxlength="1000" placeholder="Ton message..." required></textarea>
-        <button type="submit">Envoyer</button>
+        <textarea name="contenu" rows="3" maxlength="1000" placeholder="{{ "Ton message..." | t }}" required></textarea>
+        <button type="submit">{{ "Envoyer" | t }}</button>
     </form>
     <p style="font-size:0.85em; color:#999;">Pour ta sécurité, les numéros de téléphone et e-mails sont masqués : tout se passe sur App Agricole.</p>
 
-    <p><a href="{{ retour }}">← Retour aux commandes</a></p>
+    <p><a href="{{ retour }}">{{ "← Retour aux commandes" | t }}</a></p>
 {% endblock %}

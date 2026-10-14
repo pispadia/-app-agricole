@@ -311,7 +311,10 @@ def reinitialiser_mot_de_passe(jeton):
 
 @app.route("/deconnexion")
 def deconnexion():
+    langue = session.get("langue")
     session.clear()
+    if langue:
+        session["langue"] = langue  # la langue choisie reste après la déconnexion
     return redirect(url_for("accueil"))
 
 

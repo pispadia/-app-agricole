@@ -25,6 +25,8 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 **Prix du marché** (`/prix-du-marche`) : prix courant au kilo de chaque produit (médiane des annonces des 6 derniers mois exprimées en « / kg » ou « / tonne », dès 2 annonces), affiché aussi dans le catalogue à côté de chaque annonce.
 
+**Wolof** : le lien « 🌍 Wolof / Français » du menu change la langue. Les traductions sont dans `langues.py` (dictionnaire français → wolof, à faire relire par un locuteur natif) ; dans les templates, un texte se traduit avec `{{ "Texte" | t }}` et reste en français s'il n'a pas de traduction.
+
 **Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Moyen-Orient et Afrique » (pays : Sénégal), achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR` (en général `2210000`, sauf numéro dédié fourni par Orange). Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
 
 ## Revenus : commission et Premium
@@ -46,7 +48,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 ```powershell
 python -m pytest
-python -m compileall -q app.py core.py database.py emails.py sms.py wave.py prix_marche.py routes
+python -m compileall -q app.py core.py database.py emails.py sms.py wave.py prix_marche.py langues.py routes
 ```
 
 Ces vérifications tournent aussi automatiquement sur GitHub (onglet *Actions*) à chaque pull request et à chaque mise à jour de `main`. Les contrôles automatiques couvrent les règles de saisie principales. Avant chaque mise en ligne, teste également manuellement l'inscription, les quatre rôles, l'ajout au panier et le changement de statut d'une commande.

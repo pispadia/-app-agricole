@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% block contenu %}
     {% set saisie = saisie or {} %}
-    <h2>Publier une récolte</h2>
+    <h2>{{ "Publier une récolte" | t }}</h2>
     <form method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="Nom du produit (ex: Tomates)" required>
-        <input type="text" name="quantite" value="{{ saisie.get('quantite', '') }}" placeholder="Quantité (ex: 200 kg)" required>
-        <input type="text" name="prix" value="{{ saisie.get('prix', '') }}" placeholder="Prix au détail (ex: 500 FCFA / kg)" required>
-        <p style="margin:0 0 8px; font-size:0.9em;"><a href="{{ url_for('prix_marche') }}" target="_blank" rel="noopener">📈 Voir les prix du marché pour fixer ton prix</a></p>
+        <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="{{ "Nom du produit (ex: Tomates)" | t }}" required>
+        <input type="text" name="quantite" value="{{ saisie.get('quantite', '') }}" placeholder="{{ "Quantité (ex: 200 kg)" | t }}" required>
+        <input type="text" name="prix" value="{{ saisie.get('prix', '') }}" placeholder="{{ "Prix au détail (ex: 500 FCFA / kg)" | t }}" required>
+        <p style="margin:0 0 8px; font-size:0.9em;"><a href="{{ url_for('prix_marche') }}" target="_blank" rel="noopener">📈 {{ "Voir les prix du marché pour fixer ton prix" | t }}</a></p>
 
-        <label>Prix en gros (optionnel)</label>
-        <input type="text" name="prix_gros" value="{{ saisie.get('prix_gros', '') }}" placeholder="Prix en gros (ex: 400 FCFA / kg)">
-        <input type="text" name="quantite_gros_min" value="{{ saisie.get('quantite_gros_min', '') }}" placeholder="Quantité minimum pour le prix en gros (ex: à partir de 50 kg)">
+        <label>{{ "Prix en gros (optionnel)" | t }}</label>
+        <input type="text" name="prix_gros" value="{{ saisie.get('prix_gros', '') }}" placeholder="{{ "Prix en gros (ex: 400 FCFA / kg)" | t }}">
+        <input type="text" name="quantite_gros_min" value="{{ saisie.get('quantite_gros_min', '') }}" placeholder="{{ "Quantité minimum pour le prix en gros (ex: à partir de 50 kg)" | t }}">
 
-        <label>Date de disponibilité</label>
+        <label>{{ "Date de disponibilité" | t }}</label>
         <input type="date" name="date_disponibilite" value="{{ saisie.get('date_disponibilite', '') }}" required>
 
-        <input type="text" name="localite" value="{{ saisie.get('localite', '') }}" placeholder="Localité de production (ex: Thiès)" required>
+        <input type="text" name="localite" value="{{ saisie.get('localite', '') }}" placeholder="{{ "Localité de production (ex: Thiès)" | t }}" required>
 
-        <textarea name="description" placeholder="Description (optionnel)" rows="4">{{ saisie.get('description', '') }}</textarea>
+        <textarea name="description" placeholder="{{ "Description (optionnel)" | t }}" rows="4">{{ saisie.get('description', '') }}</textarea>
 
-        <label>Photo du produit (optionnel)</label>
+        <label>{{ "Photo du produit (optionnel)" | t }}</label>
         <input type="file" name="photo" accept="image/*">
 
-        <button type="submit">Publier</button>
+        <button type="submit">{{ "Publier" | t }}</button>
     </form>
-    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+    <p><a href="{{ url_for('espace_agriculteur') }}">{{ "← Retour à mon espace" | t }}</a></p>
 {% endblock %}

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block contenu %}
-    <h2>Espace Agriculteur</h2>
-    <p><a href="{{ url_for('prix_marche') }}">📈 Voir les prix du marché</a></p>
-    <p>Bienvenue {{ nom }} 👋</p>
+    <h2>{{ "Espace Agriculteur" | t }}</h2>
+    <p><a href="{{ url_for('prix_marche') }}">📈 {{ "Voir les prix du marché" | t }}</a></p>
+    <p>{{ "Bienvenue" | t }} {{ nom }} 👋</p>
 
-    <a href="{{ url_for('nouvelle_recolte') }}"><button>+ Publier une récolte</button></a>
-    <a href="{{ url_for('commandes_recues') }}"><button>📦 Voir mes commandes reçues</button></a>
-    <a href="{{ url_for('semences_pepinieres') }}"><button>🌱 Acheter semences / pépinières</button></a>
-    <a href="{{ url_for('espace_financement_agriculteur') }}"><button>💰 Financement</button></a>
+    <a href="{{ url_for('nouvelle_recolte') }}"><button>{{ "+ Publier une récolte" | t }}</button></a>
+    <a href="{{ url_for('commandes_recues') }}"><button>📦 {{ "Voir mes commandes reçues" | t }}</button></a>
+    <a href="{{ url_for('semences_pepinieres') }}"><button>🌱 {{ "Acheter semences / pépinières" | t }}</button></a>
+    <a href="{{ url_for('espace_financement_agriculteur') }}"><button>💰 {{ "Financement" | t }}</button></a>
 
-    <h3 style="margin-top: 30px;">Mes récoltes publiées</h3>
+    <h3 style="margin-top: 30px;">{{ "Mes récoltes publiées" | t }}</h3>
 
     {% if recoltes %}
         {% for recolte in recoltes %}
@@ -20,25 +20,25 @@
                 <div>
                     <strong>{{ recolte.nom }}</strong> — {{ recolte.quantite }}
                     {% if recolte.statut == 'disponible' %}
-                        <span class="badge badge-dispo">Disponible</span>
+                        <span class="badge badge-dispo">{{ "Disponible" | t }}</span>
                     {% else %}
-                        <span class="badge badge-epuise">Épuisé</span>
+                        <span class="badge badge-epuise">{{ "Épuisé" | t }}</span>
                     {% endif %}
                     <br>
-                    Détail : {{ recolte.prix }}<br>
+                    {{ "Détail" | t }} : {{ recolte.prix }}<br>
                     {% if recolte.prix_gros %}
-                        Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>
+                        {{ "Gros" | t }} : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}<br>
                     {% endif %}
-                    📍 {{ recolte.localite }} · Disponible le {{ recolte.date_disponibilite }}
+                    📍 {{ recolte.localite }} · {{ "Disponible le" | t }} {{ recolte.date_disponibilite }}
                     {% if recolte.description %}
                         <p style="margin: 5px 0 0; color: #666;">{{ recolte.description }}</p>
                     {% endif %}
                     <div style="margin-top: 8px;">
-                        <a href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}"><button type="button">Modifier</button></a>
+                        <a href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}"><button type="button">{{ "Modifier" | t }}</button></a>
                         <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}" style="display:inline;">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit">
-                                {% if recolte.statut == 'disponible' %}Marquer épuisé{% else %}Marquer disponible{% endif %}
+                                {% if recolte.statut == 'disponible' %}{{ "Marquer épuisé" | t }}{% else %}{{ "Marquer disponible" | t }}{% endif %}
                             </button>
                         </form>
                     </div>
@@ -46,6 +46,6 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>Tu n'as encore publié aucune récolte.</p>
+        <p>{{ "Tu n'as encore publié aucune récolte." | t }}</p>
     {% endif %}
 {% endblock %}
