@@ -172,7 +172,7 @@ TABLES = (
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
     "photos_recolte", "verifications", "parametres", "abonnements_push", "demandes_support",
-    "commandes_regulieres",
+    "commandes_regulieres", "favoris", "agriculteurs_suivis",
 )
 
 
@@ -195,6 +195,7 @@ INDEX = (
     ("idx_paiements_wave_utilisateur", "paiements_wave (utilisateur_id, statut)"),
     ("idx_produits_fournisseur", "produits_fournisseur (fournisseur_id)"),
     ("idx_regulieres_date", "commandes_regulieres (actif, prochaine_date)"),
+    ("idx_suivis_agriculteur", "agriculteurs_suivis (agriculteur_id)"),
 )
 
 
@@ -481,6 +482,32 @@ def init_db():
             localite TEXT,
             date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (client_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
+    # Favoris d'un client (annonces gardées de côté) et agriculteurs qu'il suit : il est
+    # prévenu quand un agriculteur suivi publie une nouvelle récolte
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS favoris (
+            id {ID_AUTO},
+            client_id INTEGER NOT NULL,
+            recolte_id INTEGER NOT NULL,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (client_id, recolte_id),
+            FOREIGN KEY (client_id) REFERENCES utilisateurs (id),
+            FOREIGN KEY (recolte_id) REFERENCES recoltes (id)
+        )
+    """)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS agriculteurs_suivis (
+            id {ID_AUTO},
+            client_id INTEGER NOT NULL,
+            agriculteur_id INTEGER NOT NULL,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (client_id, agriculteur_id),
+            FOREIGN KEY (client_id) REFERENCES utilisateurs (id),
+            FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id)
         )
     """)
     connexion.commit()

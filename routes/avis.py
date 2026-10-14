@@ -76,5 +76,7 @@ def avis_agriculteur(agriculteur_id):
            ORDER BY avis.date_creation DESC, avis.id DESC""",
         (agriculteur_id,)
     ).fetchall()
+    from routes.favoris import suit  # import ici : routes.favoris importe ce module
+    suivi = suit(connexion_bd, agriculteur_id)
     connexion_bd.close()
-    return render_template("avis_agriculteur.html", agriculteur=agriculteur, avis=avis)
+    return render_template("avis_agriculteur.html", agriculteur=agriculteur, avis=avis, suivi=suivi)
