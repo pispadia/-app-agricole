@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_etoiles.html" import etoiles %}
 {% from "_statut_commande.html" import badge_statut %}
 {% from "_livraison.html" import infos_livraison %}
 {% from "_negociation.html" import negociation %}
@@ -30,7 +31,8 @@
                 <div>
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
                     {{ badge_statut(commande.statut) }}<br>
-                    Client : {{ commande.nom_client }}{% if commande.reguliere_id %} <span class="badge badge-livree">🔁 Régulière</span>{% endif %}<br>
+                    Client : {{ commande.nom_client }}{% if commande.reguliere_id %} <span class="badge badge-livree">🔁 Régulière</span>{% endif %}
+                    <span class="fiabilite-client">{% if commande.note_client %}🛡️ {{ etoiles(commande.note_client) }} {{ '%.1f' | format(commande.note_client | float) }} ({{ commande.nb_notes_client }} {{ "note(s) d'agriculteurs" | t }}){% else %}🆕 {{ "Pas encore noté" | t }}{% endif %} · {{ commande.nb_livrees_client or 0 }} {{ "commande(s) livrée(s)" | t }}</span><br>
                     {{ negociation(commande, 'agriculteur') }}
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
@@ -62,6 +64,22 @@
                     {% endif %}
                     {% if commande.statut == 'livree' %}
                         <p style="margin: 5px 0 0;"><a href="{{ url_for('recu_commande', commande_id=commande.id) }}">🧾 Reçu</a></p>
+                    {% endif %}
+                    {% if commande.statut in ('livree', 'annulee') %}
+                        {% if commande.note_donnee_client %}
+                            <p style="margin: 5px 0 0; font-size:0.9em;">{{ "Ta note pour ce client" | t }} : {{ etoiles(commande.note_donnee_client) }}</p>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('noter_client', commande_id=commande.id) }}" class="noter-client">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <label>{{ "Note ce client" | t }}{% if commande.statut == 'annulee' %} ({{ "ex : absent au rendez-vous" | t }}){% endif %} :
+                                    <select name="note" required>
+                                        <option value="">—</option>
+                                        {% for n in range(5, 0, -1) %}<option value="{{ n }}">{{ "★" * n }}</option>{% endfor %}
+                                    </select>
+                                </label>
+                                <button type="submit" class="btn-clair btn-petit">{{ "Noter" | t }}</button>
+                            </form>
+                        {% endif %}
                     {% endif %}
                     {% if commande.statut != 'en_attente' %}
                         <p style="margin: 5px 0 0; font-size:0.88em;"><a href="{{ url_for('contact', commande=commande.id) }}" style="color:var(--rouge);">⚠️ Signaler un problème</a></p>

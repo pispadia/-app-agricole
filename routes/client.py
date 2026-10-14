@@ -9,6 +9,7 @@ from database import get_connexion, COLONNES_RECOLTE
 from core import (app, prix_valide, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
 from routes.avis import NOTES_AGRICULTEURS
+from routes.fiabilite_clients import fiabilite_du_client
 from prix_marche import prix_du_marche, produit_cle
 
 
@@ -321,13 +322,15 @@ def mes_commandes():
            WHERE commandes_regulieres.client_id = ? ORDER BY commandes_regulieres.id DESC""",
         (session["utilisateur_id"],)
     ).fetchall()
+    fiabilite = fiabilite_du_client(connexion_bd, session["utilisateur_id"])
     # Les mises à jour affichées ici sont considérées comme vues
     connexion_bd.execute("UPDATE commandes SET lu_client = 1 WHERE client_id = ?", (session["utilisateur_id"],))
     connexion_bd.commit()
     connexion_bd.close()
 
     return render_template("mes_commandes.html", nom=session["nom"], commandes=commandes,
-                           modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT, regulieres=regulieres, frequences=FREQUENCES)
+                           modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT, regulieres=regulieres, frequences=FREQUENCES,
+                           fiabilite=fiabilite)
 
 
 @app.route("/mes-commandes/<int:commande_id>/annuler", methods=["POST"])

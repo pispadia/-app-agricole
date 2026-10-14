@@ -173,6 +173,7 @@ TABLES = (
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
     "photos_recolte", "verifications", "parametres", "abonnements_push", "demandes_support",
     "commandes_regulieres", "favoris", "agriculteurs_suivis",
+    "avis_clients",
 )
 
 
@@ -196,6 +197,7 @@ INDEX = (
     ("idx_produits_fournisseur", "produits_fournisseur (fournisseur_id)"),
     ("idx_regulieres_date", "commandes_regulieres (actif, prochaine_date)"),
     ("idx_suivis_agriculteur", "agriculteurs_suivis (agriculteur_id)"),
+    ("idx_avis_clients_client", "avis_clients (client_id)"),
 )
 
 
@@ -508,6 +510,23 @@ def init_db():
             UNIQUE (client_id, agriculteur_id),
             FOREIGN KEY (client_id) REFERENCES utilisateurs (id),
             FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
+    # Fiabilité des clients : l'agriculteur note le client après une commande (livrée ou annulée,
+    # ex : client absent au rendez-vous). Seule la moyenne est montrée aux autres agriculteurs.
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS avis_clients (
+            id {ID_AUTO},
+            commande_id INTEGER NOT NULL UNIQUE,
+            agriculteur_id INTEGER NOT NULL,
+            client_id INTEGER NOT NULL,
+            note INTEGER NOT NULL CHECK(note BETWEEN 1 AND 5),
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (commande_id) REFERENCES commandes (id),
+            FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id),
+            FOREIGN KEY (client_id) REFERENCES utilisateurs (id)
         )
     """)
     connexion.commit()
