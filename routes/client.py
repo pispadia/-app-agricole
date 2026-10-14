@@ -4,6 +4,7 @@ from datetime import date
 from flask import render_template, request, redirect, url_for, session, flash
 import push
 from stock import depasse_le_stock
+from routes.commandes_regulieres import FREQUENCES, creer_reguliere
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, prix_valide, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
@@ -254,6 +255,9 @@ def commander(recolte_id):
             quantite_demandee = quantite_valide(request.form["quantite_demandee"])
             if depasse_le_stock(recolte["quantite"], quantite_demandee):
                 raise ValueError(f"Il ne reste que {recolte['quantite']} : diminue la quantité demandée.")
+            frequence = int(request.form.get("repetition", "0") or 0)
+            if frequence and frequence not in FREQUENCES:
+                raise ValueError("Fréquence de répétition inconnue.")
             prix_propose = request.form.get("prix_propose", "").strip()
             prix_propose = prix_valide(prix_propose) if prix_propose else None
             mode_livraison, adresse_livraison = livraison_valide(request.form)
@@ -262,14 +266,17 @@ def commander(recolte_id):
             flash(str(erreur))
             return redirect(url_for("commander", recolte_id=recolte_id))
         message = masquer_coordonnees(request.form.get("message", ""))
+        mode_paiement = mode_paiement_valide(request.form)
+        reguliere_id = creer_reguliere(connexion_bd, session["utilisateur_id"], recolte_id, quantite_demandee,
+                                       frequence, mode_livraison, adresse_livraison, mode_paiement) if frequence else None
 
         connexion_bd.execute(
             """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison,
-                                     adresse_livraison, mode_paiement, prix_propose, negociation)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                     adresse_livraison, mode_paiement, prix_propose, negociation, reguliere_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (recolte_id, session["utilisateur_id"], quantite_demandee, message, mode_livraison,
-             adresse_livraison, mode_paiement_valide(request.form), prix_propose,
-             "proposee" if prix_propose else None)
+             adresse_livraison, mode_paiement, prix_propose,
+             "proposee" if prix_propose else None, reguliere_id)
         )
         connexion_bd.commit()
         connexion_bd.close()
@@ -278,6 +285,8 @@ def commander(recolte_id):
                      + (f" Prix proposé : {prix_propose}." if prix_propose else ""), url_for("commandes_recues"))
 
         flash(f"Ta commande a été envoyée à {recolte['nom_agriculteur']}. Il te contactera pour la suite.")
+        if frequence:
+            flash(f"Elle sera renouvelée {FREQUENCES[frequence]} : gère-la dans « Mes commandes ».")
         return redirect(url_for("mes_commandes"))
 
     connexion_bd.close()
@@ -306,13 +315,19 @@ def mes_commandes():
            ORDER BY commandes.date_creation DESC""",
         (session["utilisateur_id"], session["utilisateur_id"])
     ).fetchall()
+    regulieres = connexion_bd.execute(
+        """SELECT commandes_regulieres.*, recoltes.nom AS nom_recolte FROM commandes_regulieres
+           JOIN recoltes ON commandes_regulieres.recolte_id = recoltes.id
+           WHERE commandes_regulieres.client_id = ? ORDER BY commandes_regulieres.id DESC""",
+        (session["utilisateur_id"],)
+    ).fetchall()
     # Les mises à jour affichées ici sont considérées comme vues
     connexion_bd.execute("UPDATE commandes SET lu_client = 1 WHERE client_id = ?", (session["utilisateur_id"],))
     connexion_bd.commit()
     connexion_bd.close()
 
     return render_template("mes_commandes.html", nom=session["nom"], commandes=commandes,
-                           modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT)
+                           modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT, regulieres=regulieres, frequences=FREQUENCES)
 
 
 @app.route("/mes-commandes/<int:commande_id>/annuler", methods=["POST"])

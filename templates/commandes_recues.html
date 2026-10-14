@@ -30,7 +30,7 @@
                 <div>
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
                     {{ badge_statut(commande.statut) }}<br>
-                    Client : {{ commande.nom_client }}<br>
+                    Client : {{ commande.nom_client }}{% if commande.reguliere_id %} <span class="badge badge-livree">🔁 Régulière</span>{% endif %}<br>
                     {{ negociation(commande, 'agriculteur') }}
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}

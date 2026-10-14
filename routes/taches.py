@@ -89,7 +89,8 @@ def taches_quotidiennes():
     if not jeton_valide():
         abort(404)
     connexion_bd = get_connexion()
-    messages = preparer_rappels(connexion_bd)
+    from routes.commandes_regulieres import passer_commandes_du_jour  # import local : évite un cycle
+    messages = preparer_rappels(connexion_bd) + passer_commandes_du_jour(connexion_bd)
     connexion_bd.close()
     lien = url_for("accueil", _external=True)
 
