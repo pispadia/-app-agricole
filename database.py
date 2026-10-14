@@ -77,7 +77,7 @@ def colonnes_de_table(curseur, nom_table):
 TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
-    "echecs_connexion", "paiements_premium", "paiements_wave", "avis",
+    "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande",
 )
 
 
@@ -309,6 +309,23 @@ def init_db():
             FOREIGN KEY (commande_id) REFERENCES commandes (id),
             FOREIGN KEY (client_id) REFERENCES utilisateurs (id),
             FOREIGN KEY (agriculteur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
+    # Messagerie entre le client et l'agriculteur d'une commande (sans échanger leurs numéros)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS messages_commande (
+            id {ID_AUTO},
+            commande_id INTEGER NOT NULL,
+            auteur_id INTEGER NOT NULL,
+            destinataire_id INTEGER NOT NULL,
+            contenu TEXT NOT NULL,
+            lu INTEGER NOT NULL DEFAULT 0,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (commande_id) REFERENCES commandes (id),
+            FOREIGN KEY (auteur_id) REFERENCES utilisateurs (id),
+            FOREIGN KEY (destinataire_id) REFERENCES utilisateurs (id)
         )
     """)
     connexion.commit()

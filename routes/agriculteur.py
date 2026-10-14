@@ -15,13 +15,16 @@ def commandes_recues():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte,
-                  utilisateurs.nom AS nom_client
+                  utilisateurs.nom AS nom_client,
+                  (SELECT COUNT(*) FROM messages_commande
+                   WHERE messages_commande.commande_id = commandes.id
+                     AND messages_commande.destinataire_id = ? AND messages_commande.lu = 0) AS messages_non_lus
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON commandes.client_id = utilisateurs.id
            WHERE recoltes.agriculteur_id = ?
            ORDER BY commandes.date_creation DESC""",
-        (session["utilisateur_id"],)
+        (session["utilisateur_id"], session["utilisateur_id"])
     ).fetchall()
     connexion_bd.close()
 

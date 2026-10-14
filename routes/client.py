@@ -4,7 +4,8 @@ from datetime import date
 from flask import render_template, request, redirect, url_for, session, flash
 import sms
 from database import get_connexion
-from core import app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON
+from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
+                  masquer_coordonnees)
 from routes.avis import NOTES_AGRICULTEURS
 
 
@@ -210,7 +211,7 @@ def commander(recolte_id):
             connexion_bd.close()
             flash(str(erreur))
             return redirect(url_for("commander", recolte_id=recolte_id))
-        message = request.form.get("message", "")
+        message = masquer_coordonnees(request.form.get("message", ""))
 
         connexion_bd.execute(
             """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison, adresse_livraison)
@@ -236,14 +237,17 @@ def mes_commandes():
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
         """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.prix, recoltes.agriculteur_id,
-                  utilisateurs.nom AS nom_agriculteur, avis.note AS note_avis
+                  utilisateurs.nom AS nom_agriculteur, avis.note AS note_avis,
+                  (SELECT COUNT(*) FROM messages_commande
+                   WHERE messages_commande.commande_id = commandes.id
+                     AND messages_commande.destinataire_id = ? AND messages_commande.lu = 0) AS messages_non_lus
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
            LEFT JOIN avis ON avis.commande_id = commandes.id
            WHERE commandes.client_id = ?
            ORDER BY commandes.date_creation DESC""",
-        (session["utilisateur_id"],)
+        (session["utilisateur_id"], session["utilisateur_id"])
     ).fetchall()
     # Les mises à jour affichées ici sont considérées comme vues
     connexion_bd.execute("UPDATE commandes SET lu_client = 1 WHERE client_id = ?", (session["utilisateur_id"],))

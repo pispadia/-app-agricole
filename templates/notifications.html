@@ -3,6 +3,19 @@
 {% block contenu %}
     <h2>Notifications</h2>
 
+    {% if discussions %}
+        <h3>Nouveaux messages</h3>
+        {% for d in discussions %}
+            <div class="carte-recolte">
+                <div>
+                    💬 <strong>{{ d.nom_auteur }}</strong> — commande de {{ d.nom_recolte }}
+                    <span class="badge badge-epuise">{{ d.nombre }} nouveau{{ 'x' if d.nombre > 1 }}</span><br>
+                    <a href="{{ url_for('messages_commande', commande_id=d.commande_id) }}">Lire et répondre</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {% if role == 'agriculteur' %}
         <h3>Commandes reçues</h3>
         {% if commandes %}
@@ -11,7 +24,7 @@
                     <div>
                         <strong>{{ c.nom_recolte }}</strong> — {{ c.quantite_demandee }}
                         {% if not c.lu %}<span class="badge badge-epuise">Nouveau</span>{% endif %}<br>
-                        Client : {{ c.nom_client }} ({{ c.email_client }})
+                        Client : {{ c.nom_client }}
                         {% if c.message %}<p style="margin: 5px 0 0; color: #666;">« {{ c.message }} »</p>{% endif %}
                         <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ c.date_creation }}</p>
                     </div>

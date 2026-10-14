@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_statut_commande.html" import badge_statut %}
+{% block contenu %}
+    <h2>💬 Discussion avec {{ interlocuteur }}</h2>
+    <p style="color:#666;">Commande : <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }} {{ badge_statut(commande.statut) }}</p>
+
+    <div class="conversation">
+        {% for message in messages %}
+            <div class="bulle {% if message.auteur_id == session['utilisateur_id'] %}bulle-moi{% endif %}">
+                <div class="bulle-texte">{{ message.contenu }}</div>
+                <div class="bulle-date">{{ message.date_creation }}</div>
+            </div>
+        {% else %}
+            <p style="color:#666;">Aucun message pour le moment. Pose ta question ou précise la livraison ici.</p>
+        {% endfor %}
+    </div>
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <textarea name="contenu" rows="3" maxlength="1000" placeholder="Ton message..." required></textarea>
+        <button type="submit">Envoyer</button>
+    </form>
+    <p style="font-size:0.85em; color:#999;">Pour ta sécurité, les numéros de téléphone et e-mails sont masqués : tout se passe sur App Agricole.</p>
+
+    <p><a href="{{ retour }}">← Retour aux commandes</a></p>
+{% endblock %}

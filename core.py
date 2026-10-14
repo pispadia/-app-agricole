@@ -128,6 +128,19 @@ def telephone_valide(texte):
     return texte
 
 
+MOTIF_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+# Suite d'au moins 8 chiffres, éventuellement séparés par des espaces ou des points
+# (77 123 45 67, +221 77..., 0022177...) ; les quantités et prix restent visibles
+MOTIF_TELEPHONE = re.compile(r"\+?\d(?:[\s.]*\d){7,}")
+
+
+def masquer_coordonnees(texte):
+    """Masque téléphones et e-mails dans un message libre, pour que clients et agriculteurs
+    ne contournent pas la plateforme (et sa commission)."""
+    texte = MOTIF_EMAIL.sub("[e-mail masqué]", texte or "")
+    return MOTIF_TELEPHONE.sub("[numéro masqué]", texte)
+
+
 @app.template_filter("whatsapp")
 def lien_whatsapp(telephone):
     """Numéro -> lien wa.me. Un numéro sénégalais local (9 chiffres, 7x) reçoit l'indicatif 221."""
