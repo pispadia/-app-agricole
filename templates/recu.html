@@ -30,7 +30,7 @@
         </p>
 
         <table>
-            <tr><td>{{ commande.nom_recolte }} — {{ commande.quantite_demandee }}<br><span style="font-size:0.85em; color:#666;">Prix affiché : {{ commande.prix }}</span></td><td>{{ montant }} FCFA</td></tr>
+            <tr><td>{{ commande.nom_recolte }} — {{ commande.quantite_demandee }}<br><span style="font-size:0.85em; color:#666;">{% if commande.negociation == 'acceptee' %}Prix convenu : {{ commande.prix_propose }}{% else %}Prix affiché : {{ commande.prix }}{% endif %}</span></td><td>{{ montant }} FCFA</td></tr>
             {% if frais %}<tr><td>Frais de livraison</td><td>{{ frais }} FCFA</td></tr>{% endif %}
             <tr class="total"><td>Total payé</td><td>{{ total }} FCFA</td></tr>
         </table>

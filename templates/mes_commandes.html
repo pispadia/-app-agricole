@@ -2,6 +2,7 @@
 {% from "_statut_commande.html" import badge_statut %}
 {% from "_etoiles.html" import etoiles %}
 {% from "_livraison.html" import infos_livraison %}
+{% from "_negociation.html" import negociation %}
 {% block contenu %}
     <h2>Mes commandes</h2>
 
@@ -14,6 +15,7 @@
                     {% if commande.lu_client == 0 %}<span class="badge badge-epuise">Mis à jour</span>{% endif %}<br>
                     Agriculteur : <a href="{{ url_for('avis_agriculteur', agriculteur_id=commande.agriculteur_id) }}">{{ commande.nom_agriculteur }}</a><br>
                     Prix affiché : {{ commande.prix }}<br>
+                    {{ negociation(commande, 'client') }}
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
                         <br><span class="badge badge-attente">🌱 Pré-commande : récolte prévue le {{ commande.date_disponibilite | date_fr }}</span>

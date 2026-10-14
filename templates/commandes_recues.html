@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_statut_commande.html" import badge_statut %}
 {% from "_livraison.html" import infos_livraison %}
+{% from "_negociation.html" import negociation %}
 {% block contenu %}
     <h2>{{ "Commandes reçues" | t }}</h2>
 
@@ -30,6 +31,7 @@
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
                     {{ badge_statut(commande.statut) }}<br>
                     Client : {{ commande.nom_client }}<br>
+                    {{ negociation(commande, 'agriculteur') }}
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
                         <br><span class="badge badge-attente">🌱 Pré-commande : récolte prévue le {{ commande.date_disponibilite | date_fr }}</span>

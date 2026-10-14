@@ -60,6 +60,7 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 - **Contact et litiges** : formulaire `/contact` (lien en pied de page, « ⚠️ Signaler un problème » sur chaque commande), avec la commande concernée. Les admins sont prévenus par e-mail et répondent depuis `/admin/support` ; la réponse part par e-mail et notification, et reste visible sur `/contact`.
 - **Carte des producteurs** : `/carte` place les annonces sur une carte du Sénégal (Leaflet, embarqué dans `static/leaflet`, fond OpenStreetMap) d'après leur localité (`localites.py`, ~80 villes et zones) ; bouton « Près de chez moi » qui liste les annonces les plus proches.
 - **Stock automatique** (`stock.py`) : à chaque livraison, la quantité livrée est retirée de l'annonce (kg, tonnes, grammes convertis ; sacs, pièces...) ; à zéro, l'annonce passe « épuisée ». Une commande plus grande que le stock est refusée. Si les unités ne se comparent pas, rien n'est modifié.
+- **Proposer un prix** : à la commande, le client peut proposer un prix ; l'agriculteur accepte ou fait une contre-offre, le client accepte ou propose à nouveau (notifications à chaque étape). La commande ne peut être confirmée qu'une fois le prix convenu, affiché sur le reçu.
 - **Administration** (`/admin`, réservé aux emails de `ADMIN_EMAILS`, une fois l'adresse confirmée par le lien reçu par e-mail : « Mon profil » > « Recevoir le lien de confirmation ») : valider les paiements Premium, marquer les commissions réglées, voir les revenus.
 
 ## Organisation du code
