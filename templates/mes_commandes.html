@@ -6,6 +6,28 @@
 {% block contenu %}
     <h2>Mes commandes</h2>
 
+    {% if regulieres %}
+        <h3 style="margin-top:0;">🔁 Mes commandes régulières</h3>
+        {% for r in regulieres %}
+            <div class="carte-recolte" style="display:block;">
+                <strong>{{ r.quantite }} de {{ r.nom_recolte }}</strong>, {{ frequences.get(r.frequence_jours, '') }}
+                {% if r.actif %}<span class="badge badge-dispo">Active</span>{% else %}<span class="badge badge-attente">En pause</span>{% endif %}
+                <p style="margin:4px 0 0; font-size:0.9em; color:var(--discret);">{% if r.actif %}Prochaine commande le {{ r.prochaine_date | date_fr }}{% else %}Aucune commande tant qu'elle est en pause{% endif %}</p>
+                <div class="groupe-boutons">
+                    <form method="POST" action="{{ url_for('gerer_reguliere', reguliere_id=r.id, action='reprendre' if not r.actif else 'pause') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clair">{{ "Reprendre" if not r.actif else "Mettre en pause" }}</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('gerer_reguliere', reguliere_id=r.id, action='arreter') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-clair" onclick="return confirm('Arrêter cette commande régulière ?')">Arrêter</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+        <h3>Toutes mes commandes</h3>
+    {% endif %}
+
     {% if commandes %}
         {% for commande in commandes %}
             <div class="carte-recolte">

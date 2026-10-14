@@ -172,6 +172,7 @@ TABLES = (
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
     "photos_recolte", "verifications", "parametres", "abonnements_push", "demandes_support",
+    "commandes_regulieres",
 )
 
 
@@ -193,6 +194,7 @@ INDEX = (
     ("idx_signalements_statut", "signalements (statut)"),
     ("idx_paiements_wave_utilisateur", "paiements_wave (utilisateur_id, statut)"),
     ("idx_produits_fournisseur", "produits_fournisseur (fournisseur_id)"),
+    ("idx_regulieres_date", "commandes_regulieres (actif, prochaine_date)"),
 )
 
 
@@ -556,6 +558,25 @@ def init_db():
             FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
         )
     """)
+    # Commandes régulières : le client reçoit la même commande à intervalle fixe ; la tâche
+    # quotidienne crée chaque commande à la date prévue
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS commandes_regulieres (
+            id {ID_AUTO},
+            client_id INTEGER NOT NULL,
+            recolte_id INTEGER NOT NULL,
+            quantite TEXT NOT NULL,
+            frequence_jours INTEGER NOT NULL,
+            mode_livraison TEXT NOT NULL DEFAULT 'retrait',
+            adresse_livraison TEXT,
+            mode_paiement TEXT NOT NULL DEFAULT 'livraison',
+            prochaine_date TEXT NOT NULL,
+            actif INTEGER NOT NULL DEFAULT 1,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES utilisateurs (id),
+            FOREIGN KEY (recolte_id) REFERENCES recoltes (id)
+        )
+    """)
     # Photos en plus de la photo principale (recoltes.photo), pour la galerie de l'annonce
     connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS photos_recolte (
@@ -624,6 +645,8 @@ def init_db():
         ("commandes", "prix_propose", "TEXT"),
         ("commandes", "contre_offre", "TEXT"),
         ("commandes", "negociation", "TEXT"),
+        # Commande créée par une commande régulière
+        ("commandes", "reguliere_id", "INTEGER"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:
