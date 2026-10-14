@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_meteo_jours.html" import jours_meteo %}
+{% block contenu %}
+    <h1>🌦️ Météo agricole</h1>
+    <form method="GET" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" name="lieu" value="{{ lieu }}" placeholder="Ta localité (ex: Thiès, Potou...)" style="flex:1; min-width:180px; margin:0;">
+        <button type="submit" style="width:auto; margin:0;">Voir</button>
+    </form>
+
+    {% if not lieu %}
+        <p style="color:var(--discret);">Indique ta localité pour voir la météo des 7 prochains jours.</p>
+    {% elif not lieu_connu %}
+        <div class="flash" style="margin-top:14px;">Localité « {{ lieu }} » inconnue. Essaie la ville la plus proche (ex : Thiès, Louga, Kaolack...).</div>
+    {% elif not jours %}
+        <div class="flash" style="margin-top:14px;">Météo indisponible pour le moment, réessaie plus tard.</div>
+    {% else %}
+        <h3>7 prochains jours à {{ lieu }}</h3>
+        {{ jours_meteo(jours) }}
+        <h3>Conseils de la semaine</h3>
+        <ul>{% for c in conseils %}<li style="margin-bottom:6px;">{{ c }}</li>{% endfor %}</ul>
+        <table class="tableau">
+            <tr><th>Jour</th><th>Temps</th><th>Temp.</th><th>Pluie</th><th>Vent</th></tr>
+            {% for j in jours %}
+                <tr><td>{{ j.jour }} {{ j.date | date_fr }}</td><td>{{ j.icone }} {{ j.libelle }}</td><td>{{ j.tmin }}–{{ j.tmax }} °C</td>
+                    <td>{{ j.pluie_mm }} mm ({{ j.pluie_proba }} %)</td><td>{{ j.vent }} km/h</td></tr>
+            {% endfor %}
+        </table>
+        <p style="font-size:0.8em; color:var(--discret);">Prévisions Open-Meteo, mises à jour toutes les 3 heures.</p>
+    {% endif %}
+    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+{% endblock %}

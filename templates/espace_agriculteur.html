@@ -39,8 +39,15 @@
         <div class="tuile"><div class="tuile-icone icone-rose">⭐</div><div class="tuile-valeur">{% if notes and notes.nb_avis %}{{ "%.1f" | format(notes.note_moyenne) }}{% else %}–{% endif %}</div><div class="tuile-libelle">{% if notes and notes.nb_avis %}{{ notes.nb_avis }} {{ "avis clients" | t }}{% else %}{{ "Pas encore d'avis" | t }}{% endif %}</div></div>
     </div>
 
+    <div id="meteo-resume"></div>
+    <script>
+        fetch("{{ url_for('resume_meteo') }}").then((r) => r.status === 200 ? r.text() : "")
+            .then((html) => { document.getElementById("meteo-resume").innerHTML = html; }).catch(() => {});
+    </script>
+
     <div class="actions">
         <a class="action" href="{{ url_for('statistiques_agriculteur') }}"><span class="tuile-icone icone-bleu">📊</span><div><strong>{{ "Mes statistiques" | t }}</strong><span>{{ "Ventes, produits les plus demandés" | t }}</span></div></a>
+        <a class="action" href="{{ url_for('meteo_agriculteur') }}"><span class="tuile-icone icone-bleu">🌦️</span><div><strong>{{ "Météo agricole" | t }}</strong><span>{{ "7 jours et conseils" | t }}</span></div></a>
         <a class="action" href="{{ url_for('prix_marche') }}"><span class="tuile-icone">📈</span><div><strong>{{ "Prix du marché" | t }}</strong><span>{{ "Fixe le bon prix" | t }}</span></div></a>
         <a class="action" href="{{ url_for('parrainage') }}"><span class="tuile-icone icone-ambre">🎁</span><div><strong>{{ "Inviter et gagner du Premium" | t }}</strong><span>{{ "1 mois offert par filleul" | t }}</span></div></a>
         <a class="action" href="{{ url_for('semences_pepinieres') }}"><span class="tuile-icone">🌱</span><div><strong>{{ "Semences et pépinières" | t }}</strong><span>{{ "Acheter auprès des fournisseurs" | t }}</span></div></a>

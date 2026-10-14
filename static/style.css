@@ -541,3 +541,11 @@ button:active, .btn:active { transform: translateY(1px); }
     .texte-langue { display: none; }
     .bouton-quitter { padding: 7px 10px; font-size: 0.85em; }
 }
+
+/* Météo */
+.meteo-jours { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; text-align: center; font-size: 0.88em; }
+.meteo-jour { background: var(--fond); border-radius: 12px; padding: 8px 2px; }
+.meteo-nom { color: var(--discret); font-weight: 600; }
+.meteo-icone { font-size: 1.5em; line-height: 1.4; }
+.meteo-pluie { color: #275d92; font-size: 0.85em; }
+@media (max-width: 600px) { .meteo-jours { grid-template-columns: repeat(4, minmax(0, 1fr)); } .meteo-jour:nth-child(n+5) { display: none; } }
