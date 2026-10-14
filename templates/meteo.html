@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% from "_meteo_jours.html" import jours_meteo %}
 {% block contenu %}
-    <h1>🌦️ Météo agricole</h1>
+    <h1>🌦️ {{ "Météo agricole" | t }}</h1>
     <form method="GET" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
         <input type="text" name="lieu" value="{{ lieu }}" placeholder="Ta localité (ex: Thiès, Potou...)" style="flex:1; min-width:180px; margin:0;">
-        <button type="submit" style="width:auto; margin:0;">Voir</button>
+        <button type="submit" style="width:auto; margin:0;">{{ "Voir" | t }}</button>
     </form>
 
     {% if not lieu %}
-        <p style="color:var(--discret);">Indique ta localité pour voir la météo des 7 prochains jours.</p>
+        <p style="color:var(--discret);">{{ "Indique ta localité pour voir la météo des 7 prochains jours." | t }}</p>
     {% elif not lieu_connu %}
         <div class="flash" style="margin-top:14px;">Localité « {{ lieu }} » inconnue. Essaie la ville la plus proche (ex : Thiès, Louga, Kaolack...).</div>
     {% elif not jours %}
@@ -27,5 +27,5 @@
         </table>
         <p style="font-size:0.8em; color:var(--discret);">Prévisions Open-Meteo, mises à jour toutes les 3 heures.</p>
     {% endif %}
-    <p><a href="{{ url_for('espace_agriculteur') }}">← Retour à mon espace</a></p>
+    <p><a href="{{ url_for('espace_agriculteur') }}">{{ "← Retour à mon espace" | t }}</a></p>
 {% endblock %}

@@ -115,6 +115,150 @@ WOLOF = {
     "Ton message...": "Sa bataaxal...",
     "Envoyer": "Yónnee",
     "← Retour aux commandes": "← Dellu ci ndigal yi",
+    # Menu, pied de page et accueil
+    "Commandes": "Ndigal yi",
+    "Carte": "Kaart",
+    "Prix du marché": "Njëgu marse bi",
+    "Premium": "Premium",
+    "Conditions d'utilisation": "Sarti jëfandikoo",
+    "Confidentialité": "Sutura",
+    "Contact": "Jokkoo ak nun",
+    "Achetez directement aux producteurs du Sénégal, au juste prix.":
+        "Jëndal ci beykati Senegaal yi ci seen loxo, ci njëg ju jub.",
+    "Publication": "Siiwal",
+    "Commande": "Ndigal",
+    "Paiement": "Fay",
+    "Notifications sur ton téléphone": "Yégle ci sa telefon",
+    "Reçois les nouvelles commandes, messages et changements de statut directement sur ton téléphone, gratuitement.":
+        "Jot ndigal yu bees yi, bataaxal yi ak li soppiku ci sa telefon, te doo fay dara.",
+    "Activer les notifications sur cet appareil": "Taal yégle yi ci jumtukaay bii",
+    # Espace agriculteur
+    "Bonjour": "Salaamaalekum",
+    "Voici tes ventes et tes récoltes en ligne.": "Yii ñooy say jaay ak say ngóob yu nekk ci internet.",
+    "commande(s) en attente de ta réponse": "ndigal yu xaar sa tontu",
+    "Réponds vite : les clients achètent plus aux agriculteurs qui confirment rapidement.":
+        "Tontu bu gaaw : jëndkat yi dañuy gën a jënd ci beykat yi gaaw a dëggal.",
+    "Répondre": "Tontu",
+    "Fais vérifier ton compte": "Seetlulu sa kont",
+    "Ta pièce est en cours de vérification.": "Ñu ngi seet sa kayit.",
+    "Le badge « Vérifié » rassure les clients et fait vendre plus.":
+        "Màndarga « Vérifié » dafay dalal xelu jëndkat yi te yokk say jaay.",
+    "Annonces en ligne": "Yéenekaay yu nekk ci internet",
+    "Commandes en attente": "Ndigal yu ngi xaar",
+    "FCFA de ventes livrées": "FCFA ci jaay yu ñu jox",
+    "avis clients": "xalaatu jëndkat",
+    "Pas encore d'avis": "Amagul benn xalaat",
+    "Ma boutique et mon affiche QR": "Sama bitig ak sama afiis QR",
+    "À poser sur ton étal au marché": "Ngir teg ko ci sa taabal ci marse bi",
+    "Mon bilan du mois": "Sama mbooleem weer wi",
+    "Ventes, avis, conseils prix": "Jaay, xalaat, digle ci njëg",
+    "Ventes, produits les plus demandés": "Jaay, meññeef yi ñu gën a laaj",
+    "Conseiller agricole": "Digalekatu mbay",
+    "Maladies, engrais, semis : demande à l'IA": "Feebar, sunguf, ji : laajal IA bi",
+    "Météo agricole": "Jawwu mbay",
+    "7 jours et conseils": "7 fan ak ay digle",
+    "Fixe le bon prix": "Tëral njëg ju jub",
+    "1 mois offert par filleul": "1 weer ñu may la ci ku nekk ku nga woo",
+    "Semences et pépinières": "Jiwu ak garab yu ndaw",
+    "Acheter auprès des fournisseurs": "Jënd ci jaaykat yi",
+    "Crédits et aides agricoles": "Bor ak ndimbal ci mbay",
+    "Badge de confiance": "Màndargay kóolute",
+    "Promotion": "Wàññi njëg",
+    "Mettre en promo": "Wàññi njëg li",
+    "jours": "fan",
+    "Lancer": "Tàmbali",
+    "Arrêter la promo": "Taxawal wàññi gi",
+    "Pas de réseau au champ ? Remplis quand même : l'annonce partira toute seule dès que le réseau revient.":
+        "Amul rezo ci tool bi ? Bindal rekk : yéenekaay bi dina dem boppam bu rezo bi délloo.",
+    "Écrire la description avec l'IA": "Bind leeral bi ak IA bi",
+    # Commandes reçues : fiabilité du client
+    "note(s) d'agriculteurs": "nòtu beykat",
+    "Pas encore noté": "Nòtuñu ko ba leegi",
+    "commande(s) livrée(s)": "ndigal yu ñu jox",
+    "Ta note pour ce client": "Sa nòt ci jëndkat bii",
+    "Note ce client": "Nòtal jëndkat bii",
+    "ex : absent au rendez-vous": "ex : ñëwul ci ndaje mi",
+    "Noter": "Nòtal",
+    # Boutique
+    "Producteur": "Beykat",
+    "Membre depuis": "Bokk na fi ca",
+    "Suivi": "Mu ngi ci sa topp",
+    "Suivre": "Topp",
+    "Créer un compte pour commander": "Ubbil kont ngir ndigal",
+    "Mon affiche QR": "Sama afiis QR",
+    "Récoltes en vente": "Ngóob yu ñuy jaay",
+    "Aucune récolte en vente pour le moment.": "Amul benn ngóob buñuy jaay ba leegi.",
+    "Suis ce producteur pour être prévenu de sa prochaine récolte.":
+        "Toppal beykat bii ngir ñu yégal la ngóobam bu topp.",
+    "Ce que disent ses clients": "Li jëndkatam yi wax",
+    "Tous les avis": "Xalaat yépp",
+    # Espace client et favoris
+    "Espace Client": "Bérëbu jëndkat bi",
+    "Achète directement aux agriculteurs, au juste prix.": "Jëndal ci beykat yi ci seen loxo, ci njëg ju jub.",
+    "Mes commandes": "Samay ndigal",
+    "Mon panier": "Sama pañe",
+    "en cours": "ñu ngi ci",
+    "Suivi, reçus et avis": "Topp, reçu ak xalaat",
+    "Mes favoris": "Li ma bëgg",
+    "Annonces gardées et agriculteurs suivis": "Yéenekaay yi nga denc ak beykat yi ngay topp",
+    "Mes alertes produits": "Samay yégle meññeef",
+    "Prévenu dès qu'un produit arrive": "Ñu yégal la bu meññeef ñëwee",
+    "Compare avant d'acheter": "Méngaleel balaa ngay jënd",
+    "Invite un agriculteur": "Wooal benn beykat",
+    "Récoltes disponibles": "Ngóob yu am",
+    "Aucune récolte ne correspond à ta recherche.": "Amul benn ngóob bu dëppoo ak li ngay seet.",
+    "Ta note de fiabilité donnée par les agriculteurs": "Sa nòtu kóolute bi beykat yi la jox",
+    "Les annonces que tu as gardées et les agriculteurs que tu suis.":
+        "Yéenekaay yi nga denc ak beykat yi ngay topp.",
+    "Catalogue": "Katalog",
+    "Agriculteurs suivis": "Beykat yi ngay topp",
+    "Tu es prévenu dès qu'un agriculteur suivi publie une nouvelle récolte.":
+        "Dinañu la yégal bu beykat bu ngay topp siiwalee ngóob bu bees.",
+    "annonce(s) en ligne": "yéenekaay ci internet",
+    "Ne plus suivre": "Bàyyi topp",
+    "Tu ne suis encore aucun agriculteur. Sur une annonce, touche « Suivre cet agriculteur ».":
+        "Toppoo benn beykat ba leegi. Ci benn yéenekaay, bësal « Suivre cet agriculteur ».",
+    "Annonces gardées": "Yéenekaay yi nga denc",
+    "Plus disponible": "Amatul",
+    "Commander": "Ndigal",
+    "Retirer": "Far",
+    "Aucune annonce gardée. Sur une annonce, touche « Ajouter aux favoris ».":
+        "Dencoo benn yéenekaay. Ci benn yéenekaay, bësal « Ajouter aux favoris ».",
+    # Météo et conseiller
+    "Indique ta localité pour voir la météo des 7 prochains jours.":
+        "Bindal sa dëkk ngir gis jawwu 7 fan yiy ñëw.",
+    "Pose ta question sur tes cultures : maladie d'une plante, engrais, arrosage, semis, conservation des récoltes... Ajoute une photo de la plante si tu veux.":
+        "Laajal sa laaj ci say mbay : feebaru garab, sunguf, suuxat, ji, denc ngóob... Yokkal nataalu garab gi bu la neexee.",
+    "Demander conseil": "Laaj digle",
+    # Bilan du mois
+    "Mon bilan de": "Sama mbooleem",
+    "Tes ventes, tes clients et des conseils pour le mois suivant.":
+        "Say jaay, say jëndkat ak ay digle ngir weer wiy ñëw.",
+    "Voir": "Xool",
+    "livrées": "yu ñu jox",
+    "nouvel(s) avis": "xalaat yu bees",
+    "nouveaux abonnés": "ñu bees ñuy la topp",
+    "Produits les plus demandés": "Meññeef yi ñu gën a laaj",
+    "commande(s)": "ndigal",
+    "Aucune commande ce mois-là.": "Amul benn ndigal ci weer woowu.",
+    "annonce(s) publiée(s) ce mois-là.": "yéenekaay yu ñu siiwal ci weer woowu.",
+    "Conseils prix (annonces en ligne)": "Digle ci njëg (yéenekaay yu nekk ci internet)",
+    "Tes prix sont proches du prix courant du marché (ou il n'y a pas encore assez d'annonces pour comparer).":
+        "Sa njëg yi jege nañu njëgu marse bi (walla amagul yéenekaay yu doy ngir méngale).",
+    "Recevoir ce bilan par e-mail au début de chaque mois": "Jot mbooleem mii ci e-mail ci njëlbéenu weer wu nekk",
+    "Enregistrer": "Denc",
+    # Vérification du compte
+    "Badge « Agriculteur vérifié »": "Màndarga « Agriculteur vérifié »",
+    "Ton compte est vérifié : le badge apparaît sur toutes tes annonces.":
+        "Seetlu nañu sa kont : màndarga mi dafay feeñ ci say yéenekaay yépp.",
+    "Ta pièce est en cours de vérification. Tu seras prévenu par SMS.":
+        "Ñu ngi seet sa kayit. Dinañu la yégal ci SMS.",
+    "Ta dernière pièce n'a pas pu être vérifiée. Envoie une photo plus lisible.":
+        "Mënuñoo seet sa kayit bu mujj bi. Yónneel nataal bu gën a leer.",
+    "Les clients font plus confiance aux agriculteurs vérifiés. Envoie une photo de ta carte d'identité (ou passeport) : le nom doit correspondre à celui de ton compte.":
+        "Jëndkat yi dañuy gën a wóolu beykat yi ñu seetlu. Yónneel nataalu sa kàrt didantite (walla paaspoor) : tur wi war na dëppoo ak bi nekk ci sa kont.",
+    "La photo est vue uniquement par l'équipe App Agricole et supprimée dès la vérification.":
+        "Ekibu App Agricole rekk ay gis nataal bi, te dinañu ko far bu seet gi jeexee.",
 }
 
 
