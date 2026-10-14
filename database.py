@@ -598,6 +598,11 @@ def init_db():
         ("utilisateurs", "date_inscription", "TEXT"),
         # Badge « Agriculteur vérifié » : vide, 'en_attente', 'verifie' ou 'refuse'
         ("utilisateurs", "verification", "TEXT"),
+        # Négociation du prix : offre du client, contre-offre de l'agriculteur, et état
+        # (vide, 'proposee', 'contre_offre' ou 'acceptee' ; le prix accepté est prix_propose)
+        ("commandes", "prix_propose", "TEXT"),
+        ("commandes", "contre_offre", "TEXT"),
+        ("commandes", "negociation", "TEXT"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

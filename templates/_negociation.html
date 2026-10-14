@@ -1,0 +1,38 @@
+{# Négociation du prix d'une commande (voir routes/negociation.py) #}
+{% macro negociation(commande, vue) %}
+    {% if commande.negociation %}
+        <div class="bandeau" style="margin:10px 0; padding:12px 14px;">
+            <div>
+                {% if commande.negociation == 'acceptee' %}
+                    <strong>🤝 Prix convenu : {{ commande.prix_propose }}</strong>
+                {% elif commande.negociation == 'proposee' %}
+                    <strong>💬 {{ "Le client propose" if vue == 'agriculteur' else "Tu proposes" }} : {{ commande.prix_propose }}</strong>
+                    {% if commande.contre_offre %}<p>Contre-offre précédente : {{ commande.contre_offre }}</p>{% endif %}
+                    {% if vue == 'client' %}<p>En attente de la réponse de l'agriculteur.</p>{% endif %}
+                {% elif commande.negociation == 'contre_offre' %}
+                    <strong>💬 {{ "Ta contre-offre" if vue == 'agriculteur' else "Contre-offre de l'agriculteur" }} : {{ commande.contre_offre }}</strong>
+                    <p>Ton offre : {{ commande.prix_propose }}{% if vue == 'agriculteur' %} · en attente du client{% endif %}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% if commande.statut == 'en_attente' %}
+            {% set attend_agriculteur = vue == 'agriculteur' and commande.negociation == 'proposee' %}
+            {% set attend_client = vue == 'client' and commande.negociation == 'contre_offre' %}
+            {% if attend_agriculteur or attend_client %}
+                <div class="groupe-boutons" style="margin-bottom:8px;">
+                    <form method="POST" action="{{ url_for('repondre_offre', commande_id=commande.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="action" value="accepter">
+                        <button type="submit">✓ Accepter {{ commande.prix_propose if attend_agriculteur else commande.contre_offre }}</button>
+                    </form>
+                </div>
+                <form method="POST" action="{{ url_for('repondre_offre', commande_id=commande.id) }}" style="display:flex; gap:6px; flex-wrap:wrap; margin:0 0 8px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="{{ 'contre_offre' if attend_agriculteur else 'nouvelle_offre' }}">
+                    <input type="text" name="prix" placeholder="ex: 450 FCFA / kg" required style="flex:1; min-width:160px; margin:0;">
+                    <button type="submit" class="btn-clair" style="width:auto; margin:0;">{{ "Faire une contre-offre" if attend_agriculteur else "Proposer un autre prix" }}</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endmacro %}

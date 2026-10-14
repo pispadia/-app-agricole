@@ -5,7 +5,7 @@ from flask import render_template, request, redirect, url_for, session, flash
 import push
 from stock import depasse_le_stock
 from database import get_connexion, COLONNES_RECOLTE
-from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
+from core import (app, prix_valide, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
 from routes.avis import NOTES_AGRICULTEURS
 from prix_marche import prix_du_marche, produit_cle
@@ -245,6 +245,8 @@ def commander(recolte_id):
             quantite_demandee = quantite_valide(request.form["quantite_demandee"])
             if depasse_le_stock(recolte["quantite"], quantite_demandee):
                 raise ValueError(f"Il ne reste que {recolte['quantite']} : diminue la quantité demandée.")
+            prix_propose = request.form.get("prix_propose", "").strip()
+            prix_propose = prix_valide(prix_propose) if prix_propose else None
             mode_livraison, adresse_livraison = livraison_valide(request.form)
         except ValueError as erreur:
             connexion_bd.close()
@@ -254,15 +256,17 @@ def commander(recolte_id):
 
         connexion_bd.execute(
             """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison,
-                                     adresse_livraison, mode_paiement)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                                     adresse_livraison, mode_paiement, prix_propose, negociation)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (recolte_id, session["utilisateur_id"], quantite_demandee, message, mode_livraison,
-             adresse_livraison, mode_paiement_valide(request.form))
+             adresse_livraison, mode_paiement_valide(request.form), prix_propose,
+             "proposee" if prix_propose else None)
         )
         connexion_bd.commit()
         connexion_bd.close()
         push.alerter(recolte["agriculteur_id"], recolte["telephone_agriculteur"],
-                     message_nouvelle_commande([recolte["nom"]]), url_for("commandes_recues"))
+                     message_nouvelle_commande([recolte["nom"]])
+                     + (f" Prix proposé : {prix_propose}." if prix_propose else ""), url_for("commandes_recues"))
 
         flash(f"Ta commande a été envoyée à {recolte['nom_agriculteur']}. Il te contactera pour la suite.")
         return redirect(url_for("mes_commandes"))

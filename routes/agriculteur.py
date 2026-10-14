@@ -89,7 +89,7 @@ def changer_statut_commande(commande_id):
     connexion_bd = get_connexion()
     # Seulement les commandes portant sur une récolte de cet agriculteur
     commande = connexion_bd.execute(
-        """SELECT commandes.statut, commandes.client_id, commandes.mode_livraison, commandes.mode_paiement, commandes.paye_en_ligne,
+        """SELECT commandes.statut, commandes.client_id, commandes.negociation, commandes.mode_livraison, commandes.mode_paiement, commandes.paye_en_ligne,
                   recoltes.nom AS nom_recolte, utilisateurs.telephone AS telephone_client
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
@@ -127,6 +127,8 @@ def changer_statut_commande(commande_id):
             alerter_client(commande, "livree")
             flash(f"Commande livrée. Commission de la plateforme : {commission} FCFA.")
             flash(info_stock)
+    elif nouveau_statut == "confirmee" and commande["negociation"] in ("proposee", "contre_offre"):
+        flash("Réponds d'abord à l'offre de prix du client (accepter ou contre-offre).")
     elif nouveau_statut == "confirmee":
         # À la confirmation, l'agriculteur peut fixer la date et les frais de livraison
         try:

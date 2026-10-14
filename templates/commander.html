@@ -20,6 +20,10 @@
         {{ choix_livraison(modes_livraison) }}
         {{ choix_paiement(modes_paiement) }}
 
+        <label>Proposer un prix (optionnel)</label>
+        <input type="text" name="prix_propose" placeholder="ex: {{ recolte.prix_gros or '450 FCFA / kg' }} — sinon le prix affiché s'applique">
+        <p style="margin:0; font-size:0.85em; color:var(--discret);">Pour un achat en gros par exemple. L'agriculteur accepte, refuse ou te fait une contre-offre.</p>
+
         <label>Message pour l'agriculteur (optionnel)</label>
         <textarea name="message" rows="3" placeholder="Précisions, date de livraison souhaitée..."></textarea>
 
