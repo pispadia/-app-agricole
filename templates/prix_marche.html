@@ -21,5 +21,5 @@
         <p>Pas encore assez d'annonces avec un prix au kilo (ex : « 500 FCFA / kg ») pour calculer des prix du marché.</p>
     {% endif %}
 
-    <p><a href="{{ url_for('tableau_de_bord') }}">← Retour</a></p>
+    <p><a href="{{ url_for('tableau_de_bord') if session.get('utilisateur_id') else url_for('catalogue_public') }}">← Retour</a></p>
 {% endblock %}

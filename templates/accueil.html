@@ -1,7 +1,37 @@
 {% extends "base.html" %}
+{% from "_carte_annonce.html" import carte_annonce %}
+{% block meta %}
+    <meta name="description" content="App Agricole : les agriculteurs du Sénégal vendent leurs récoltes directement aux acheteurs. Prix du marché, livraison, paiement Wave.">
+{% endblock %}
 {% block contenu %}
     <h1>{{ "Bienvenue sur l'App Agricole" | t }}</h1>
     <p>{{ "La plateforme qui connecte agriculteurs, clients et fournisseurs." | t }}</p>
-    <a href="{{ url_for('inscription') }}"><button>{{ "Créer un compte" | t }}</button></a>
-    <a href="{{ url_for('connexion') }}"><button>{{ "Se connecter" | t }}</button></a>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="{{ url_for('inscription', role='agriculteur') }}" style="flex:1; min-width:150px;"><button>🌾 {{ "Je vends mes récoltes" | t }}</button></a>
+        <a href="{{ url_for('catalogue_public') }}" style="flex:1; min-width:150px;"><button>🛒 {{ "J'achète" | t }}</button></a>
+    </div>
+    <p style="text-align:center;">{{ "Déjà inscrit ?" | t }} <a href="{{ url_for('connexion') }}">{{ "Se connecter" | t }}</a></p>
+
+    {# Chiffres affichés seulement quand ils rassurent (au lancement, « 1 agriculteur » fait fuir) #}
+    {% if chiffres.agriculteurs >= 10 %}
+    <div class="carte-recolte" style="display:flex; flex-direction:row; justify-content:space-around; text-align:center;">
+        <div><strong style="font-size:1.4em;">{{ chiffres.agriculteurs }}</strong><br>{{ "agriculteurs" | t }}</div>
+        <div><strong style="font-size:1.4em;">{{ chiffres.annonces }}</strong><br>{{ "annonces" | t }}</div>
+        <div><strong style="font-size:1.4em;">{{ chiffres.livraisons }}</strong><br>{{ "commandes livrées" | t }}</div>
+    </div>
+    {% endif %}
+
+    {% if recoltes %}
+        <h3>{{ "Dernières récoltes" | t }}</h3>
+        {% for recolte in recoltes %}
+            {{ carte_annonce(recolte) }}
+        {% endfor %}
+        <p style="text-align:center;"><a href="{{ url_for('catalogue_public') }}">{{ "Voir toutes les récoltes" | t }} →</a></p>
+    {% endif %}
+
+    <h3>{{ "Comment ça marche" | t }}</h3>
+    <p>1. {{ "L'agriculteur publie sa récolte (gratuit)." | t }}<br>
+       2. {{ "Le client commande ou réserve, en retrait ou en livraison." | t }}<br>
+       3. {{ "Paiement à la livraison ou avec Wave." | t }}</p>
 {% endblock %}

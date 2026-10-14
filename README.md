@@ -33,6 +33,8 @@ Pour le « mot de passe oublié », crée un compte gratuit sur [Brevo](https://
 
 **Pré-commandes** : une récolte dont la date de disponibilité est future (jusqu'à un an) apparaît « 🌱 À venir » et se réserve dès maintenant ; filtre « Disponible maintenant / À venir » dans le catalogue, mention « Pré-commande » dans les commandes du client et de l'agriculteur.
 
+**Vitrine publique** : la page d'accueil montre les dernières récoltes et des boutons « Je vends / J'achète » ; le catalogue (`/catalogue`) et les prix du marché sont visibles sans compte ; `robots.txt` et `sitemap.xml` aident Google à référencer les annonces.
+
 **Alertes SMS** : l'agriculteur reçoit un SMS à chaque nouvelle commande ou annulation, le client à chaque changement de statut (confirmée, livrée, annulée), si un téléphone est renseigné dans son profil. Crée une application sur [Orange Developer](https://developer.orange.com) avec l'API « SMS Moyen-Orient et Afrique » (pays : Sénégal), achète un pack de SMS, puis définis `ORANGE_SMS_CLIENT_ID`, `ORANGE_SMS_CLIENT_SECRET` et `ORANGE_SMS_EXPEDITEUR` (en général `2210000`, sauf numéro dédié fourni par Orange). Sans ces variables, les SMS s'affichent dans la console ; un SMS en échec ne bloque jamais la commande.
 
 ## Revenus : commission et Premium

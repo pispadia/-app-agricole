@@ -1,0 +1,23 @@
+{# Carte compacte d'une récolte (catalogue public, page d'accueil) : renvoie vers l'annonce #}
+{% from "_etoiles.html" import etoiles %}
+{% macro carte_annonce(recolte, prix_courant=none) %}
+    <div class="carte-recolte">
+        {% if recolte.a_photo %}
+            <img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}" loading="lazy">
+        {% endif %}
+        <div>
+            <strong><a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}" style="color:inherit;">{{ recolte.nom }}</a></strong> — {{ recolte.quantite }}
+            {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
+            {{ recolte.prix }}
+            {% if prix_courant %}<span style="color:#666; font-size:0.85em;">(prix courant : {{ prix_courant.median }} FCFA/kg)</span>{% endif %}<br>
+            Par {{ recolte.nom_agriculteur }} {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}<br>
+            {% if a_venir(recolte.date_disponibilite) %}
+                <span class="badge badge-attente">🌱 À venir : prête le {{ recolte.date_disponibilite | date_fr }}</span><br>
+            {% endif %}
+            📍 {{ recolte.localite }}
+            <div style="margin-top: 8px;">
+                <a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}"><button type="button">{{ "Réserver" if a_venir(recolte.date_disponibilite) else "Voir et commander" }}</button></a>
+            </div>
+        </div>
+    </div>
+{% endmacro %}

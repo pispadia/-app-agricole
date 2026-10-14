@@ -10,16 +10,16 @@ from routes.avis import NOTES_AGRICULTEURS
 from prix_marche import prix_du_marche, produit_cle
 
 
-@app.route("/espace-client")
-def espace_client():
-    if not utilisateur_connecte() or session["role"] != "client":
-        return redirect(url_for("connexion"))
+ORDRES_CATALOGUE = {
+    "recent": "recoltes.date_creation DESC",
+    "nom": "recoltes.nom ASC",
+    "localite": "recoltes.localite ASC",
+    "note": "COALESCE(notes.note_moyenne, 0) DESC, recoltes.date_creation DESC",
+}
 
-    recherche = request.args.get("recherche", "").strip()
-    localite = request.args.get("localite", "").strip()
-    tri = request.args.get("tri", "recent")
-    periode = request.args.get("periode", "")
 
+def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", periode="", limite=None):
+    """Récoltes disponibles du catalogue (client connecté, catalogue public, page d'accueil)."""
     requete = """
         SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
                utilisateurs.premium_jusqu_au AS premium_agriculteur,
@@ -48,33 +48,46 @@ def espace_client():
         requete += " AND recoltes.date_disponibilite > ?"
         parametres.append(date.today().isoformat())
 
-    ordres = {
-        "recent": "recoltes.date_creation DESC",
-        "nom": "recoltes.nom ASC",
-        "localite": "recoltes.localite ASC",
-        "note": "COALESCE(notes.note_moyenne, 0) DESC, recoltes.date_creation DESC",
-    }
     # Les annonces des membres Premium passent en premier
-    aujourdhui = date.today().isoformat()
     requete += (" ORDER BY CASE WHEN utilisateurs.premium_jusqu_au >= ? THEN 0 ELSE 1 END, "
-                + ordres.get(tri, ordres["recent"]))
-    parametres.append(aujourdhui)
+                + ORDRES_CATALOGUE.get(tri, ORDRES_CATALOGUE["recent"]))
+    parametres.append(date.today().isoformat())
+    if limite:
+        requete += f" LIMIT {int(limite)}"
+    return connexion_bd.execute(requete, parametres).fetchall()
 
-    connexion_bd = get_connexion()
-    recoltes = connexion_bd.execute(requete, parametres).fetchall()
+
+def donnees_catalogue(connexion_bd):
+    """Filtres lus dans l'adresse, récoltes trouvées, prix courants et localités, pour les templates."""
+    filtres = {
+        "recherche": request.args.get("recherche", "").strip(),
+        "localite": request.args.get("localite", "").strip(),
+        "tri": request.args.get("tri", "recent"),
+        "periode": request.args.get("periode", ""),
+    }
+    recoltes = rechercher_recoltes(connexion_bd, **filtres)
     marche = prix_du_marche(connexion_bd)
-    prix_courants = {r["id"]: marche.get(produit_cle(r["nom"])) for r in recoltes}
     localites = connexion_bd.execute(
         "SELECT DISTINCT localite FROM recoltes WHERE statut = 'disponible' ORDER BY localite"
     ).fetchall()
-    connexion_bd.close()
+    return {
+        "recoltes": recoltes, "localites": localites, "recherche": filtres["recherche"],
+        "localite_choisie": filtres["localite"], "tri_choisi": filtres["tri"],
+        "periode_choisie": filtres["periode"], "aujourdhui": date.today().isoformat(),
+        "prix_courants": {r["id"]: marche.get(produit_cle(r["nom"])) for r in recoltes},
+    }
 
-    return render_template(
-        "espace_client.html", nom=session["nom"], recoltes=recoltes,
-        localites=localites, recherche=recherche, localite_choisie=localite, tri_choisi=tri,
-        periode_choisie=periode,
-        taille_panier=len(session.get("panier", [])), aujourdhui=aujourdhui, prix_courants=prix_courants
-    )
+
+@app.route("/espace-client")
+def espace_client():
+    if not utilisateur_connecte() or session["role"] != "client":
+        return redirect(url_for("connexion"))
+
+    connexion_bd = get_connexion()
+    donnees = donnees_catalogue(connexion_bd)
+    connexion_bd.close()
+    return render_template("espace_client.html", nom=session["nom"],
+                           taille_panier=len(session.get("panier", [])), **donnees)
 
 
 def get_recolte_avec_agriculteur(connexion_bd, recolte_id):
