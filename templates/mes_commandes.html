@@ -5,6 +5,9 @@
 {% from "_negociation.html" import negociation %}
 {% block contenu %}
     <h2>Mes commandes</h2>
+    {% if fiabilite and fiabilite.note_client %}
+        <p class="fiabilite-client">🛡️ {{ "Ta note de fiabilité donnée par les agriculteurs" | t }} : {{ etoiles(fiabilite.note_client) }} {{ '%.1f' | format(fiabilite.note_client | float) }} ({{ fiabilite.nb_notes_client }})</p>
+    {% endif %}
 
     {% if regulieres %}
         <h3 style="margin-top:0;">🔁 Mes commandes régulières</h3>

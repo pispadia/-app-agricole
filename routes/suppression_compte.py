@@ -55,6 +55,7 @@ def effacer_compte(connexion_bd, utilisateur_id):
     for table, colonne in (("alertes_produit", "client_id"), ("abonnements_push", "utilisateur_id"),
                            ("commandes_regulieres", "client_id"), ("favoris", "client_id"),
                            ("agriculteurs_suivis", "client_id"), ("agriculteurs_suivis", "agriculteur_id"),
+                           ("avis_clients", "client_id"),
                            ("verifications", "utilisateur_id")):
         connexion_bd.execute(f"DELETE FROM {table} WHERE {colonne} = ?", (utilisateur_id,))
     connexion_bd.commit()

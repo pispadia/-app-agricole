@@ -4,6 +4,7 @@ import push
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
 from routes.avis import NOTES_AGRICULTEURS
+from routes.fiabilite_clients import FIABILITE_CLIENTS, LIVRAISONS_CLIENTS
 from stock import decompter_livraison
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, encoder_photo, masquer_coordonnees, date_disponibilite_valide, quantite_valide, prix_valide, utilisateur_connecte,
@@ -42,14 +43,18 @@ def commandes_recues():
 
     connexion_bd = get_connexion()
     commandes = connexion_bd.execute(
-        """SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.date_disponibilite,
-                  utilisateurs.nom AS nom_client,
+        f"""SELECT commandes.*, recoltes.nom AS nom_recolte, recoltes.date_disponibilite,
+                  utilisateurs.nom AS nom_client, avis_clients.note AS note_donnee_client,
+                  fiabilite.note_client, fiabilite.nb_notes_client, livraisons.nb_livrees_client,
                   (SELECT COUNT(*) FROM messages_commande
                    WHERE messages_commande.commande_id = commandes.id
                      AND messages_commande.destinataire_id = ? AND messages_commande.lu = 0) AS messages_non_lus
            FROM commandes
            JOIN recoltes ON commandes.recolte_id = recoltes.id
            JOIN utilisateurs ON commandes.client_id = utilisateurs.id
+           LEFT JOIN avis_clients ON avis_clients.commande_id = commandes.id
+           LEFT JOIN {FIABILITE_CLIENTS} fiabilite ON fiabilite.client_id = commandes.client_id
+           LEFT JOIN {LIVRAISONS_CLIENTS} livraisons ON livraisons.client_id = commandes.client_id
            WHERE recoltes.agriculteur_id = ?
            ORDER BY commandes.date_creation DESC""",
         (session["utilisateur_id"], session["utilisateur_id"])
