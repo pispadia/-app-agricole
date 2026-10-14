@@ -10,6 +10,7 @@ from core import (app, prix_valide, quantite_valide, utilisateur_connecte, livra
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
 from routes.avis import NOTES_AGRICULTEURS
 from routes.fiabilite_clients import fiabilite_du_client
+from promo import prix_promo
 from prix_marche import prix_du_marche, produit_cle
 
 
@@ -21,7 +22,8 @@ ORDRES_CATALOGUE = {
 }
 
 
-def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", periode="", limite=None, decalage=0):
+def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", periode="", promo="", limite=None,
+                        decalage=0):
     """Récoltes disponibles du catalogue (client connecté, catalogue public, page d'accueil)."""
     requete = """
         SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
@@ -52,6 +54,10 @@ def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", p
         requete += " AND recoltes.date_disponibilite > ?"
         parametres.append(date.today().isoformat())
 
+    if promo:
+        requete += " AND recoltes.promo_pourcent IS NOT NULL AND recoltes.promo_jusqu_au >= ?"
+        parametres.append(date.today().isoformat())
+
     # Les annonces des membres Premium passent en premier
     requete += (" ORDER BY CASE WHEN utilisateurs.premium_jusqu_au >= ? THEN 0 ELSE 1 END, "
                 + ORDRES_CATALOGUE.get(tri, ORDRES_CATALOGUE["recent"]))
@@ -71,6 +77,7 @@ def donnees_catalogue(connexion_bd):
         "localite": request.args.get("localite", "").strip(),
         "tri": request.args.get("tri", "recent"),
         "periode": request.args.get("periode", ""),
+        "promo": "1" if request.args.get("promo") else "",
     }
     # Par pages : une de plus que la taille de page, pour savoir s'il en reste après
     page = max(int(request.args.get("page", "1")) if request.args.get("page", "").isdigit() else 1, 1)
@@ -85,7 +92,7 @@ def donnees_catalogue(connexion_bd):
     return {
         "recoltes": recoltes, "localites": localites, "recherche": filtres["recherche"],
         "localite_choisie": filtres["localite"], "tri_choisi": filtres["tri"],
-        "periode_choisie": filtres["periode"], "aujourdhui": date.today().isoformat(),
+        "periode_choisie": filtres["periode"], "promo_choisie": filtres["promo"], "aujourdhui": date.today().isoformat(),
         "prix_courants": {r["id"]: marche.get(produit_cle(r["nom"])) for r in recoltes},
         "numero_page": page, "page_suivante": page_suivante,
     }
@@ -210,10 +217,10 @@ def valider_panier():
             continue
         connexion_bd.execute(
             """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison,
-                                     adresse_livraison, mode_paiement)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                                     adresse_livraison, mode_paiement, prix_promo)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (item["recolte_id"], session["utilisateur_id"], item["quantite"], "Commande depuis le panier",
-             mode_livraison, adresse_livraison, mode_paiement)
+             mode_livraison, adresse_livraison, mode_paiement, prix_promo(recolte))
         )
         envoyees += 1
         produits_par_agriculteur.setdefault(
@@ -273,11 +280,12 @@ def commander(recolte_id):
 
         connexion_bd.execute(
             """INSERT INTO commandes (recolte_id, client_id, quantite_demandee, message, mode_livraison,
-                                     adresse_livraison, mode_paiement, prix_propose, negociation, reguliere_id)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                     adresse_livraison, mode_paiement, prix_propose, negociation, reguliere_id,
+                                     prix_promo)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (recolte_id, session["utilisateur_id"], quantite_demandee, message, mode_livraison,
              adresse_livraison, mode_paiement, prix_propose,
-             "proposee" if prix_propose else None, reguliere_id)
+             "proposee" if prix_propose else None, reguliere_id, prix_promo(recolte))
         )
         connexion_bd.commit()
         connexion_bd.close()

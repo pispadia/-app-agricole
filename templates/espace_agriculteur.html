@@ -77,7 +77,9 @@
                         <span class="badge badge-epuise">{{ "Épuisé" | t }}</span>
                     {% endif %}
                     <div style="color:#3d4b44; margin-top:4px;">
-                        <strong style="color:var(--vert-fonce);">{{ recolte.prix }}</strong>
+                        {% if prix_promo(recolte) %}<strong style="color:var(--vert-fonce);">{{ prix_promo(recolte) }}</strong> <s class="prix-barre">{{ recolte.prix }}</s>
+                        <span class="badge badge-promo">🏷️ −{{ promo_active(recolte) }} % jusqu'au {{ recolte.promo_jusqu_au | date_fr }}</span>
+                        {% else %}<strong style="color:var(--vert-fonce);">{{ recolte.prix }}</strong>{% endif %}
                         {% if recolte.prix_gros %} · {{ "Gros" | t }} : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}{% endif %}
                     </div>
                     <div style="color:var(--discret); font-size:0.9em;">📍 {{ recolte.localite }} · {{ "Disponible le" | t }} {{ recolte.date_disponibilite | date_fr }}</div>
@@ -85,6 +87,18 @@
                         <a class="btn btn-whatsapp btn-petit" href="{{ lien_partage_whatsapp(recolte) }}" target="_blank" rel="noopener">📤 {{ "Partager sur WhatsApp" | t }}</a>
                         <a class="btn btn-clair btn-petit" href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}">{{ "Voir l'annonce" | t }}</a>
                         <a class="btn btn-clair btn-petit" href="{{ url_for('modifier_recolte', recolte_id=recolte.id) }}">{{ "Modifier" | t }}</a>
+                        {% if recolte.statut == 'disponible' %}
+                            <details class="promo-details">
+                                <summary class="btn btn-clair btn-petit">🏷️ {% if promo_active(recolte) %}{{ "Promotion" | t }}{% else %}{{ "Mettre en promo" | t }}{% endif %}</summary>
+                                <form method="POST" action="{{ url_for('promotion_recolte', recolte_id=recolte.id) }}" class="formulaire-promo">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <select name="pourcent" required>{% for p in pourcentages_promo %}<option value="{{ p }}" {% if p == 20 %}selected{% endif %}>−{{ p }} %</option>{% endfor %}</select>
+                                    <select name="duree" required>{% for d in durees_promo %}<option value="{{ d }}" {% if d == 7 %}selected{% endif %}>{{ d }} {{ "jours" | t }}</option>{% endfor %}</select>
+                                    <button type="submit" class="btn-petit">{{ "Lancer" | t }}</button>
+                                    {% if promo_active(recolte) %}<button type="submit" name="action" value="arreter" formnovalidate class="btn-clair btn-petit">{{ "Arrêter la promo" | t }}</button>{% endif %}
+                                </form>
+                            </details>
+                        {% endif %}
                         <form method="POST" action="{{ url_for('basculer_statut', recolte_id=recolte.id) }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn-clair">

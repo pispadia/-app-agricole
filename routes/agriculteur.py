@@ -1,6 +1,7 @@
 """Espace agriculteur : récoltes et commandes reçues."""
 from flask import jsonify, render_template, request, redirect, url_for, session, flash
 import push
+import promo
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
 from routes.avis import NOTES_AGRICULTEURS
@@ -204,6 +205,7 @@ def espace_agriculteur():
         "espace_agriculteur.html", nom=session["nom"], recoltes=recoltes, verification=verification,
         en_ligne=sum(1 for r in recoltes if r["statut"] == "disponible" and not r["masquee"]),
         en_attente=chiffres["en_attente"] or 0, ventes=chiffres["ventes"], notes=notes,
+        pourcentages_promo=promo.POURCENTAGES, durees_promo=promo.DUREES_JOURS,
     )
 
 

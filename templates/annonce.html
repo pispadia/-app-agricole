@@ -38,7 +38,12 @@
             <h1 style="margin-bottom:6px;">{{ recolte.nom }}</h1>
             {% if recolte.statut != 'disponible' %}<span class="badge badge-epuise" style="margin:0 0 8px;">Plus disponible</span>{% endif %}
             {% if a_venir(recolte.date_disponibilite) %}<span class="badge badge-attente" style="margin:0 0 8px;">🌱 Récolte à venir : réserve-la dès maintenant</span>{% endif %}
-            <div class="prix-offre" style="font-size:1.7em;">{{ recolte.prix }}</div>
+            {% if prix_promo(recolte) %}
+                <div class="prix-offre" style="font-size:1.7em;">{{ prix_promo(recolte) }} <s class="prix-barre">{{ recolte.prix }}</s></div>
+                <span class="badge badge-promo" style="margin:4px 0 0;">🏷️ Promo −{{ promo_active(recolte) }} % jusqu'au {{ recolte.promo_jusqu_au | date_fr }}</span>
+            {% else %}
+                <div class="prix-offre" style="font-size:1.7em;">{{ recolte.prix }}</div>
+            {% endif %}
             {% if prix_courant %}<p style="margin:2px 0 0; color:var(--discret); font-size:0.9em;">Prix courant sur le marché : {{ prix_courant.median }} FCFA/kg</p>{% endif %}
             {% if recolte.prix_gros %}<p style="margin:6px 0 0;">Gros : <strong>{{ recolte.prix_gros }}</strong>{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}</p>{% endif %}
 

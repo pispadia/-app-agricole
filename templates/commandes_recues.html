@@ -33,6 +33,7 @@
                     {{ badge_statut(commande.statut) }}<br>
                     Client : {{ commande.nom_client }}{% if commande.reguliere_id %} <span class="badge badge-livree">🔁 Régulière</span>{% endif %}
                     <span class="fiabilite-client">{% if commande.note_client %}🛡️ {{ etoiles(commande.note_client) }} {{ '%.1f' | format(commande.note_client | float) }} ({{ commande.nb_notes_client }} {{ "note(s) d'agriculteurs" | t }}){% else %}🆕 {{ "Pas encore noté" | t }}{% endif %} · {{ commande.nb_livrees_client or 0 }} {{ "commande(s) livrée(s)" | t }}</span><br>
+                    {% if commande.prix_promo %}<span class="badge badge-promo">🏷️ Prix promo : {{ commande.prix_promo }}</span><br>{% endif %}
                     {{ negociation(commande, 'agriculteur') }}
                     {{ infos_livraison(commande, modes_livraison) }}
                     {% if a_venir(commande.date_disponibilite) and commande.statut in ('en_attente', 'confirmee') %}
