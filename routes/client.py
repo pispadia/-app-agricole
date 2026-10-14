@@ -3,6 +3,7 @@ from datetime import date
 
 from flask import render_template, request, redirect, url_for, session, flash
 import push
+from stock import depasse_le_stock
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
@@ -129,6 +130,9 @@ def ajouter_au_panier(recolte_id):
     if not recolte_commandable(recolte):
         flash("Cette récolte n'est plus disponible.")
         return redirect(url_for("espace_client"))
+    if depasse_le_stock(recolte["quantite"], quantite):
+        flash(f"Il ne reste que {recolte['quantite']} de {recolte['nom']}.")
+        return redirect(url_for("espace_client"))
 
     panier = session.get("panier", [])
     panier.append({"recolte_id": recolte_id, "quantite": quantite})
@@ -190,7 +194,7 @@ def valider_panier():
     produits_par_agriculteur = {}  # un seul message par agriculteur
     for item in panier:
         recolte = get_recolte_avec_agriculteur(connexion_bd, item["recolte_id"])
-        if not recolte_commandable(recolte):
+        if not recolte_commandable(recolte) or depasse_le_stock(recolte["quantite"], item["quantite"]):
             indisponibles.append(recolte["nom"] if recolte else "une récolte supprimée")
             continue
         connexion_bd.execute(
@@ -239,6 +243,8 @@ def commander(recolte_id):
     if request.method == "POST":
         try:
             quantite_demandee = quantite_valide(request.form["quantite_demandee"])
+            if depasse_le_stock(recolte["quantite"], quantite_demandee):
+                raise ValueError(f"Il ne reste que {recolte['quantite']} : diminue la quantité demandée.")
             mode_livraison, adresse_livraison = livraison_valide(request.form)
         except ValueError as erreur:
             connexion_bd.close()

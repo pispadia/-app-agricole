@@ -4,6 +4,7 @@ import push
 from routes.alertes import prevenir_clients
 from routes.parrainage import recompenser_parrainage
 from routes.avis import NOTES_AGRICULTEURS
+from stock import decompter_livraison
 from database import get_connexion, COLONNES_RECOLTE
 from core import (app, encoder_photo, masquer_coordonnees, date_disponibilite_valide, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
@@ -102,10 +103,12 @@ def changer_statut_commande(commande_id):
     elif nouveau_statut == "livree" and commande["paye_en_ligne"]:
         # Déjà payée en ligne : montant et commission sont connus, l'admin reversera la somme due
         connexion_bd.execute("UPDATE commandes SET statut = 'livree', lu_client = 0 WHERE id = ?", (commande_id,))
+        info_stock = decompter_livraison(connexion_bd, commande_id)
         connexion_bd.commit()
         recompenser_parrainage(connexion_bd, commande_id)
         alerter_client(commande, "livree")
         flash("Commande livrée. La plateforme va te reverser le montant de la vente (commission déduite).")
+        flash(info_stock)
     elif nouveau_statut == "livree":
         # À la livraison, l'agriculteur indique le montant encaissé : la commission
         # de la plateforme est calculée dessus
@@ -119,9 +122,11 @@ def changer_statut_commande(commande_id):
                 """UPDATE commandes SET statut = 'livree', lu_client = 0, montant = ?, commission = ?
                    WHERE id = ?""", (montant, commission, commande_id)
             )
+            info_stock = decompter_livraison(connexion_bd, commande_id)
             connexion_bd.commit()
             alerter_client(commande, "livree")
             flash(f"Commande livrée. Commission de la plateforme : {commission} FCFA.")
+            flash(info_stock)
     elif nouveau_statut == "confirmee":
         # À la confirmation, l'agriculteur peut fixer la date et les frais de livraison
         try:
