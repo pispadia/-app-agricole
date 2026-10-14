@@ -51,7 +51,7 @@
             <div class="vendeur">
                 <span class="tuile-icone" style="margin:0;">👩🏾‍🌾</span>
                 <div>
-                    Vendu par <strong>{{ recolte.nom_agriculteur }}</strong>
+                    Vendu par <strong><a href="{{ url_for('boutique', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a></strong>
                     {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}{% if recolte.verification_agriculteur == 'verifie' %}<span class="badge badge-livree" title="Identité vérifiée par App Agricole">✅ Vérifié</span>{% endif %}
                     <div>{{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}</div>
                 </div>

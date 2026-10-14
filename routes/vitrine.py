@@ -36,7 +36,7 @@ def catalogue_public():
 
 @app.route("/robots.txt")
 def robots():
-    lignes = ["User-agent: *", "Allow: /$", "Allow: /catalogue", "Allow: /annonce/", "Allow: /prix-du-marche", "Allow: /carte",
+    lignes = ["User-agent: *", "Allow: /$", "Allow: /catalogue", "Allow: /annonce/", "Allow: /producteurs/", "Allow: /prix-du-marche", "Allow: /carte",
               "Disallow: /", f"Sitemap: {url_for('plan_du_site', _external=True)}"]
     return Response("\n".join(lignes) + "\n", mimetype="text/plain")
 
@@ -48,10 +48,15 @@ def plan_du_site():
         """SELECT recoltes.id FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
            WHERE recoltes.statut = 'disponible' AND recoltes.masquee = 0 AND utilisateurs.suspendu = 0 ORDER BY recoltes.id DESC LIMIT 5000"""
     ).fetchall()
+    producteurs = connexion_bd.execute(
+        """SELECT DISTINCT recoltes.agriculteur_id FROM recoltes JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id
+           WHERE recoltes.statut = 'disponible' AND recoltes.masquee = 0 AND utilisateurs.suspendu = 0 LIMIT 5000"""
+    ).fetchall()
     connexion_bd.close()
     adresses = [url_for("accueil", _external=True), url_for("catalogue_public", _external=True),
                 url_for("prix_marche", _external=True)]
     adresses += [url_for("voir_annonce", recolte_id=a["id"], _external=True) for a in annonces]
+    adresses += [url_for("boutique", agriculteur_id=p["agriculteur_id"], _external=True) for p in producteurs]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     xml += [f"  <url><loc>{adresse}</loc></url>" for adresse in adresses]

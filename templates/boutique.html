@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_carte_annonce.html" import carte_annonce with context %}
+{% from "_etoiles.html" import etoiles %}
+{% block titre %}{{ agriculteur.nom }} · Producteur sur App Agricole{% endblock %}
+{% block meta %}
+    <meta property="og:type" content="profile">
+    <meta property="og:site_name" content="App Agricole">
+    <meta property="og:title" content="{{ agriculteur.nom }}, producteur sur App Agricole">
+    <meta property="og:description" content="{{ recoltes | length }} récolte(s) en vente{% if localites %} à {{ localites | join(', ') }}{% endif %}. Commandez directement au producteur.">
+    <meta property="og:url" content="{{ url_for('boutique', agriculteur_id=agriculteur.id, _external=True) }}">
+{% endblock %}
+{% block mise_en_page %}large{% endblock %}
+{% block contenu %}
+    <div class="entete-page">
+        <div>
+            <div class="surtitre">{{ "Producteur" | t }}</div>
+            <h1>👩🏾‍🌾 {{ agriculteur.nom }}</h1>
+            <p>
+                {% if agriculteur.verification == 'verifie' %}<span class="badge badge-livree" title="Identité vérifiée par App Agricole">✅ Vérifié</span>{% endif %}
+                {% if agriculteur.premium_jusqu_au and agriculteur.premium_jusqu_au >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}
+                {% if agriculteur.nb_avis %}{{ etoiles(agriculteur.note_moyenne, agriculteur.nb_avis) }}{% endif %}
+            </p>
+            <p style="margin:4px 0 0;">
+                {% if localites %}📍 {{ localites | join(', ') }} · {% endif %}📦 {{ livraisons }} {{ "commande(s) livrée(s)" | t }}
+                {% if agriculteur.date_inscription %} · {{ "Membre depuis" | t }} {{ agriculteur.date_inscription[:4] }}{% endif %}
+            </p>
+        </div>
+        <div class="groupe-boutons">
+            {% if role == 'client' %}
+                <form method="POST" action="{{ url_for('suivre_agriculteur', agriculteur_id=agriculteur.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="retour" value="boutique">
+                    <button type="submit" class="btn {% if suivi %}btn-clair{% endif %}">{% if suivi %}✔️ {{ "Suivi" | t }}{% else %}➕ {{ "Suivre" | t }}{% endif %}</button>
+                </form>
+            {% elif role is none %}
+                <a class="btn" href="{{ url_for('inscription') }}">{{ "Créer un compte pour commander" | t }}</a>
+            {% endif %}
+            {% if session.get('utilisateur_id') == agriculteur.id %}
+                <a class="btn btn-clair" href="{{ url_for('affiche_boutique') }}">🖨️ {{ "Mon affiche QR" | t }}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="titre-section"><h2>{{ "Récoltes en vente" | t }} ({{ recoltes | length }})</h2></div>
+    {% if recoltes %}
+        <div class="grille-annonces">
+            {% for recolte in recoltes %}
+                {{ carte_annonce(recolte, client=role == 'client') }}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="vide">{{ "Aucune récolte en vente pour le moment." | t }}{% if role == 'client' and not suivi %} {{ "Suis ce producteur pour être prévenu de sa prochaine récolte." | t }}{% endif %}</p>
+    {% endif %}
+
+    {% if derniers_avis %}
+        <div class="titre-section"><h2>{{ "Ce que disent ses clients" | t }}</h2>
+            {% if role %}<a href="{{ url_for('avis_agriculteur', agriculteur_id=agriculteur.id) }}">{{ "Tous les avis" | t }} →</a>{% endif %}
+        </div>
+        {% for un_avis in derniers_avis %}
+            <div class="carte-recolte" style="display:block;">
+                {{ etoiles(un_avis.note) }} — <strong>{{ un_avis.nom_client.split(' ')[0] }}</strong>
+                <p style="margin:5px 0 0;">{{ un_avis.commentaire }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

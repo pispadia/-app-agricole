@@ -24,7 +24,7 @@
             {% if recolte.prix_gros %}<div class="fiche-info">Gros : {{ recolte.prix_gros }}{% if recolte.quantite_gros_min %} ({{ recolte.quantite_gros_min }}){% endif %}</div>{% endif %}
             <div class="fiche-info">📦 {{ recolte.quantite }} · 📍 {{ recolte.localite }}</div>
             <div class="fiche-info">
-                Par {% if client %}<a href="{{ url_for('avis_agriculteur', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a>{% else %}{{ recolte.nom_agriculteur }}{% endif %}
+                Par <a href="{{ url_for('boutique', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a>
                 {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}
             </div>
             <div class="fiche-pied">

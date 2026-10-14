@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Affiche · {{ agriculteur.nom }}</title>
+    <style>
+        @page { size: A4; margin: 12mm; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #14281d; background: #eef2ee; }
+        .barre { max-width: 720px; margin: 16px auto; padding: 0 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .barre a, .barre button { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: 10px; border: 1px solid #1f7a4d; text-decoration: none; cursor: pointer; }
+        .barre button { background: #1f7a4d; color: #fff; }
+        .barre a { background: #fff; color: #1f7a4d; }
+        .barre p { flex-basis: 100%; margin: 0; color: #4b5d53; font-size: 0.92em; }
+        .affiche { max-width: 720px; margin: 0 auto 24px; background: #fff; border-radius: 16px; padding: 36px 32px; text-align: center; border: 6px solid #1f7a4d; }
+        .marque { color: #1f7a4d; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.95em; }
+        h1 { font-size: 2.4em; margin: 10px 0 4px; }
+        .verifie { display: inline-block; background: #e3f4ea; color: #1f7a4d; border-radius: 999px; padding: 4px 12px; font-weight: 600; }
+        .appel { font-size: 1.5em; font-weight: 700; margin: 22px 0 10px; }
+        .qr { width: 300px; max-width: 80%; height: auto; display: block; margin: 0 auto; }
+        .adresse { font-size: 0.95em; color: #4b5d53; word-break: break-all; margin-top: 6px; }
+        ul { list-style: none; padding: 0; margin: 22px auto 0; max-width: 460px; text-align: left; }
+        li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed #c9d6cd; padding: 7px 0; font-size: 1.1em; }
+        li strong { white-space: nowrap; }
+        .pied { margin-top: 22px; color: #4b5d53; }
+        @media print {
+            body { background: #fff; }
+            .barre { display: none; }
+            .affiche { border-radius: 0; margin: 0; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="barre">
+        <button type="button" onclick="window.print()">🖨️ Imprimer l'affiche</button>
+        <a href="{{ url_for('boutique', agriculteur_id=agriculteur.id) }}">Voir ma boutique</a>
+        <a href="{{ url_for('qr_boutique', agriculteur_id=agriculteur.id) }}" download="qr-app-agricole.svg">Télécharger le QR code</a>
+        <a href="{{ url_for('espace_agriculteur') }}">← Mon espace</a>
+        <p>Imprime cette affiche (ou fais-la imprimer dans un cyber) et pose-la sur ton étal : les clients scannent le QR code avec leur téléphone pour voir tes produits et commander.</p>
+    </div>
+    <div class="affiche">
+        <div class="marque">🌾 App Agricole</div>
+        <h1>{{ agriculteur.nom }}</h1>
+        {% if agriculteur.verification == 'verifie' %}<span class="verifie">✅ Producteur vérifié</span>{% endif %}
+        <div class="appel">📱 Scannez pour commander mes produits</div>
+        <img class="qr" src="{{ url_for('qr_boutique', agriculteur_id=agriculteur.id) }}" alt="QR code vers la boutique de {{ agriculteur.nom }}">
+        <div class="adresse">{{ url_for('boutique', agriculteur_id=agriculteur.id, _external=True) }}</div>
+        {% if recoltes %}
+            <ul>
+                {% for recolte in recoltes %}<li><span>{{ recolte.nom }}</span><strong>{{ recolte.prix }}</strong></li>{% endfor %}
+            </ul>
+        {% endif %}
+        <div class="pied">Paiement à la livraison ou avec Wave · Livraison ou retrait</div>
+    </div>
+</body>
+</html>
