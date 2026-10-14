@@ -330,6 +330,17 @@ def mes_commandes():
            WHERE commandes_regulieres.client_id = ? ORDER BY commandes_regulieres.id DESC""",
         (session["utilisateur_id"],)
     ).fetchall()
+    groupes = connexion_bd.execute(
+        """SELECT achats_groupes.id, achats_groupes.objectif, achats_groupes.date_limite, recoltes.nom AS nom_recolte,
+                  participations_groupe.quantite
+           FROM participations_groupe
+           JOIN achats_groupes ON participations_groupe.groupe_id = achats_groupes.id
+           JOIN recoltes ON achats_groupes.recolte_id = recoltes.id
+           WHERE participations_groupe.client_id = ? AND achats_groupes.statut = 'ouvert'
+             AND achats_groupes.date_limite >= ?
+           ORDER BY achats_groupes.id DESC""",
+        (session["utilisateur_id"], date.today().isoformat())
+    ).fetchall()
     fiabilite = fiabilite_du_client(connexion_bd, session["utilisateur_id"])
     # Les mises à jour affichées ici sont considérées comme vues
     connexion_bd.execute("UPDATE commandes SET lu_client = 1 WHERE client_id = ?", (session["utilisateur_id"],))
@@ -338,7 +349,7 @@ def mes_commandes():
 
     return render_template("mes_commandes.html", nom=session["nom"], commandes=commandes,
                            modes_livraison=MODES_LIVRAISON, modes_paiement=MODES_PAIEMENT, regulieres=regulieres, frequences=FREQUENCES,
-                           fiabilite=fiabilite)
+                           fiabilite=fiabilite, groupes=groupes)
 
 
 @app.route("/mes-commandes/<int:commande_id>/annuler", methods=["POST"])

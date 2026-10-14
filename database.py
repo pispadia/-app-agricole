@@ -173,7 +173,7 @@ TABLES = (
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
     "photos_recolte", "verifications", "parametres", "abonnements_push", "demandes_support",
     "commandes_regulieres", "favoris", "agriculteurs_suivis",
-    "avis_clients",
+    "avis_clients", "achats_groupes", "participations_groupe",
 )
 
 
@@ -198,6 +198,8 @@ INDEX = (
     ("idx_regulieres_date", "commandes_regulieres (actif, prochaine_date)"),
     ("idx_suivis_agriculteur", "agriculteurs_suivis (agriculteur_id)"),
     ("idx_avis_clients_client", "avis_clients (client_id)"),
+    ("idx_achats_groupes_recolte", "achats_groupes (recolte_id, statut)"),
+    ("idx_participations_groupe", "participations_groupe (groupe_id)"),
 )
 
 
@@ -531,6 +533,36 @@ def init_db():
     """)
     connexion.commit()
 
+    # Achats groupés : plusieurs clients s'associent pour atteindre la quantité du prix de gros
+    # d'une annonce ; quand l'objectif est atteint, une commande au prix de gros est créée pour chacun
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS achats_groupes (
+            id {ID_AUTO},
+            recolte_id INTEGER NOT NULL,
+            initiateur_id INTEGER NOT NULL,
+            objectif TEXT NOT NULL,
+            prix TEXT NOT NULL,
+            date_limite TEXT NOT NULL,
+            statut TEXT NOT NULL DEFAULT 'ouvert',
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (recolte_id) REFERENCES recoltes (id),
+            FOREIGN KEY (initiateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS participations_groupe (
+            id {ID_AUTO},
+            groupe_id INTEGER NOT NULL,
+            client_id INTEGER NOT NULL,
+            quantite TEXT NOT NULL,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (groupe_id, client_id),
+            FOREIGN KEY (groupe_id) REFERENCES achats_groupes (id),
+            FOREIGN KEY (client_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
     # Limites d'envoi (e-mails de réinitialisation, de confirmation, inscriptions) : une
     # ligne par envoi, pour bloquer les abus qui épuiseraient le quota d'e-mails
     connexion.execute(f"""
@@ -700,6 +732,8 @@ def init_db():
         # Rapport mensuel de l'agriculteur : envoyé par e-mail (désactivable), dernier mois envoyé
         ("utilisateurs", "rapport_mensuel", "INTEGER NOT NULL DEFAULT 1"),
         ("utilisateurs", "rapport_envoye_pour", "TEXT"),
+        # Commande créée par un achat groupé
+        ("commandes", "achat_groupe_id", "INTEGER"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

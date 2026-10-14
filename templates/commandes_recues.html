@@ -30,7 +30,7 @@
             <div class="carte-recolte">
                 <div>
                     <strong>{{ commande.nom_recolte }}</strong> — {{ commande.quantite_demandee }}
-                    {{ badge_statut(commande.statut) }}<br>
+                    {{ badge_statut(commande.statut) }}{% if commande.achat_groupe_id %} <span class="badge badge-livree">👥 Achat groupé</span>{% endif %}<br>
                     Client : {{ commande.nom_client }}{% if commande.reguliere_id %} <span class="badge badge-livree">🔁 Régulière</span>{% endif %}
                     <span class="fiabilite-client">{% if commande.note_client %}🛡️ {{ etoiles(commande.note_client) }} {{ '%.1f' | format(commande.note_client | float) }} ({{ commande.nb_notes_client }} {{ "note(s) d'agriculteurs" | t }}){% else %}🆕 {{ "Pas encore noté" | t }}{% endif %} · {{ commande.nb_livrees_client or 0 }} {{ "commande(s) livrée(s)" | t }}</span><br>
                     {% if commande.prix_promo %}<span class="badge badge-promo">🏷️ Prix promo : {{ commande.prix_promo }}</span><br>{% endif %}
