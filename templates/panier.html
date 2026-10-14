@@ -6,8 +6,8 @@
     {% if articles %}
         {% for article in articles %}
             <div class="carte-recolte">
-                {% if article.recolte.photo %}
-                    <img src="{{ article.recolte.photo }}" alt="{{ article.recolte.nom }}">
+                {% if article.recolte.a_photo %}
+                    <img src="{{ url_for('photo_annonce', recolte_id=article.recolte.id) }}" alt="{{ article.recolte.nom }}" loading="lazy">
                 {% endif %}
                 <div>
                     <strong>{{ article.recolte.nom }}</strong> — {{ article.quantite }}<br>

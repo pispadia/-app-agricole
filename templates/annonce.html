@@ -9,11 +9,11 @@
     <meta property="og:title" content="{{ titre_annonce }}">
     <meta property="og:description" content="{{ recolte.quantite }} disponible{{ ' dès le ' ~ (recolte.date_disponibilite | date_fr) if recolte.date_disponibilite }}. Vendu par {{ recolte.nom_agriculteur }} sur App Agricole.">
     <meta property="og:url" content="{{ url_for('voir_annonce', recolte_id=recolte.id, _external=True) }}">
-    {% if recolte.photo %}<meta property="og:image" content="{{ url_for('photo_annonce', recolte_id=recolte.id, _external=True) }}">{% endif %}
+    {% if recolte.a_photo %}<meta property="og:image" content="{{ url_for('photo_annonce', recolte_id=recolte.id, _external=True) }}">{% endif %}
 {% endblock %}
 {% block contenu %}
     <div class="carte-recolte" style="display:block;">
-        {% if recolte.photo %}
+        {% if recolte.a_photo %}
             <img src="{{ url_for('photo_annonce', recolte_id=recolte.id) }}" alt="{{ recolte.nom }}" style="width:100%; max-width:none; height:auto; max-height:320px; object-fit:cover; border-radius:8px;">
         {% endif %}
         <h2 style="margin-bottom:5px;">{{ recolte.nom }}</h2>

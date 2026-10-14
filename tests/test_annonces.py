@@ -37,6 +37,8 @@ def test_photo_servie_comme_image(client):
     reponse = client.get("/annonce/1/photo")
     assert reponse.mimetype == "image/png" and reponse.data == PNG
     assert "max-age" in reponse.headers["Cache-Control"]
+    # Deuxième visite : le navigateur envoie l'empreinte, la photo n'est pas renvoyée
+    assert client.get("/annonce/1/photo", headers={"If-None-Match": reponse.headers["ETag"]}).status_code == 304
     assert client.get("/annonce/99/photo").status_code == 404
 
 
@@ -70,3 +72,28 @@ def test_bouton_partager_pour_l_agriculteur(client):
     page = client.get("/espace-agriculteur").get_data(as_text=True)
     assert "https://wa.me/?text=Mil%20disponible%20%C3%A0%20Thi%C3%A8s" in page
     assert "http%3A//localhost/annonce/1" in page
+
+
+def test_catalogue_leger_sans_photo_integree(client):
+    with client.session_transaction() as session:
+        session.update(utilisateur_id=1, nom="F", role="client")
+    page = client.get("/espace-client").get_data(as_text=True)
+    assert 'src="/annonce/1/photo"' in page and "base64" not in page
+
+
+def test_page_404_propre(client):
+    reponse = client.get("/annonce/99")
+    assert reponse.status_code == 404 and "Page introuvable" in reponse.get_data(as_text=True)
+
+
+def test_page_500_propre(client, monkeypatch):
+    from routes import annonces
+
+    def panne(*args):
+        raise RuntimeError("base indisponible")
+
+    monkeypatch.setattr(annonces, "recolte_publique", panne)
+    monkeypatch.setitem(app.config, "PROPAGATE_EXCEPTIONS", False)
+    reponse = client.get("/annonce/1")
+    assert reponse.status_code == 500 and "Un problème est survenu" in reponse.get_data(as_text=True)
+    assert "base indisponible" not in reponse.get_data(as_text=True)

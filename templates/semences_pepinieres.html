@@ -30,8 +30,8 @@
     {% if produits %}
         {% for produit in produits %}
             <div class="carte-recolte">
-                {% if produit.photo %}
-                    <img src="{{ produit.photo }}" alt="{{ produit.nom }}">
+                {% if produit.a_photo %}
+                    <img src="{{ url_for('photo_produit', produit_id=produit.id) }}" alt="{{ produit.nom }}" loading="lazy">
                 {% endif %}
                 <div>
                     <strong>{{ produit.nom }}</strong>

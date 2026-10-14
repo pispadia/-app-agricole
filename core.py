@@ -29,6 +29,26 @@ app.config["WTF_CSRF_TIME_LIMIT"] = None
 csrf = CSRFProtect(app)
 
 
+@app.errorhandler(404)
+def page_introuvable(erreur):
+    from flask import render_template
+    return render_template("erreur.html", titre="Page introuvable",
+                           message="Cette page n'existe pas ou n'est plus disponible."), 404
+
+
+@app.errorhandler(500)
+def erreur_serveur(erreur):
+    # Le détail de l'erreur part dans les journaux de Render ; l'utilisateur voit une page propre
+    from flask import render_template
+    app.logger.exception("Erreur pendant la requête %s", request.path)
+    try:
+        return render_template("erreur.html", titre="Un problème est survenu",
+                               message="Réessaie dans un instant. Si le problème continue, contacte-nous."), 500
+    except Exception:
+        # Si même la page d'erreur échoue (ex : base de données indisponible), page minimale
+        return "<h2>Un problème est survenu</h2><p>Réessaie dans un instant.</p>", 500
+
+
 @app.errorhandler(CSRFError)
 def jeton_csrf_invalide(erreur):
     flash("Votre session a expiré ou le formulaire n'est plus valide. Merci de réessayer.")

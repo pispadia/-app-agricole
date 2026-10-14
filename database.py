@@ -12,6 +12,7 @@ UTILISE_POSTGRES = bool(DATABASE_URL)
 if UTILISE_POSTGRES:
     import psycopg2
     import psycopg2.extras
+    import psycopg2.pool
     # Render fournit parfois une URL commençant par "postgres://", que psycopg2
     # n'accepte plus depuis SQLAlchemy 1.4+ ; on la corrige en "postgresql://".
     if DATABASE_URL.startswith("postgres://"):
@@ -19,6 +20,18 @@ if UTILISE_POSTGRES:
 
 # Colonne identifiant auto-incrémentée : syntaxe différente entre SQLite et PostgreSQL
 ID_AUTO = "SERIAL PRIMARY KEY" if UTILISE_POSTGRES else "INTEGER PRIMARY KEY AUTOINCREMENT"
+
+
+# Colonnes des listes de récoltes et de produits, sans la photo (stockée en base64, elle
+# pèse jusqu'à 2 Mo) : les pages l'affichent via /annonce/<id>/photo ou /produit/<id>/photo.
+COLONNES_RECOLTE = """recoltes.id, recoltes.agriculteur_id, recoltes.nom, recoltes.quantite, recoltes.prix,
+    recoltes.prix_gros, recoltes.quantite_gros_min, recoltes.date_disponibilite, recoltes.localite,
+    recoltes.description, recoltes.statut, recoltes.date_creation, (recoltes.photo IS NOT NULL) AS a_photo"""
+COLONNES_PRODUIT = """produits_fournisseur.id, produits_fournisseur.fournisseur_id, produits_fournisseur.nom,
+    produits_fournisseur.type_produit, produits_fournisseur.variete, produits_fournisseur.duree_croissance,
+    produits_fournisseur.quantite, produits_fournisseur.prix, produits_fournisseur.localite,
+    produits_fournisseur.description, produits_fournisseur.statut, produits_fournisseur.date_creation,
+    (produits_fournisseur.photo IS NOT NULL) AS a_photo"""
 
 
 class ConnexionCompatible:
@@ -29,15 +42,44 @@ class ConnexionCompatible:
     quelle base de données est utilisée derrière.
     """
 
-    def __init__(self, connexion_brute):
+    def __init__(self, connexion_brute, depuis_reservoir=False):
         self._connexion = connexion_brute
+        self._depuis_reservoir = depuis_reservoir
+        self._fermee = False
+        self._utilisee = False
 
     def execute(self, requete, parametres=()):
-        curseur = self._connexion.cursor()
         if UTILISE_POSTGRES:
             requete = requete.replace("?", "%s")
-        curseur.execute(requete, parametres)
+        try:
+            curseur = self._connexion.cursor()
+            curseur.execute(requete, parametres)
+        except (psycopg2.OperationalError, psycopg2.InterfaceError) if UTILISE_POSTGRES else ():
+            # Connexion du réservoir coupée par le serveur pendant qu'elle attendait (ex : Supabase
+            # ferme les connexions inactives). Si rien n'a encore été fait avec, on la remplace
+            # et on rejoue la requête ; sinon l'erreur remonte (des écritures seraient perdues).
+            if not (self._depuis_reservoir and not self._utilisee):
+                raise
+            curseur = self._reessayer_avec_connexion_neuve(requete, parametres)
+        self._utilisee = True
         return curseur
+
+    def _reessayer_avec_connexion_neuve(self, requete, parametres):
+        # Plusieurs connexions inactives ont pu être coupées en même temps : on les écarte
+        # une à une (au plus la taille du réservoir), puis on finit par une connexion neuve.
+        for _ in range(int(os.environ.get("DB_POOL_MAX", "5")) + 1):
+            if self._depuis_reservoir:
+                _reservoir.putconn(self._connexion, close=True)
+            else:
+                self._connexion.close()
+            self._connexion, self._depuis_reservoir = _connexion_postgres()
+            try:
+                curseur = self._connexion.cursor()
+                curseur.execute(requete, parametres)
+                return curseur
+            except (psycopg2.OperationalError, psycopg2.InterfaceError):
+                continue
+        raise psycopg2.OperationalError("Base de données injoignable")
 
     def commit(self):
         self._connexion.commit()
@@ -46,18 +88,68 @@ class ConnexionCompatible:
         self._connexion.rollback()
 
     def close(self):
-        self._connexion.close()
+        if self._fermee:
+            return
+        self._fermee = True
+        if self._depuis_reservoir:
+            # La connexion retourne dans le réservoir au lieu d'être fermée : la suivante
+            # évite ainsi une nouvelle connexion chiffrée vers la base (lente).
+            rendre_connexion(self._connexion)
+        else:
+            self._connexion.close()
+
+    def __del__(self):
+        # Filet de sécurité : une connexion oubliée (erreur avant close()) revient au réservoir
+        try:
+            self.close()
+        except Exception:
+            pass
+
+
+# Réservoir de connexions PostgreSQL, créé au premier usage dans chaque processus
+# (après le fork de gunicorn). DB_POOL_MAX limite les connexions par processus (au-delà,
+# connexion directe), DB_POOL_MIN est le nombre gardé ouvert entre deux pages.
+_reservoir = None
+
+
+def _connexion_postgres():
+    """Retourne (connexion, vient_du_reservoir)."""
+    global _reservoir
+    if _reservoir is None:
+        # Une page utilise parfois 2 ou 3 connexions à la fois (la route, puis le menu) :
+        # on en garde DB_POOL_MIN ouvertes au repos pour ne pas les rouvrir à chaque page.
+        maximum = int(os.environ.get("DB_POOL_MAX", "5"))
+        _reservoir = psycopg2.pool.ThreadedConnectionPool(
+            min(int(os.environ.get("DB_POOL_MIN", "3")), maximum), maximum, DATABASE_URL,
+            cursor_factory=psycopg2.extras.RealDictCursor,
+        )
+    try:
+        connexion = _reservoir.getconn()
+        if connexion.closed:  # coupée par le serveur pendant qu'elle attendait : on la remplace
+            _reservoir.putconn(connexion, close=True)
+            connexion = _reservoir.getconn()
+        return connexion, True
+    except psycopg2.pool.PoolError:
+        # Réservoir épuisé : connexion directe plutôt qu'une page en erreur
+        return psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor), False
+
+
+def rendre_connexion(connexion):
+    try:
+        if not connexion.closed:
+            connexion.rollback()  # termine toute transaction laissée ouverte
+        _reservoir.putconn(connexion, close=bool(connexion.closed))
+    except Exception:
+        # Connexion inutilisable : on l'écarte, le réservoir en ouvrira une neuve
+        _reservoir.putconn(connexion, close=True)
 
 
 def get_connexion():
     """Ouvre une connexion à la base de données (PostgreSQL en ligne, SQLite en local)."""
     if UTILISE_POSTGRES:
-        connexion_brute = psycopg2.connect(
-            DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor
-        )
-    else:
-        connexion_brute = sqlite3.connect(DB_NAME)
-        connexion_brute.row_factory = sqlite3.Row
+        return ConnexionCompatible(*_connexion_postgres())
+    connexion_brute = sqlite3.connect(DB_NAME)
+    connexion_brute.row_factory = sqlite3.Row
     return ConnexionCompatible(connexion_brute)
 
 
