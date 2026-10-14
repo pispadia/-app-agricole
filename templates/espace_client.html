@@ -25,7 +25,7 @@
                 {% endif %}
                 <div>
                     <strong><a href="{{ url_for('voir_annonce', recolte_id=recolte.id) }}" style="color:inherit;">{{ recolte.nom }}</a></strong> — {{ recolte.quantite }}
-                    {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}<br>
+                    {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}{% if recolte.verification_agriculteur == 'verifie' %}<span class="badge badge-livree" title="Identité vérifiée par App Agricole">✅ Vérifié</span>{% endif %}<br>
                     Par <a href="{{ url_for('avis_agriculteur', agriculteur_id=recolte.agriculteur_id) }}">{{ recolte.nom_agriculteur }}</a>
                     {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}<br>
                     Détail : {{ recolte.prix }}

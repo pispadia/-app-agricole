@@ -23,6 +23,7 @@ def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", p
     requete = """
         SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
                utilisateurs.premium_jusqu_au AS premium_agriculteur,
+               utilisateurs.verification AS verification_agriculteur,
                notes.note_moyenne, notes.nb_avis
         FROM recoltes
         JOIN utilisateurs ON recoltes.agriculteur_id = utilisateurs.id

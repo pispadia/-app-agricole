@@ -95,6 +95,7 @@ WOLOF = {
     "Localité de production (ex: Thiès)": "Dëkk bi mu bayu (ex: Thiès)",
     "Description (optionnel)": "Leeral (bu la neexee)",
     "Photo du produit (optionnel)": "Nataalu meññeef mi (bu la neexee)",
+    "Faire vérifier mon compte": "Seetlu sama kont",
     "Autres photos (optionnel, 3 maximum)": "Yeneen nataal (bu la neexee, 3 ci lu ëpp)",
     "Publier": "Siiwal",
     "← Retour à mon espace": "← Dellu ci sama bérëb",

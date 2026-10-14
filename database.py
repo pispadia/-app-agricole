@@ -171,7 +171,7 @@ TABLES = (
     "utilisateurs", "recoltes", "commandes", "produits_fournisseur", "contacts_fournisseur",
     "offres_financement", "demandes_financement", "contacts_offre", "contacts_demande",
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
-    "photos_recolte",
+    "photos_recolte", "verifications",
 )
 
 
@@ -488,6 +488,17 @@ def init_db():
             FOREIGN KEY (auteur_id) REFERENCES utilisateurs (id)
         )
     """)
+    # Pièce d'identité envoyée pour le badge « Agriculteur vérifié » : effacée dès que
+    # l'admin a décidé (seul le résultat reste, dans utilisateurs.verification)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS verifications (
+            id {ID_AUTO},
+            utilisateur_id INTEGER NOT NULL UNIQUE,
+            piece TEXT NOT NULL,
+            date_creation TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
     # Photos en plus de la photo principale (recoltes.photo), pour la galerie de l'annonce
     connexion.execute(f"""
         CREATE TABLE IF NOT EXISTS photos_recolte (
@@ -549,6 +560,8 @@ def init_db():
         ("commandes", "frais_livraison", "INTEGER"),
         # Date d'inscription (statistiques de l'admin) ; vide pour les comptes plus anciens
         ("utilisateurs", "date_inscription", "TEXT"),
+        # Badge « Agriculteur vérifié » : vide, 'en_attente', 'verifie' ou 'refuse'
+        ("utilisateurs", "verification", "TEXT"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

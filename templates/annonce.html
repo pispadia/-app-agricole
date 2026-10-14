@@ -38,7 +38,7 @@
         {% if recolte.description %}<p style="color:#555;">{{ recolte.description }}</p>{% endif %}
         <p>
             Vendu par <strong>{{ recolte.nom_agriculteur }}</strong>
-            {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}
+            {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}{% if recolte.verification_agriculteur == 'verifie' %}<span class="badge badge-livree" title="Identité vérifiée par App Agricole">✅ Vérifié</span>{% endif %}
             {{ etoiles(recolte.note_moyenne, recolte.nb_avis) }}
         </p>
 
