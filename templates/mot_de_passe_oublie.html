@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block contenu %}
     <h2>Mot de passe oublié</h2>
-    <p>Indique l'email de ton compte : tu recevras un lien pour choisir un nouveau mot de passe.</p>
+    <p>Indique le numéro de téléphone ou l'e-mail de ton compte : tu recevras un code par SMS, ou un lien par e-mail, pour choisir un nouveau mot de passe.</p>
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="email" name="email" placeholder="Email" required>
-        <button type="submit">Envoyer le lien</button>
+        <input type="text" name="identifiant" placeholder="Téléphone ou e-mail" required>
+        <button type="submit">Recevoir le code ou le lien</button>
     </form>
     <p><a href="{{ url_for('connexion') }}">← Retour à la connexion</a></p>
 {% endblock %}

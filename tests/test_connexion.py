@@ -4,6 +4,8 @@ import database
 from app import app
 from routes import comptes
 
+LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
@@ -11,7 +13,7 @@ def client(tmp_path, monkeypatch):
     database.init_db()
     monkeypatch.setitem(app.config, "WTF_CSRF_ENABLED", False)
     client = app.test_client()
-    client.post("/inscription", data={
+    client.post("/inscription", data={**LIEU, 
         "nom": "Awa", "email": "awa@exemple.sn", "mot_de_passe": "bon-mot-de-passe", "role": "client",
     })
     return client

@@ -19,7 +19,7 @@
             <strong>{{ u.nom }}</strong> — {{ u.role | capitalize }}
             {% if u.suspendu %}<span class="badge badge-epuise">Suspendu</span>{% endif %}
             {% if u.premium_jusqu_au and u.premium_jusqu_au >= aujourdhui %}<span class="badge badge-attente">⭐ Premium</span>{% endif %}<br>
-            {{ u.email }}{% if u.telephone %} · {{ u.telephone }}{% endif %}<br>
+            {{ u.email or "📱 compte par téléphone" }}{% if u.telephone %} · {{ u.telephone }}{% endif %}<br>
             <span style="color:#666; font-size:0.9em;">
                 {% if u.role == 'client' %}{{ u.nb_achats }} commande{{ 's' if u.nb_achats > 1 }}{% endif %}
                 {% if u.role == 'agriculteur' %}{{ u.nb_ventes }} commande{{ 's' if u.nb_ventes > 1 }} reçue{{ 's' if u.nb_ventes > 1 }}{% endif %}

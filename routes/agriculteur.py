@@ -8,7 +8,8 @@ from routes.avis import NOTES_AGRICULTEURS
 from routes.fiabilite_clients import FIABILITE_CLIENTS, LIVRAISONS_CLIENTS
 from stock import decompter_livraison
 from database import get_connexion, COLONNES_RECOLTE
-from core import (app, encoder_photo, masquer_coordonnees, date_disponibilite_valide, quantite_valide, prix_valide, utilisateur_connecte,
+from geographie import texte_lieu
+from core import (app, utilisateur_courant, encoder_photo, masquer_coordonnees, date_disponibilite_valide, quantite_valide, prix_valide, utilisateur_connecte,
                   montant_valide, calculer_commission, TAUX_COMMISSION, NUMERO_PAIEMENT,
                   planning_livraison_valide, date_fr, MODES_LIVRAISON, MODES_PAIEMENT)
 
@@ -258,7 +259,8 @@ def nouvelle_recolte():
         flash("Récolte publiée avec succès.")
         return redirect(url_for("espace_agriculteur"))
 
-    return render_template("nouvelle_recolte.html")
+    # La localité est préremplie avec l'adresse donnée à l'inscription
+    return render_template("nouvelle_recolte.html", saisie={"localite": texte_lieu(utilisateur_courant())})
 
 
 @app.route("/espace-agriculteur/modifier-recolte/<int:recolte_id>", methods=["GET", "POST"])

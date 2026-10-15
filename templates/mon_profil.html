@@ -1,9 +1,12 @@
 {% extends "base.html" %}
+{% from "_lieu.html" import choix_lieu %}
 {% block contenu %}
     <h2>Mon profil</h2>
     <p style="color:#888; text-transform: capitalize;">Rôle : {{ utilisateur.role }}</p>
 
-    {% if email_confirme %}
+    {% if not utilisateur.email %}
+        <p><span class="badge badge-dispo">📱 Compte lié à ton numéro {{ utilisateur.telephone_connexion }}</span></p>
+    {% elif email_confirme %}
         <p><span class="badge badge-dispo">✓ Adresse e-mail confirmée</span></p>
     {% else %}
         <div class="flash">
@@ -22,11 +25,20 @@
         <label>Nom</label>
         <input type="text" name="nom" value="{{ utilisateur.nom }}" required>
 
-        <label>Email</label>
-        <input type="email" name="email" value="{{ utilisateur.email }}" required>
+        {% if utilisateur.telephone_connexion %}
+            <label>Téléphone (sert à te connecter, jamais montré aux autres utilisateurs)</label>
+            <input type="tel" name="telephone" value="{{ utilisateur.telephone_connexion }}" required>
+            <label>Email (facultatif)</label>
+            <input type="email" name="email" value="{{ utilisateur.email or '' }}">
+        {% else %}
+            <label>Email</label>
+            <input type="email" name="email" value="{{ utilisateur.email }}" required>
 
-        <label>Téléphone (optionnel) : sert uniquement à t'envoyer les alertes SMS, il n'est jamais montré aux autres utilisateurs</label>
-        <input type="tel" name="telephone" value="{{ utilisateur.telephone or '' }}" placeholder="ex: 77 123 45 67">
+            <label>Téléphone (optionnel) : sert uniquement à t'envoyer les alertes SMS, il n'est jamais montré aux autres utilisateurs</label>
+            <input type="tel" name="telephone" value="{{ utilisateur.telephone or '' }}" placeholder="ex: 77 123 45 67">
+        {% endif %}
+
+        {{ choix_lieu(saisie, pays, senegal, autre) }}
 
         <label>Nouveau mot de passe (laisser vide pour ne pas le changer, 8 caractères minimum)</label>
         <input type="password" name="nouveau_mot_de_passe" placeholder="Nouveau mot de passe" minlength="8">

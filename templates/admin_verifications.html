@@ -5,7 +5,7 @@
 
     {% for d in demandes %}
         <div class="carte-recolte" style="display:block;">
-            <strong>{{ d.nom }}</strong> ({{ d.email }}{% if d.telephone %}, {{ d.telephone }}{% endif %})
+            <strong>{{ d.nom }}</strong> ({{ d.email or "compte par téléphone" }}{% if d.telephone %}, {{ d.telephone }}{% endif %})
             <p style="margin:5px 0; font-size:0.85em; color:#999;">Envoyée le {{ d.date_creation }}</p>
             <a href="{{ url_for('piece_identite', utilisateur_id=d.utilisateur_id) }}" target="_blank" rel="noopener">
                 <img src="{{ url_for('piece_identite', utilisateur_id=d.utilisateur_id) }}" alt="Pièce d'identité de {{ d.nom }}" style="max-width:100%; max-height:260px; border-radius:5px;">

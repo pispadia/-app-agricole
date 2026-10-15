@@ -224,6 +224,27 @@ WOLOF = {
     "Retirer": "Far",
     "Aucune annonce gardée. Sur une annonce, touche « Ajouter aux favoris ».":
         "Dencoo benn yéenekaay. Ci benn yéenekaay, bësal « Ajouter aux favoris ».",
+    # Inscription par téléphone et adresse
+    "Je m'inscris avec": "Dama bindu ak",
+    "Mon téléphone": "Sama telefon",
+    "Mon e-mail": "Sama e-mail",
+    "Numéro de téléphone": "Nimeerou telefon",
+    "Il te servira à te connecter. Il n'est jamais montré aux autres utilisateurs.":
+        "Dinga ko jëfandikoo ngir dugg. Kenn du ko gis.",
+    "Où habites-tu ?": "Fan nga dëkk ?",
+    "Pays": "Réew",
+    "Région": "Diiwaan",
+    "Département": "Departemaa",
+    "Commune ou ville": "Komin walla dëkk",
+    "Village ou quartier": "Dëkk walla gox",
+    "facultatif": "bu la neexee",
+    "Choisis…": "Tànnal…",
+    "Autre (écrire)": "Leneen (bind ko)",
+    "Écrire": "Bind",
+    "Écris ici": "Bindal fii",
+    "ex : Keur Mbaye, quartier Escale": "ex : Keur Mbaye, goxu Escale",
+    "Téléphone ou e-mail": "Telefon walla e-mail",
+    "Pas encore de compte ?": "Amuloo kont ba leegi ?",
     # Météo et conseiller
     "Indique ta localité pour voir la météo des 7 prochains jours.":
         "Bindal sa dëkk ngir gis jawwu 7 fan yiy ñëw.",

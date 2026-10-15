@@ -342,12 +342,12 @@ def est_premium():
 
 def email_confirme(utilisateur):
     """Vrai si l'adresse actuelle du compte a été confirmée par le lien envoyé par e-mail."""
-    email = utilisateur["email"].strip().lower()
-    return (utilisateur["email_confirme"] or "").strip().lower() == email
+    email = (utilisateur["email"] or "").strip().lower()
+    return bool(email) and (utilisateur["email_confirme"] or "").strip().lower() == email
 
 
 def adresse_admin(utilisateur):
-    return bool(utilisateur) and utilisateur["email"].strip().lower() in EMAILS_ADMIN
+    return bool(utilisateur) and (utilisateur["email"] or "").strip().lower() in EMAILS_ADMIN
 
 
 def est_admin(utilisateur=None):

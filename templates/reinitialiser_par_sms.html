@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <h2>Nouveau mot de passe</h2>
+    <p>Entre le code à 6 chiffres reçu par SMS au <strong>{{ telephone }}</strong>, puis choisis ton nouveau mot de passe.</p>
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="code" placeholder="Code à 6 chiffres" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required>
+        <input type="password" name="mot_de_passe" placeholder="Nouveau mot de passe (8 caractères minimum)" minlength="8" required>
+        <input type="password" name="confirmation" placeholder="Répète le mot de passe" minlength="8" required>
+        <button type="submit">Changer mon mot de passe</button>
+    </form>
+    <p><a href="{{ url_for('mot_de_passe_oublie') }}">Je n'ai pas reçu de code</a></p>
+{% endblock %}

@@ -36,6 +36,7 @@ def obstacles_suppression(connexion_bd, utilisateur_id):
 def effacer_compte(connexion_bd, utilisateur_id):
     connexion_bd.execute(
         """UPDATE utilisateurs SET nom = 'Compte supprimé', email = ?, mot_de_passe = ?, telephone = NULL,
+                  telephone_connexion = NULL, localite = NULL,
                   email_confirme = NULL, code_parrainage = NULL, suspendu = 1, verification = NULL
            WHERE id = ?""",
         (f"supprime-{utilisateur_id}@compte-supprime.invalid",
@@ -56,6 +57,7 @@ def effacer_compte(connexion_bd, utilisateur_id):
                            ("commandes_regulieres", "client_id"), ("favoris", "client_id"),
                            ("agriculteurs_suivis", "client_id"), ("agriculteurs_suivis", "agriculteur_id"),
                            ("avis_clients", "client_id"), ("participations_groupe", "client_id"),
+                           ("codes_sms", "utilisateur_id"),
                            ("verifications", "utilisateur_id")):
         connexion_bd.execute(f"DELETE FROM {table} WHERE {colonne} = ?", (utilisateur_id,))
     connexion_bd.commit()

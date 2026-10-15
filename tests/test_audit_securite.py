@@ -6,6 +6,8 @@ from app import app
 from routes import comptes
 from tests.test_paiement_wave import FauxWave
 
+LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
 
 @pytest.fixture
 def emails(monkeypatch):
@@ -20,7 +22,7 @@ def client(tmp_path, monkeypatch, emails):
     database.init_db()
     monkeypatch.setitem(app.config, "WTF_CSRF_ENABLED", False)
     client = app.test_client()
-    client.post("/inscription", data={"nom": "Awa", "email": "a@x.sn", "mot_de_passe": "motdepasse", "role": "agriculteur"})
+    client.post("/inscription", data={**LIEU, "nom": "Awa", "email": "a@x.sn", "mot_de_passe": "motdepasse", "role": "agriculteur"})
     emails.clear()
     return client
 
@@ -58,7 +60,7 @@ def test_confirmation_limitee(client, emails):
 def test_inscriptions_limitees_par_ip(client, monkeypatch):
     monkeypatch.setattr(comptes, "MAX_INSCRIPTIONS_PAR_IP", 2)
     for i in range(3):
-        page = client.post("/inscription", data={"nom": "N", "email": f"n{i}@x.sn", "mot_de_passe": "motdepasse",
+        page = client.post("/inscription", data={**LIEU, "nom": "N", "email": f"n{i}@x.sn", "mot_de_passe": "motdepasse",
                                                  "role": "client"}, follow_redirects=True)
     assert "Trop de comptes créés" in page.get_data(as_text=True)
     connexion = database.get_connexion()
