@@ -1,0 +1,98 @@
+{# Adresse pas à pas : pays -> région -> département -> commune -> village ou quartier.
+   À chaque étape on choisit dans la liste, ou « Autre » pour écrire soi-même.
+   Sans JavaScript, chaque étape reste une simple case à remplir. #}
+{% macro choix_lieu(saisie, pays, senegal, autre) %}
+    <fieldset class="lieu" data-lieu>
+        <legend>📍 {{ "Où habites-tu ?" | t }}</legend>
+
+        <label for="lieu-pays">{{ "Pays" | t }}</label>
+        <select name="pays" id="lieu-pays" required>
+            {% for code, nom, indicatif in pays %}
+                <option value="{{ code }}" data-indicatif="{{ indicatif }}" {% if saisie.get('pays', 'SN') == code %}selected{% endif %}>{{ nom }}</option>
+            {% endfor %}
+        </select>
+
+        {% for niveau, libelle, exemple in (("region", "Région", "ex : Thiès"), ("departement", "Département", "ex : Mbour"), ("commune", "Commune ou ville", "ex : Joal-Fadiouth")) %}
+            <div class="lieu-etape" data-niveau="{{ niveau }}">
+                <label for="lieu-{{ niveau }}">{{ libelle | t }}{% if niveau == 'departement' %} <span class="facultatif" hidden>({{ "facultatif" | t }})</span>{% endif %}</label>
+                <select name="{{ niveau }}" id="lieu-{{ niveau }}" data-valeur="{{ saisie.get(niveau, '') }}">
+                    <option value="{{ autre }}" selected>{{ "Autre (écrire)" | t }}</option>
+                </select>
+                <input type="text" name="{{ niveau }}_autre" id="lieu-{{ niveau }}-autre" maxlength="80"
+                       value="{{ saisie.get(niveau ~ '_autre', '') }}" placeholder="{{ "Écris ici" | t }} ({{ exemple }})" aria-label="{{ libelle | t }}">
+            </div>
+        {% endfor %}
+
+        <label for="lieu-localite">{{ "Village ou quartier" | t }} <span class="facultatif">({{ "facultatif" | t }})</span></label>
+        <input type="text" name="localite" id="lieu-localite" maxlength="80" value="{{ saisie.get('localite', '') }}" placeholder="{{ "ex : Keur Mbaye, quartier Escale" | t }}">
+    </fieldset>
+
+    <script>
+    (function () {
+        const GEO = {{ senegal | tojson }};
+        const AUTRE = {{ autre | tojson }};
+        const bloc = document.currentScript.previousElementSibling;
+        const pays = bloc.querySelector("#lieu-pays");
+        const etapes = ["region", "departement", "commune"].map((niveau) => {
+            const div = bloc.querySelector(`[data-niveau="${niveau}"]`);
+            return {niveau, div, select: div.querySelector("select"), autre: div.querySelector("input"),
+                    initiale: div.querySelector("select").dataset.valeur};
+        });
+
+        function options(index) {
+            // Liste proposée à cette étape, d'après les choix précédents (Sénégal uniquement)
+            if (pays.value !== "SN") return [];
+            let noeud = GEO;
+            for (let i = 0; i < index; i++) {
+                const choix = etapes[i].select.value;
+                if (!noeud || Array.isArray(noeud) || !(choix in noeud)) return [];
+                noeud = noeud[choix];
+            }
+            if (!noeud) return [];
+            return Array.isArray(noeud) ? noeud.slice().sort((a, b) => a.localeCompare(b, "fr")) : Object.keys(noeud);
+        }
+
+        function afficherAutre(etape) {
+            const ecrire = etape.select.value === AUTRE;
+            etape.autre.hidden = !ecrire;
+            const obligatoire = !(etape.niveau === "departement" && pays.value !== "SN");
+            etape.autre.required = ecrire && obligatoire;
+            etape.select.required = obligatoire;
+        }
+
+        function remplir(index, valeur) {
+            const etape = etapes[index];
+            const liste = options(index);
+            etape.select.innerHTML = "";
+            if (liste.length) {
+                etape.select.add(new Option({{ "Choisis…" | t | tojson }}, ""));
+                liste.forEach((nom) => etape.select.add(new Option(nom, nom)));
+            }
+            etape.select.add(new Option(liste.length ? {{ "Autre (écrire)" | t | tojson }} : {{ "Écrire" | t | tojson }}, AUTRE));
+            if (valeur && liste.includes(valeur)) {
+                etape.select.value = valeur;
+            } else if (valeur || !liste.length) {
+                etape.select.value = AUTRE;
+                if (valeur && valeur !== AUTRE && !etape.autre.value) etape.autre.value = valeur;
+            } else {
+                etape.select.value = "";
+            }
+            // Une seule réponse possible : la liste est cachée, on écrit directement
+            etape.select.hidden = !liste.length;
+            afficherAutre(etape);
+            etape.div.querySelector(".facultatif") && (etape.div.querySelector(".facultatif").hidden = pays.value === "SN");
+        }
+
+        function depuis(index, valeurs) {
+            for (let i = index; i < etapes.length; i++) remplir(i, valeurs ? valeurs[i] : "");
+        }
+
+        pays.addEventListener("change", () => depuis(0));
+        etapes.forEach((etape, i) => etape.select.addEventListener("change", () => {
+            afficherAutre(etape);
+            depuis(i + 1);
+        }));
+        depuis(0, etapes.map((e) => e.initiale));
+    })();
+    </script>
+{% endmacro %}

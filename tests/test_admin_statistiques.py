@@ -6,6 +6,8 @@ import core
 import database
 from app import app
 
+LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
@@ -15,7 +17,7 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setattr(core, "EMAILS_ADMIN", {"admin@x.sn"})
     client = app.test_client()
     for nom, email, role in (("Admin", "admin@x.sn", "client"), ("Fatou", "f@x.sn", "agriculteur")):
-        client.post("/inscription", data={"nom": nom, "email": email, "mot_de_passe": "motdepasse", "role": role})
+        client.post("/inscription", data={**LIEU, "nom": nom, "email": email, "mot_de_passe": "motdepasse", "role": role})
     connexion = database.get_connexion()
     connexion.execute("UPDATE utilisateurs SET email_confirme = email WHERE email = 'admin@x.sn'")
     connexion.execute(

@@ -8,6 +8,8 @@ import sms
 from app import app
 from routes import parrainage
 
+LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
@@ -71,7 +73,7 @@ def test_inscription_avec_le_lien(client):
     assert len(code) == 8 and f"parrain={code}" in page and "wa.me" in page
     nouveau = app.test_client()
     nouveau.get(f"/inscription?parrain={code.lower()}")
-    nouveau.post("/inscription", data={"nom": "Ibou", "email": "i@x.sn", "mot_de_passe": "motdepasse", "role": "client"})
+    nouveau.post("/inscription", data={**LIEU, "nom": "Ibou", "email": "i@x.sn", "mot_de_passe": "motdepasse", "role": "client"})
     assert ligne("SELECT parrain_id FROM utilisateurs WHERE email = 'i@x.sn'")["parrain_id"] == 1
 
 

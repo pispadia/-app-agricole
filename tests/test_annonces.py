@@ -5,6 +5,8 @@ import pytest
 import database
 from app import app
 
+LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
 PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 20
 
 
@@ -53,14 +55,14 @@ def test_annonce_inconnue_ou_agriculteur_suspendu(client):
 
 def test_inscription_puis_connexion_ramene_a_la_commande(client):
     client.get("/inscription?suivant=/commander/1")
-    client.post("/inscription", data={"nom": "Awa", "email": "a@x.sn", "mot_de_passe": "motdepasse", "role": "client"})
+    client.post("/inscription", data={**LIEU, "nom": "Awa", "email": "a@x.sn", "mot_de_passe": "motdepasse", "role": "client"})
     reponse = client.post("/connexion", data={"email": "a@x.sn", "mot_de_passe": "motdepasse"})
     assert reponse.headers["Location"].endswith("/commander/1")
 
 
 @pytest.mark.parametrize("suivant", ["https://pirate.example", "//pirate.example", "/\\pirate.example"])
 def test_pas_de_redirection_externe(client, suivant):
-    client.post("/inscription", data={"nom": "Awa", "email": "a@x.sn", "mot_de_passe": "motdepasse", "role": "client"})
+    client.post("/inscription", data={**LIEU, "nom": "Awa", "email": "a@x.sn", "mot_de_passe": "motdepasse", "role": "client"})
     client.get("/connexion", query_string={"suivant": suivant})
     reponse = client.post("/connexion", data={"email": "a@x.sn", "mot_de_passe": "motdepasse"})
     assert reponse.headers["Location"].endswith("/espace-client")

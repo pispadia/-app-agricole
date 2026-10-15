@@ -55,11 +55,13 @@ def contact():
         categorie = request.form.get("categorie", "")
         message = request.form.get("message", "").strip()
         nom = utilisateur["nom"] if utilisateur else request.form.get("nom", "").strip()
-        email = utilisateur["email"] if utilisateur else request.form.get("email", "").strip()
+        # Compte créé avec un téléphone : pas d'e-mail, la réponse est lue ici (et le numéro est gardé)
+        email = (utilisateur["email"] or utilisateur["telephone"] or "") if utilisateur \
+            else request.form.get("email", "").strip()
         commande_id = request.form.get("commande_id", "")
         commande_id = int(commande_id) if commande_id.isdigit() and int(commande_id) in {c["id"] for c in commandes} else None
 
-        if categorie not in CATEGORIES or not message or not nom or "@" not in email:
+        if categorie not in CATEGORIES or not message or not nom or (not utilisateur and "@" not in email):
             flash("Choisis un sujet et écris ton message (avec ton nom et ton e-mail).")
         elif len(message) > LONGUEUR_MAX:
             flash(f"Le message ne doit pas dépasser {LONGUEUR_MAX} caractères.")
@@ -123,7 +125,7 @@ def repondre_support(demande_id):
         (reponse or None, datetime.now().strftime("%Y-%m-%d %H:%M"), demande_id))
     connexion_bd.commit()
     connexion_bd.close()
-    if reponse:
+    if reponse and "@" in (demande["email"] or ""):  # sinon (compte par téléphone) : réponse lue dans l'app
         envoyer_email(demande["email"], f"Réponse à ta demande n°{demande_id} · App Agricole",
                       f"<p>Bonjour {escape(demande['nom'])},</p><p>{escape(reponse)}</p>"
                       f"<p>— L'équipe App Agricole</p><hr><p style=\"color:#888\">Ta demande : "

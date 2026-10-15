@@ -14,7 +14,7 @@ def client(tmp_path, monkeypatch):
 
 
 def inscrire(client, **champs):
-    donnees = {"nom": "Awa", "email": "awa@x.sn", "mot_de_passe": "mot-de-passe", "role": "client"}
+    donnees = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff", "nom": "Awa", "email": "awa@x.sn", "mot_de_passe": "mot-de-passe", "role": "client"}
     donnees.update(champs)
     return client.post("/inscription", data=donnees, follow_redirects=True).get_data(as_text=True)
 
@@ -57,10 +57,10 @@ def test_telephone_enregistre_et_valide(client):
 def test_profil_telephone_et_mot_de_passe(client):
     inscrire(client)
     en_tant_que(client, 1, "client")
-    client.post("/mon-profil", data={"nom": "Awa", "email": "awa@x.sn", "telephone": "+221 70 000 00 00",
+    client.post("/mon-profil", data={"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff", "nom": "Awa", "email": "awa@x.sn", "telephone": "+221 70 000 00 00",
                                      "nouveau_mot_de_passe": "", "mot_de_passe_actuel": "mot-de-passe"})
     assert utilisateurs()[0]["telephone"] == "+221 70 000 00 00"
-    page = client.post("/mon-profil", data={"nom": "Awa", "email": "awa@x.sn", "telephone": "",
+    page = client.post("/mon-profil", data={"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff", "nom": "Awa", "email": "awa@x.sn", "telephone": "",
                                             "nouveau_mot_de_passe": "court", "mot_de_passe_actuel": "mot-de-passe"},
                        follow_redirects=True).get_data(as_text=True)
     assert "au moins 8 caractères" in page

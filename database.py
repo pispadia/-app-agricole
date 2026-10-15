@@ -173,7 +173,7 @@ TABLES = (
     "echecs_connexion", "paiements_premium", "paiements_wave", "avis", "messages_commande", "alertes_produit", "limites_envoi", "signalements",
     "photos_recolte", "verifications", "parametres", "abonnements_push", "demandes_support",
     "commandes_regulieres", "favoris", "agriculteurs_suivis",
-    "avis_clients", "achats_groupes", "participations_groupe",
+    "avis_clients", "achats_groupes", "participations_groupe", "codes_sms",
 )
 
 
@@ -210,7 +210,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS utilisateurs (
             id {ID_AUTO},
             nom TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
+            email TEXT UNIQUE,
             mot_de_passe TEXT NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('client', 'agriculteur', 'fournisseur', 'financeur'))
         )
@@ -563,6 +563,20 @@ def init_db():
     """)
     connexion.commit()
 
+    # Codes envoyés par SMS pour réinitialiser le mot de passe d'un compte créé avec un téléphone
+    # (seule l'empreinte du code est gardée)
+    connexion.execute(f"""
+        CREATE TABLE IF NOT EXISTS codes_sms (
+            id {ID_AUTO},
+            utilisateur_id INTEGER NOT NULL,
+            empreinte TEXT NOT NULL,
+            expire_a INTEGER NOT NULL,
+            essais INTEGER NOT NULL DEFAULT 0,
+            FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs (id)
+        )
+    """)
+    connexion.commit()
+
     # Limites d'envoi (e-mails de réinitialisation, de confirmation, inscriptions) : une
     # ligne par envoi, pour bloquer les abus qui épuiseraient le quota d'e-mails
     connexion.execute(f"""
@@ -734,6 +748,14 @@ def init_db():
         ("utilisateurs", "rapport_envoye_pour", "TEXT"),
         # Commande créée par un achat groupé
         ("commandes", "achat_groupe_id", "INTEGER"),
+        # Inscription par téléphone (numéro international unique, sert d'identifiant) et adresse :
+        # pays, région, département, commune, village ou quartier
+        ("utilisateurs", "telephone_connexion", "TEXT"),
+        ("utilisateurs", "pays", "TEXT"),
+        ("utilisateurs", "region", "TEXT"),
+        ("utilisateurs", "departement", "TEXT"),
+        ("utilisateurs", "commune", "TEXT"),
+        ("utilisateurs", "localite", "TEXT"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:
@@ -762,9 +784,21 @@ def init_db():
             print(f"[migration] ERREUR sur {nom_table} : {erreur}")
 
 
+    # Comptes créés avec un numéro de téléphone : l'e-mail devient facultatif (les bases
+    # PostgreSQL créées avant gardaient « NOT NULL » ; une base neuve est déjà correcte)
+    if UTILISE_POSTGRES:
+        try:
+            curseur.execute("ALTER TABLE utilisateurs ALTER COLUMN email DROP NOT NULL")
+            connexion.commit()
+        except Exception as erreur:
+            connexion.rollback()
+            print(f"[migration] ERREUR email facultatif : {erreur}")
+
     # Index, une fois toutes les colonnes ajoutées (certains portent sur des colonnes récentes)
     for nom_index, definition in INDEX:
         connexion.execute(f"CREATE INDEX IF NOT EXISTS {nom_index} ON {definition}")
+    # Un numéro de téléphone ne sert d'identifiant qu'à un seul compte
+    connexion.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_telephone_connexion ON utilisateurs (telephone_connexion)")
     connexion.commit()
     connexion.close()
     print(f"Base de données initialisée ({'PostgreSQL' if UTILISE_POSTGRES else 'SQLite'}).")

@@ -84,7 +84,7 @@
         {% for p in paiements %}
             <div class="carte-recolte">
                 <div>
-                    <strong>{{ p.nom }}</strong> ({{ p.role }}, {{ p.email }}) — {{ p.montant }} FCFA<br>
+                    <strong>{{ p.nom }}</strong> ({{ p.role }}, {{ p.email or "compte par téléphone" }}) — {{ p.montant }} FCFA<br>
                     Référence : <strong>{{ p.reference }}</strong>
                     <p style="margin: 5px 0 0; font-size: 0.85em; color: #999;">{{ p.date_creation | date_fr }}</p>
                     {% for decision, libelle, couleur in [("valider", "Valider", ""), ("refuser", "Refuser", "background-color:#a94442;")] %}

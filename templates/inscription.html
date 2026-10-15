@@ -1,12 +1,34 @@
 {% extends "base.html" %}
+{% from "_lieu.html" import choix_lieu %}
 {% block contenu %}
     {% set saisie = saisie or {} %}
+    {% set mode = saisie.get('mode', 'telephone') %}
     <h2>{{ "Créer un compte" | t }}</h2>
-    <form method="POST">
+    <form method="POST" class="formulaire-inscription">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="text" name="nom" value="{{ saisie.get('nom', '') }}" placeholder="{{ "Nom complet" | t }}" required>
-        <input type="email" name="email" value="{{ saisie.get('email', '') }}" placeholder="{{ "Email" | t }}" required>
-        <input type="tel" name="telephone" value="{{ saisie.get('telephone', '') }}" placeholder="{{ "Téléphone pour les alertes SMS (optionnel, jamais affiché)" | t }}">
+
+        <fieldset class="choix-mode">
+            <legend>{{ "Je m'inscris avec" | t }}</legend>
+            <label class="mode"><input type="radio" name="mode" value="telephone" {% if mode == 'telephone' %}checked{% endif %}> 📱 {{ "Mon téléphone" | t }}</label>
+            <label class="mode"><input type="radio" name="mode" value="email" {% if mode == 'email' %}checked{% endif %}> ✉️ {{ "Mon e-mail" | t }}</label>
+        </fieldset>
+
+        <div data-mode="telephone">
+            <label for="telephone-connexion">{{ "Numéro de téléphone" | t }}</label>
+            <div class="champ-telephone">
+                <span class="indicatif" id="indicatif">+221</span>
+                <input type="tel" name="telephone" id="telephone-connexion" value="{{ saisie.get('telephone', '') if mode == 'telephone' else '' }}" placeholder="77 123 45 67" inputmode="tel">
+            </div>
+            <p class="aide">{{ "Il te servira à te connecter. Il n'est jamais montré aux autres utilisateurs." | t }}</p>
+        </div>
+        <div data-mode="email">
+            <input type="email" name="email" value="{{ saisie.get('email', '') }}" placeholder="{{ "Email" | t }}">
+            <input type="tel" name="telephone" value="{{ saisie.get('telephone', '') if mode == 'email' else '' }}" placeholder="{{ "Téléphone pour les alertes SMS (optionnel, jamais affiché)" | t }}">
+        </div>
+
+        {{ choix_lieu(saisie, pays, senegal, autre) }}
+
         <input type="password" name="mot_de_passe" placeholder="{{ "Mot de passe (8 caractères minimum)" | t }}" minlength="8" required>
 
         <select name="role" required>
@@ -24,4 +46,31 @@
 
         <button type="submit">{{ "S'inscrire" | t }}</button>
     </form>
+    <p>{{ "Déjà inscrit ?" | t }} <a href="{{ url_for('connexion') }}">{{ "Se connecter" | t }}</a></p>
+
+    <script>
+    (function () {
+        const formulaire = document.querySelector(".formulaire-inscription");
+        const blocs = formulaire.querySelectorAll("[data-mode]");
+        const pays = formulaire.querySelector("#lieu-pays");
+        function appliquer() {
+            const mode = formulaire.querySelector('input[name="mode"]:checked').value;
+            blocs.forEach((bloc) => {
+                const actif = bloc.dataset.mode === mode;
+                bloc.hidden = !actif;
+                // Seuls les champs du mode choisi sont envoyés (les deux s'appellent « telephone »)
+                bloc.querySelectorAll("input").forEach((champ) => { champ.disabled = !actif; });
+            });
+            formulaire.querySelector('#telephone-connexion').required = mode === "telephone";
+            formulaire.querySelector('input[name="email"]').required = mode === "email";
+        }
+        function indicatif() {
+            document.getElementById("indicatif").textContent = "+" + pays.selectedOptions[0].dataset.indicatif;
+        }
+        formulaire.querySelectorAll('input[name="mode"]').forEach((r) => r.addEventListener("change", appliquer));
+        pays.addEventListener("change", indicatif);
+        appliquer();
+        indicatif();
+    })();
+    </script>
 {% endblock %}

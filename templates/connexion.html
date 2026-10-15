@@ -3,9 +3,10 @@
     <h2>{{ "Connexion" | t }}</h2>
     <form method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="email" name="email" placeholder="{{ "Email" | t }}" required>
-        <input type="password" name="mot_de_passe" placeholder="{{ "Mot de passe" | t }}" required>
+        <input type="text" name="identifiant" placeholder="{{ "Téléphone ou e-mail" | t }}" autocomplete="username" required>
+        <input type="password" name="mot_de_passe" placeholder="{{ "Mot de passe" | t }}" autocomplete="current-password" required>
         <button type="submit">{{ "Se connecter" | t }}</button>
     </form>
     <p><a href="{{ url_for('mot_de_passe_oublie') }}">{{ "Mot de passe oublié ?" | t }}</a></p>
+    <p>{{ "Pas encore de compte ?" | t }} <a href="{{ url_for('inscription') }}">{{ "Créer un compte" | t }}</a></p>
 {% endblock %}

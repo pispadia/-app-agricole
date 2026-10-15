@@ -9,7 +9,7 @@
     {% for d in demandes %}
         <div class="carte-recolte" style="display:block;">
             <strong>N°{{ d.id }} · {{ categories.get(d.categorie, d.categorie) }}</strong>
-            <p style="margin:2px 0; font-size:0.9em; color:var(--discret);">{{ d.nom }} · <a href="mailto:{{ d.email }}">{{ d.email }}</a> · {{ d.date_creation | date_fr }}{% if not d.utilisateur_id %} · visiteur sans compte{% endif %}</p>
+            <p style="margin:2px 0; font-size:0.9em; color:var(--discret);">{{ d.nom }} · {% if "@" in (d.email or "") %}<a href="mailto:{{ d.email }}">{{ d.email }}</a>{% else %}📱 {{ d.email }}{% endif %} · {{ d.date_creation | date_fr }}{% if not d.utilisateur_id %} · visiteur sans compte{% endif %}</p>
             {% if d.commande_id %}
                 <p style="margin:4px 0; font-size:0.9em;">📦 Commande n°{{ d.commande_id }} : {{ d.nom_recolte }} · client {{ d.nom_client }} · vendeur {{ d.nom_agriculteur }} · statut {{ d.statut_commande }}</p>
             {% endif %}

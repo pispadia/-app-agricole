@@ -13,7 +13,10 @@ URL_BREVO = "https://api.brevo.com/v3/smtp/email"
 
 
 def envoyer_email(destinataire, sujet, contenu_html):
-    """Envoie un e-mail. Retourne True si l'envoi a réussi (ou a été affiché en local)."""
+    """Envoie un e-mail. Retourne True si l'envoi a réussi (ou a été affiché en local).
+    Un compte créé avec un numéro de téléphone peut ne pas avoir d'adresse : rien n'est envoyé."""
+    if not destinataire:
+        return False
     cle_api = os.environ.get("BREVO_API_KEY")
     expediteur = os.environ.get("EMAIL_EXPEDITEUR")
 

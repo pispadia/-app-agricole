@@ -7,6 +7,8 @@ import database
 from app import app
 from routes import comptes
 
+LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
 
 @pytest.fixture
 def emails(monkeypatch):
@@ -26,7 +28,7 @@ def client(tmp_path, monkeypatch, emails):
 
 
 def inscrire(client, email="chef@exemple.sn"):
-    client.post("/inscription", data={"nom": "Chef", "email": email, "mot_de_passe": "motdepasse",
+    client.post("/inscription", data={**LIEU, "nom": "Chef", "email": email, "mot_de_passe": "motdepasse",
                                       "role": "client"})
     client.post("/connexion", data={"email": email, "mot_de_passe": "motdepasse"})
 
@@ -55,7 +57,7 @@ def test_changer_d_email_retire_la_confirmation(client, emails):
     # Un utilisateur confirmé qui prend une adresse admin via son profil n'est pas admin
     inscrire(client, email="awa@exemple.sn")
     client.get(chemin_du_lien(emails))
-    client.post("/mon-profil", data={"nom": "Awa", "email": "chef@exemple.sn",
+    client.post("/mon-profil", data={"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff", "nom": "Awa", "email": "chef@exemple.sn",
                                      "mot_de_passe_actuel": "motdepasse"})
     assert emails[-1][0] == "chef@exemple.sn"  # le lien part vers la nouvelle adresse
     assert client.get("/admin").status_code == 302
@@ -64,7 +66,7 @@ def test_changer_d_email_retire_la_confirmation(client, emails):
 def test_ancien_lien_inutilisable_apres_changement_d_email(client, emails):
     inscrire(client, email="awa@exemple.sn")
     ancien_lien = chemin_du_lien(emails)
-    client.post("/mon-profil", data={"nom": "Awa", "email": "chef@exemple.sn",
+    client.post("/mon-profil", data={"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff", "nom": "Awa", "email": "chef@exemple.sn",
                                      "mot_de_passe_actuel": "motdepasse"})
     page = client.get(ancien_lien, follow_redirects=True).get_data(as_text=True)
     assert "ne correspond plus" in page
