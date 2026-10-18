@@ -11,6 +11,7 @@
             {% endif %}
             <span class="fiche-etiquettes">
                 {% if a_venir_ %}<span class="badge badge-attente">🌱 À venir : prête le {{ recolte.date_disponibilite | date_fr }}</span>{% endif %}
+                {% if recolte.proximite and libelles_proximite %}<span class="badge badge-proche">📍 {{ libelles_proximite[recolte.proximite] | t }}</span>{% endif %}
                 {% if promo_active(recolte) %}<span class="badge badge-promo">🏷️ −{{ promo_active(recolte) }} %</span>{% endif %}
                 {% if recolte.premium_agriculteur and recolte.premium_agriculteur >= aujourdhui %}<span class="badge badge-attente">⭐ Pro</span>{% endif %}
             </span>

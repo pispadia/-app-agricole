@@ -224,6 +224,13 @@ WOLOF = {
     "Retirer": "Far",
     "Aucune annonce gardée. Sur une annonce, touche « Ajouter aux favoris ».":
         "Dencoo benn yéenekaay. Ci benn yéenekaay, bësal « Ajouter aux favoris ».",
+    # Récoltes près de chez moi
+    "Près de chez moi": "Ci wetu sama kër",
+    "Récoltes près de chez toi d'abord": "Ngóob yi jege sa kër ñoo jiitu",
+    "Changer d'adresse": "Soppi sa adrees",
+    "Dans ta commune": "Ci sa komin",
+    "Dans ton département": "Ci sa departemaa",
+    "Dans ta région": "Ci sa diiwaan",
     # Menu « ⋮ » des services
     "Tous les services": "Liggéey yépp",
     "Vendre": "Jaay",

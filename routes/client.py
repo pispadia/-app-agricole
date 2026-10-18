@@ -6,7 +6,7 @@ import push
 from stock import depasse_le_stock
 from routes.commandes_regulieres import FREQUENCES, creer_reguliere
 from database import get_connexion, COLONNES_RECOLTE
-from core import (app, prix_valide, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
+from core import (app, utilisateur_courant, prix_valide, quantite_valide, utilisateur_connecte, livraison_valide, MODES_LIVRAISON,
                   masquer_coordonnees, mode_paiement_valide, MODES_PAIEMENT)
 from routes.avis import NOTES_AGRICULTEURS
 from routes.fiabilite_clients import fiabilite_du_client
@@ -22,11 +22,44 @@ ORDRES_CATALOGUE = {
 }
 
 
+# Proximité d'une annonce avec l'adresse de l'utilisateur : 3 même commune, 2 même département,
+# 1 même région, 0 ailleurs. On compare l'adresse de l'agriculteur et le texte de la localité
+# de l'annonce (les annonces anciennes n'ont que ce texte).
+PROXIMITE = """CASE
+    WHEN LOWER(COALESCE(utilisateurs.commune, '')) = ? OR LOWER(recoltes.localite) LIKE ? THEN 3
+    WHEN LOWER(COALESCE(utilisateurs.departement, '')) = ? OR LOWER(recoltes.localite) LIKE ? THEN 2
+    WHEN LOWER(COALESCE(utilisateurs.region, '')) = ? OR LOWER(recoltes.localite) LIKE ? THEN 1
+    ELSE 0 END"""
+LIBELLES_PROXIMITE = {3: "Dans ta commune", 2: "Dans ton département", 1: "Dans ta région"}
+JAMAIS = "\x00"  # valeur qui ne correspond à rien quand une partie de l'adresse manque
+
+
+def parametres_proximite(adresse):
+    parametres = []
+    for niveau in ("commune", "departement", "region"):
+        valeur = (adresse.get(niveau) or "").strip().lower()
+        parametres += [valeur or JAMAIS, f"%{valeur}%" if valeur else JAMAIS]
+    return parametres
+
+
+def adresse_utilisateur():
+    """{commune, departement, region} de l'utilisateur connecté, ou None s'il n'a pas donné d'adresse."""
+    utilisateur = utilisateur_courant()
+    if utilisateur is None or not utilisateur["commune"]:
+        return None
+    return {"commune": utilisateur["commune"], "departement": utilisateur["departement"],
+            "region": utilisateur["region"]}
+
+
 def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", periode="", promo="", limite=None,
-                        decalage=0):
-    """Récoltes disponibles du catalogue (client connecté, catalogue public, page d'accueil)."""
+                        decalage=0, adresse=None):
+    """Récoltes disponibles du catalogue (client connecté, catalogue public, page d'accueil).
+    Avec `adresse`, chaque récolte porte sa proximité (0 à 3) et le tri « proche » met les plus
+    proches en premier."""
+    parametres = parametres_proximite(adresse) if adresse else []
     requete = """
-        SELECT """ + COLONNES_RECOLTE + """, utilisateurs.nom AS nom_agriculteur,
+        SELECT """ + COLONNES_RECOLTE + """, """ + (PROXIMITE if adresse else "0") + """ AS proximite,
+               utilisateurs.nom AS nom_agriculteur,
                utilisateurs.premium_jusqu_au AS premium_agriculteur,
                utilisateurs.verification AS verification_agriculteur,
                notes.note_moyenne, notes.nb_avis
@@ -35,7 +68,6 @@ def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", p
         LEFT JOIN """ + NOTES_AGRICULTEURS + """ notes ON notes.agriculteur_id = recoltes.agriculteur_id
         WHERE recoltes.statut = 'disponible' AND recoltes.masquee = 0 AND utilisateurs.suspendu = 0
     """
-    parametres = []
 
     if recherche:
         requete += " AND (recoltes.nom LIKE ? OR recoltes.description LIKE ?)"
@@ -58,8 +90,9 @@ def rechercher_recoltes(connexion_bd, recherche="", localite="", tri="recent", p
         requete += " AND recoltes.promo_pourcent IS NOT NULL AND recoltes.promo_jusqu_au >= ?"
         parametres.append(date.today().isoformat())
 
-    # Les annonces des membres Premium passent en premier
-    requete += (" ORDER BY CASE WHEN utilisateurs.premium_jusqu_au >= ? THEN 0 ELSE 1 END, "
+    # Les plus proches d'abord (tri « proche »), puis les annonces des membres Premium
+    requete += " ORDER BY " + ("proximite DESC, " if adresse and tri == "proche" else "")
+    requete += ("CASE WHEN utilisateurs.premium_jusqu_au >= ? THEN 0 ELSE 1 END, "
                 + ORDRES_CATALOGUE.get(tri, ORDRES_CATALOGUE["recent"]))
     parametres.append(date.today().isoformat())
     if limite:
@@ -72,16 +105,17 @@ ANNONCES_PAR_PAGE = 24
 
 def donnees_catalogue(connexion_bd):
     """Filtres lus dans l'adresse, récoltes trouvées, prix courants et localités, pour les templates."""
+    adresse = adresse_utilisateur()
     filtres = {
         "recherche": request.args.get("recherche", "").strip(),
         "localite": request.args.get("localite", "").strip(),
-        "tri": request.args.get("tri", "recent"),
+        "tri": request.args.get("tri") or ("proche" if adresse else "recent"),
         "periode": request.args.get("periode", ""),
         "promo": "1" if request.args.get("promo") else "",
     }
     # Par pages : une de plus que la taille de page, pour savoir s'il en reste après
     page = max(int(request.args.get("page", "1")) if request.args.get("page", "").isdigit() else 1, 1)
-    recoltes = rechercher_recoltes(connexion_bd, **filtres, limite=ANNONCES_PAR_PAGE + 1,
+    recoltes = rechercher_recoltes(connexion_bd, **filtres, adresse=adresse, limite=ANNONCES_PAR_PAGE + 1,
                                    decalage=(page - 1) * ANNONCES_PAR_PAGE)
     page_suivante = page + 1 if len(recoltes) > ANNONCES_PAR_PAGE else None
     recoltes = recoltes[:ANNONCES_PAR_PAGE]
@@ -95,6 +129,7 @@ def donnees_catalogue(connexion_bd):
         "periode_choisie": filtres["periode"], "promo_choisie": filtres["promo"], "aujourdhui": date.today().isoformat(),
         "prix_courants": {r["id"]: marche.get(produit_cle(r["nom"])) for r in recoltes},
         "numero_page": page, "page_suivante": page_suivante,
+        "adresse_utilisateur": adresse, "libelles_proximite": LIBELLES_PROXIMITE,
     }
 
 
