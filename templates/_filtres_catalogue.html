@@ -1,4 +1,8 @@
 {# Filtres du catalogue (espace client et catalogue public) #}
+    {% if adresse_utilisateur %}
+        <p class="pres-de-chez-moi">📍 {{ "Récoltes près de chez toi d'abord" | t }} : <strong>{{ adresse_utilisateur.commune }}</strong>{% if adresse_utilisateur.region and adresse_utilisateur.region != adresse_utilisateur.commune %}, {{ adresse_utilisateur.region }}{% endif %}
+            · <a href="{{ url_for('mon_profil') }}">{{ "Changer d'adresse" | t }}</a></p>
+    {% endif %}
     <form method="GET" class="filtres">
         <input type="text" name="recherche" placeholder="🔍 Rechercher un produit (mil, oignon...)" value="{{ recherche }}">
         <select name="localite">
@@ -13,6 +17,7 @@
             <option value="a_venir" {% if periode_choisie == 'a_venir' %}selected{% endif %}>À venir (pré-commande)</option>
         </select>
         <select name="tri">
+            {% if adresse_utilisateur %}<option value="proche" {% if tri_choisi == 'proche' %}selected{% endif %}>📍 {{ "Près de chez moi" | t }}</option>{% endif %}
             <option value="recent" {% if tri_choisi == 'recent' %}selected{% endif %}>Plus récent</option>
             <option value="nom" {% if tri_choisi == 'nom' %}selected{% endif %}>Nom (A-Z)</option>
             <option value="localite" {% if tri_choisi == 'localite' %}selected{% endif %}>Localité (A-Z)</option>
