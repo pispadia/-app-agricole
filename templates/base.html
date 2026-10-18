@@ -41,6 +41,7 @@
                 <a href="#" id="installer-app" hidden>📲 {{ "Installer l'app" | t }}</a>
             </nav>
             <a class="bouton-quitter bouton-langue" href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}" title="{{ 'Wolof' if langue == 'fr' else 'Français' }}">🌍<span class="texte-langue"> {{ "Wolof" if langue == "fr" else "Français" }}</span></a>
+            {% include "_menu_services.html" %}
             {% if session.get('utilisateur_id') %}
                 <a class="avatar {{ 'actif' if page == 'mon_profil' }}" href="{{ url_for('mon_profil') }}" title="{{ 'Mon profil' | t }}">{{ (session.get('nom') or '?')[:1] | upper }}</a>
                 <a class="bouton-quitter" href="{{ url_for('deconnexion') }}">{{ "Déconnexion" | t }}</a>

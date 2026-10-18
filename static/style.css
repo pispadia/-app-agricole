@@ -597,3 +597,20 @@ button:active, .btn:active { transform: translateY(1px); }
 .lieu label { display: block; font-weight: 600; margin: 4px 0 4px; }
 .lieu .facultatif { font-weight: normal; color: var(--discret); }
 .lieu-etape input[type="text"] { margin-top: -4px; }
+
+/* Menu « ⋮ » : tous les services */
+.menu-services { position: relative; flex-shrink: 0; }
+.bouton-menu { width: 40px; height: 40px; padding: 0; margin: 0; border-radius: 50%; border: 1px solid var(--bordure, #dde4dc); background: #fff; color: var(--sombre); font-size: 1.4em; font-weight: 700; line-height: 1; cursor: pointer; }
+.menu-services.ouvert .bouton-menu { background: var(--vert-pale); color: var(--vert-fonce); border-color: var(--vert); }
+.panneau-services { position: absolute; right: 0; top: calc(100% + 8px); z-index: 50; width: 290px; max-height: 75vh; overflow-y: auto; background: #fff; border: 1px solid var(--bordure, #dde4dc); border-radius: 16px; box-shadow: 0 12px 32px rgba(20, 40, 29, 0.18); padding: 8px; }
+.panneau-services a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--sombre); text-decoration: none; font-weight: 500; }
+.panneau-services a:hover, .panneau-services a:focus-visible { background: var(--fond); }
+.panneau-services a.actif { background: var(--vert-pale); color: var(--vert-fonce); font-weight: 600; }
+.panneau-services .menu-icone { width: 26px; text-align: center; font-size: 1.15em; }
+.panneau-services .menu-groupe { margin: 10px 12px 4px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--discret); }
+.panneau-services .menu-groupe:first-child { margin-top: 4px; }
+.panneau-services .menu-sortie { color: var(--rouge); }
+@media (max-width: 600px) {
+    .panneau-services { position: fixed; left: 12px; right: 12px; top: 64px; width: auto; max-height: calc(100vh - 80px); }
+    .bouton-quitter:not(.bouton-langue) { display: none; }  /* Déconnexion : dans le menu ⋮ sur téléphone */
+}

@@ -1,0 +1,82 @@
+{# Menu « ⋮ » : tous les services de l'app, selon le type de compte. #}
+{% macro lien(endpoint, icone, libelle) %}
+    <a href="{{ url_for(endpoint, **kwargs) }}" class="{{ 'actif' if request.endpoint == endpoint }}"><span class="menu-icone">{{ icone }}</span>{{ libelle | t }}</a>
+{% endmacro %}
+<div class="menu-services" data-menu-services>
+    <button type="button" class="bouton-menu" aria-label="{{ 'Tous les services' | t }}" aria-expanded="false" aria-controls="panneau-services">⋮</button>
+    <div class="panneau-services" id="panneau-services" hidden>
+        {% set role = session.get('role') %}
+        {% if role == 'agriculteur' %}
+            <div class="menu-groupe">{{ "Vendre" | t }}</div>
+            {{ lien('nouvelle_recolte', '➕', 'Publier une récolte') }}
+            {{ lien('espace_agriculteur', '🌾', 'Mes récoltes') }}
+            {{ lien('commandes_recues', '📦', 'Commandes reçues') }}
+            {{ lien('affiche_boutique', '🖨️', 'Ma boutique et mon affiche QR') }}
+            <div class="menu-groupe">{{ "Suivre et décider" | t }}</div>
+            {{ lien('rapport_mensuel', '🗓️', 'Mon bilan du mois') }}
+            {{ lien('statistiques_agriculteur', '📊', 'Mes statistiques') }}
+            {{ lien('prix_marche', '📈', 'Prix du marché') }}
+            {{ lien('meteo_agriculteur', '🌦️', 'Météo agricole') }}
+            {% if ia_active %}{{ lien('conseiller_agricole', '🤖', 'Conseiller agricole') }}{% endif %}
+            <div class="menu-groupe">{{ "Acheter et financer" | t }}</div>
+            {{ lien('semences_pepinieres', '🌱', 'Semences et pépinières') }}
+            {{ lien('espace_financement_agriculteur', '💰', 'Financement') }}
+            {{ lien('demande_verification', '✅', 'Faire vérifier mon compte') }}
+        {% elif role == 'client' %}
+            <div class="menu-groupe">{{ "Acheter" | t }}</div>
+            {{ lien('espace_client', '🛒', 'Récoltes disponibles') }}
+            {{ lien('voir_panier', '🧺', 'Mon panier') }}
+            {{ lien('mes_commandes', '📦', 'Mes commandes') }}
+            {{ lien('mes_favoris', '❤️', 'Mes favoris') }}
+            {{ lien('mes_alertes', '🔔', 'Mes alertes produits') }}
+            {{ lien('prix_marche', '📈', 'Prix du marché') }}
+        {% elif role == 'fournisseur' %}
+            <div class="menu-groupe">{{ "Mes produits" | t }}</div>
+            {{ lien('espace_fournisseur', '🌱', 'Mes produits') }}
+            {{ lien('nouveau_produit', '➕', 'Ajouter un produit') }}
+            {{ lien('messages_recus', '✉️', 'Messages reçus') }}
+        {% elif role == 'financeur' %}
+            <div class="menu-groupe">{{ "Mes offres" | t }}</div>
+            {{ lien('espace_financeur', '💰', 'Mes offres') }}
+            {{ lien('nouvelle_offre', '➕', 'Nouvelle offre') }}
+            {{ lien('interets_recus', '✉️', 'Intérêts reçus') }}
+        {% endif %}
+
+        <div class="menu-groupe">{{ "Découvrir" | t }}</div>
+        {{ lien('catalogue_public', '🧺', 'Toutes les récoltes') }}
+        {{ lien('carte_producteurs', '🗺️', 'Carte des producteurs') }}
+        {% if role != 'agriculteur' and role != 'client' %}{{ lien('prix_marche', '📈', 'Prix du marché') }}{% endif %}
+
+        <div class="menu-groupe">{{ "Mon compte" | t }}</div>
+        {% if session.get('utilisateur_id') %}
+            {{ lien('notifications', '🔔', 'Notifications') }}
+            {{ lien('mon_profil', '👤', 'Mon profil') }}
+            {{ lien('premium', '⭐', 'Premium') }}
+            {{ lien('parrainage', '🎁', 'Inviter et gagner du Premium') }}
+            {% if est_admin %}{{ lien('admin', '🛠️', 'Administration') }}{% endif %}
+        {% else %}
+            {{ lien('connexion', '🔑', 'Connexion') }}
+            {{ lien('inscription', '✍️', 'Créer un compte') }}
+        {% endif %}
+        {{ lien('contact', '💬', 'Aide et contact') }}
+        <a href="{{ url_for('changer_langue', code='wo' if langue == 'fr' else 'fr') }}"><span class="menu-icone">🌍</span>{{ "Wolof" if langue == "fr" else "Français" }}</a>
+        {% if session.get('utilisateur_id') %}
+            <a href="{{ url_for('deconnexion') }}" class="menu-sortie"><span class="menu-icone">🚪</span>{{ "Déconnexion" | t }}</a>
+        {% endif %}
+    </div>
+</div>
+<script>
+(function () {
+    const bloc = document.currentScript.previousElementSibling;
+    const bouton = bloc.querySelector(".bouton-menu");
+    const panneau = bloc.querySelector(".panneau-services");
+    function ouvrir(oui) {
+        panneau.hidden = !oui;
+        bouton.setAttribute("aria-expanded", oui ? "true" : "false");
+        bloc.classList.toggle("ouvert", oui);
+    }
+    bouton.addEventListener("click", (e) => { e.stopPropagation(); ouvrir(panneau.hidden); });
+    document.addEventListener("click", (e) => { if (!bloc.contains(e.target)) ouvrir(false); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") { ouvrir(false); bouton.focus(); } });
+})();
+</script>
