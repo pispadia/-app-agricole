@@ -45,6 +45,13 @@
             .then((html) => { document.getElementById("meteo-resume").innerHTML = html; }).catch(() => {});
     </script>
 
+    <form method="POST" action="{{ url_for('changer_mode_simple') }}" class="bandeau-simple">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="actif" value="1">
+        <span>👆 {{ "Tu lis peu ? Essaie l'écran très simple : de grosses cases et une voix qui lit pour toi." | t }}</span>
+        <button type="submit" class="btn-petit">🔆 {{ "Écran très simple" | t }}</button>
+    </form>
+
     <div class="actions">
         <a class="action" href="{{ url_for('affiche_boutique') }}"><span class="tuile-icone">🖨️</span><div><strong>{{ "Ma boutique et mon affiche QR" | t }}</strong><span>{{ "À poser sur ton étal au marché" | t }}</span></div></a>
         <a class="action" href="{{ url_for('rapport_mensuel') }}"><span class="tuile-icone icone-ambre">🗓️</span><div><strong>{{ "Mon bilan du mois" | t }}</strong><span>{{ "Ventes, avis, conseils prix" | t }}</span></div></a>
