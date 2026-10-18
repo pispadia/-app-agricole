@@ -184,6 +184,10 @@ def espace_agriculteur():
         return redirect(url_for("connexion"))
 
     connexion_bd = get_connexion()
+    from routes.mode_simple import mode_simple_actif, espace_simple  # import ici : évite un cycle
+    if mode_simple_actif(connexion_bd, session["utilisateur_id"]) and request.args.get("complet") != "1":
+        connexion_bd.close()
+        return espace_simple()
     recoltes = connexion_bd.execute(
         f"SELECT {COLONNES_RECOLTE} FROM recoltes WHERE agriculteur_id = ? ORDER BY date_creation DESC",
         (session["utilisateur_id"],)

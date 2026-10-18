@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block contenu %}
+    <div class="simple-entete">
+        <h1>👋 {{ "Bonjour" | t }} {{ prenom }}</h1>
+        <button type="button" class="bouton-lire bouton-lire-tout" data-lire-page aria-label="{{ 'Écouter toute la page' | t }}">🔊 {{ "Écouter" | t }}</button>
+    </div>
+
+    <div class="simple-grille">
+        <a class="simple-tuile simple-vert" href="{{ url_for('nouvelle_recolte') }}"
+           data-lire="{{ 'Vendre une récolte. Touche ici pour mettre une récolte en vente.' | t }}">
+            <span class="simple-image">🌾➕</span>
+            <strong>{{ "Vendre une récolte" | t }}</strong>
+            <span>{{ en_ligne }} {{ "annonce(s) en ligne" | t }}</span>
+        </a>
+
+        <a class="simple-tuile {{ 'simple-alerte' if a_confirmer else 'simple-bleu' }}" href="{{ url_for('commandes_recues') }}"
+           data-lire="{{ 'Mes commandes.' | t }} {% if a_confirmer %}{{ a_confirmer }} {{ 'commande(s) attendent ta réponse.' | t }}{% else %}{{ 'Aucune commande à confirmer.' | t }}{% endif %}{% if a_livrer %} {{ a_livrer }} {{ 'commande(s) à livrer.' | t }}{% endif %}">
+            <span class="simple-image">📦</span>
+            <strong>{{ "Mes commandes" | t }}</strong>
+            {% if a_confirmer %}<span class="simple-pastille">{{ a_confirmer }}</span><span>{{ "à confirmer" | t }}</span>
+            {% elif a_livrer %}<span>{{ a_livrer }} {{ "à livrer" | t }}</span>
+            {% else %}<span>{{ "Rien à faire" | t }} ✔️</span>{% endif %}
+        </a>
+
+        <a class="simple-tuile simple-ambre" href="{{ url_for('rapport_mensuel') }}"
+           data-lire="{{ 'Mon argent. Ce mois-ci, tu as vendu pour' | t }} {{ ventes_mois }} {{ 'francs CFA. Depuis le début :' | t }} {{ ventes_total }} {{ 'francs CFA.' | t }}">
+            <span class="simple-image">💰</span>
+            <strong>{{ "Mon argent" | t }}</strong>
+            <span class="simple-montant">{{ "{:,}".format(ventes_mois).replace(",", " ") }} FCFA</span>
+            <span>{{ "ce mois-ci" | t }}</span>
+        </a>
+
+        <a class="simple-tuile simple-ciel" href="{{ url_for('meteo_agriculteur') }}"
+           data-lire="{{ 'La météo. Touche ici pour savoir s’il va pleuvoir cette semaine.' | t }}">
+            <span class="simple-image">🌦️</span>
+            <strong>{{ "La météo" | t }}</strong>
+            <span>{{ "Pluie, chaleur, vent" | t }}</span>
+        </a>
+    </div>
+
+    <p class="simple-aide">{{ "Touche 🔊 pour écouter. Touche une grande case pour l'ouvrir." | t }}</p>
+
+    <form method="POST" action="{{ url_for('changer_mode_simple') }}" class="simple-sortie">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="actif" value="0">
+        <button type="submit" class="btn-clair btn-petit">{{ "Passer à l'écran complet" | t }}</button>
+    </form>
+
+    <script>
+    (function () {
+        // Lecture à voix haute avec la voix du téléphone (rien ne s'affiche si le téléphone n'en a pas)
+        if (!("speechSynthesis" in window)) {
+            document.querySelectorAll("[data-lire-page]").forEach((b) => { b.hidden = true; });
+            return;
+        }
+        function lire(texte) {
+            speechSynthesis.cancel();
+            const phrase = new SpeechSynthesisUtterance(texte);
+            phrase.lang = "fr-FR";
+            phrase.rate = 0.9;
+            speechSynthesis.speak(phrase);
+        }
+        // Un petit haut-parleur sur chaque case : le toucher lit la case sans l'ouvrir
+        document.querySelectorAll(".simple-tuile[data-lire]").forEach((tuile) => {
+            const bouton = document.createElement("button");
+            bouton.type = "button";
+            bouton.className = "bouton-lire";
+            bouton.textContent = "🔊";
+            bouton.setAttribute("aria-label", {{ "Écouter" | t | tojson }});
+            bouton.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); lire(tuile.dataset.lire); });
+            tuile.appendChild(bouton);
+        });
+        document.querySelector("[data-lire-page]").addEventListener("click", () => {
+            const textes = [document.querySelector(".simple-entete h1").textContent.replace("👋", "")];
+            document.querySelectorAll(".simple-tuile[data-lire]").forEach((t) => textes.push(t.dataset.lire));
+            lire(textes.join(" "));
+        });
+    })();
+    </script>
+{% endblock %}

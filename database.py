@@ -756,6 +756,8 @@ def init_db():
         ("utilisateurs", "departement", "TEXT"),
         ("utilisateurs", "commune", "TEXT"),
         ("utilisateurs", "localite", "TEXT"),
+        # Mode très simple de l'espace agriculteur (gros boutons, lecture à voix haute)
+        ("utilisateurs", "mode_simple", "INTEGER NOT NULL DEFAULT 0"),
     )
     for nom_table, colonne, definition in colonnes_ajoutees:
         try:

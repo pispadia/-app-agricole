@@ -616,3 +616,30 @@ button:active, .btn:active { transform: translateY(1px); }
 }
 .badge-proche { background: #e3f1fb; color: #1d5f8c; }
 .pres-de-chez-moi { margin: 0 0 10px; padding: 8px 12px; border-radius: 10px; background: #e3f1fb; color: #1d5f8c; font-size: 0.92em; }
+
+/* Mode très simple (espace agriculteur) */
+.simple-entete { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.simple-entete h1 { margin: 0; font-size: 1.9em; }
+.simple-grille { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.simple-tuile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 200px; padding: 56px 12px 18px; border-radius: 22px; text-align: center; text-decoration: none; color: var(--sombre); border: 3px solid transparent; box-shadow: 0 4px 14px rgba(20, 40, 29, 0.08); }
+.simple-tuile:active { transform: scale(0.98); }
+.simple-tuile:focus-visible { border-color: var(--sombre); outline: none; }
+.simple-image { font-size: 3.2em; line-height: 1; }
+.simple-tuile strong { font-size: 1.3em; }
+.simple-tuile span { font-size: 1em; color: #3d4b44; }
+.simple-montant { font-size: 1.25em !important; font-weight: 700; color: var(--sombre) !important; }
+.simple-vert { background: #dff3e6; }
+.simple-bleu { background: #e3f1fb; }
+.simple-alerte { background: #fde8e4; border-color: #e5533d; }
+.simple-ambre { background: #fdf1d8; }
+.simple-ciel { background: #e8f0fb; }
+.simple-pastille { display: inline-grid; place-items: center; min-width: 46px; height: 46px; padding: 0 8px; border-radius: 999px; background: #e5533d; color: #fff !important; font-size: 1.5em !important; font-weight: 800; }
+.bouton-lire { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; margin: 0; padding: 0; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.9); font-size: 1.3em; cursor: pointer; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12); }
+.bouton-lire-tout { position: static; width: auto; height: auto; padding: 10px 18px; border-radius: 999px; font-size: 1.05em; font-weight: 700; background: var(--vert); color: #fff; }
+.simple-aide { text-align: center; color: var(--discret); margin: 18px 0 8px; }
+.simple-sortie { text-align: center; }
+.simple-sortie button { width: auto; }
+.bandeau-simple { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 14px; margin: 0 0 16px; border-radius: 14px; background: #fdf1d8; }
+.bandeau-simple span { flex: 1 1 220px; }
+.bandeau-simple button { width: auto; margin: 0; }
+@media (max-width: 380px) { .simple-grille { gap: 10px; } .simple-tuile { min-height: 160px; } .simple-image { font-size: 2.6em; } }

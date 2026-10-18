@@ -224,6 +224,34 @@ WOLOF = {
     "Retirer": "Far",
     "Aucune annonce gardée. Sur une annonce, touche « Ajouter aux favoris ».":
         "Dencoo benn yéenekaay. Ci benn yéenekaay, bësal « Ajouter aux favoris ».",
+    # Écran très simple
+    "Écran très simple": "Xët wu yomb",
+    "Tu lis peu ? Essaie l'écran très simple : de grosses cases et une voix qui lit pour toi.":
+        "Doo bare jàng ? Jéemal xët wu yomb wi : kaase yu mag ak baat buy jàngal la.",
+    "Écouter": "Déglu",
+    "Écouter toute la page": "Déglu xët wi yépp",
+    "Vendre une récolte": "Jaay ngóob",
+    "Vendre une récolte. Touche ici pour mettre une récolte en vente.":
+        "Jaay ngóob. Bësal fii ngir jaay sa ngóob.",
+    "Mes commandes.": "Samay ndigal.",
+    "commande(s) attendent ta réponse.": "ndigal yu xaar sa tontu.",
+    "Aucune commande à confirmer.": "Amul benn ndigal bu war a dëggal.",
+    "commande(s) à livrer.": "ndigal yu war a jox.",
+    "à confirmer": "war a dëggal",
+    "à livrer": "war a jox",
+    "Rien à faire": "Amul dara",
+    "Mon argent": "Sama xaalis",
+    "Mon argent. Ce mois-ci, tu as vendu pour": "Sama xaalis. Ci weer wii, jaay nga",
+    "francs CFA. Depuis le début :": "dërëm. Li dale ca njëlbéen ba leegi :",
+    "francs CFA.": "dërëm.",
+    "ce mois-ci": "ci weer wii",
+    "La météo": "Jawwu ji",
+    "La météo. Touche ici pour savoir s’il va pleuvoir cette semaine.":
+        "Jawwu ji. Bësal fii ngir xam ndax dina tàw ayu-bés bii.",
+    "Pluie, chaleur, vent": "Tàw, tàng, ngelaw",
+    "Touche 🔊 pour écouter. Touche une grande case pour l'ouvrir.":
+        "Bësal 🔊 ngir déglu. Bësal benn kaase bu mag ngir ubbi ko.",
+    "Passer à l'écran complet": "Dem ci xët wu mat wi",
     # Récoltes près de chez moi
     "Près de chez moi": "Ci wetu sama kër",
     "Récoltes près de chez toi d'abord": "Ngóob yi jege sa kër ñoo jiitu",
