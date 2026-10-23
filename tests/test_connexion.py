@@ -62,3 +62,40 @@ def test_succes_remet_le_compteur_a_zero(client):
     se_connecter(client, "bon-mot-de-passe")
     with client.session_transaction() as session:
         assert session.get("role") == "client"
+
+
+def connecte(client):
+    with client.session_transaction() as session:
+        return "utilisateur_id" in session
+
+
+def test_changer_mot_de_passe_deconnecte_les_autres_appareils(client):
+    se_connecter(client, "bon-mot-de-passe")
+    autre_appareil = app.test_client()
+    se_connecter(autre_appareil, "bon-mot-de-passe")
+    assert connecte(autre_appareil)
+
+    client.post("/mon-profil", data={**LIEU, "nom": "Awa", "email": "awa@exemple.sn", "telephone": "",
+                                     "mot_de_passe_actuel": "bon-mot-de-passe",
+                                     "nouveau_mot_de_passe": "nouveau-mot-de-passe"})
+    # Celui qui a changé le mot de passe reste connecté, l'autre appareil est déconnecté
+    assert client.get("/mon-profil").status_code == 200 and connecte(client)
+    page = autre_appareil.get("/mon-profil", follow_redirects=True).get_data(as_text=True)
+    assert "Ton mot de passe a été changé" in page
+    assert not connecte(autre_appareil)
+
+
+def test_connexion_repart_d_une_session_neuve(client):
+    with client.session_transaction() as session:
+        session["reinitialisation_telephone"] = "+221770000000"
+        session["langue"] = "wo"
+    se_connecter(client, "bon-mot-de-passe")
+    with client.session_transaction() as session:
+        assert "reinitialisation_telephone" not in session
+        assert session["langue"] == "wo"
+
+
+def test_entetes_de_securite(client):
+    entetes = client.get("/connexion").headers
+    assert entetes["X-Frame-Options"] == "DENY"
+    assert "object-src 'none'" in entetes["Content-Security-Policy"]

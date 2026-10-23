@@ -1,4 +1,6 @@
 """Accueil, inscription, connexion et profil."""
+import hashlib
+import hmac
 import secrets
 import time
 from datetime import date
@@ -173,19 +175,51 @@ def enregistrer_echec(connexion_bd, email):
 MESSAGE_COMPTE_SUSPENDU = "Ce compte est suspendu. Contacte l'administrateur de la plateforme."
 
 
+MESSAGE_MOT_DE_PASSE_CHANGE = "Ton mot de passe a été changé : reconnecte-toi."
+
+
+def version_session(empreinte_mot_de_passe):
+    """Empreinte du mot de passe gardée dans la session : quand le mot de passe change, les
+    sessions ouvertes ailleurs (téléphone perdu, ordinateur partagé) ne sont plus valables."""
+    return hmac.new(app.secret_key.encode(), empreinte_mot_de_passe.encode(), hashlib.sha256).hexdigest()[:32]
+
+
+def ouvrir_session(utilisateur):
+    """Nouvelle session propre (rien ne reste d'avant la connexion, sauf la langue et la page suivante)."""
+    garder = {cle: session[cle] for cle in ("langue", "suivant") if cle in session}
+    session.clear()
+    session.update(garder)
+    session["utilisateur_id"] = utilisateur["id"]
+    session["nom"] = utilisateur["nom"]
+    session["role"] = utilisateur["role"]
+    session["version"] = version_session(utilisateur["mot_de_passe"])
+
+
 @app.before_request
 def deconnecter_compte_suspendu():
-    """Un compte suspendu pendant qu'il est connecté est déconnecté à sa requête suivante."""
-    if not utilisateur_connecte() or request.endpoint in (None, "static"):
+    """Un compte suspendu ou dont le mot de passe a changé pendant qu'il est connecté
+    est déconnecté à sa requête suivante."""
+    if not utilisateur_connecte() or request.endpoint in (None, "static", "sante"):
         return None
     connexion_bd = get_connexion()
     utilisateur = connexion_bd.execute(
-        "SELECT suspendu FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)
+        "SELECT suspendu, mot_de_passe FROM utilisateurs WHERE id = ?", (session["utilisateur_id"],)
     ).fetchone()
     connexion_bd.close()
-    if utilisateur is not None and utilisateur["suspendu"]:
+    message = None
+    if utilisateur is None:
+        return None
+    if utilisateur["suspendu"]:
+        message = MESSAGE_COMPTE_SUSPENDU
+    elif "version" in session and not hmac.compare_digest(session["version"],
+                                                          version_session(utilisateur["mot_de_passe"])):
+        message = MESSAGE_MOT_DE_PASSE_CHANGE
+    if message:
+        langue = session.get("langue")
         session.clear()
-        flash(MESSAGE_COMPTE_SUSPENDU)
+        if langue:
+            session["langue"] = langue
+        flash(message)
         return redirect(url_for("connexion"))
     return None
 
@@ -220,9 +254,7 @@ def connexion():
             flash(MESSAGE_COMPTE_SUSPENDU)
             return redirect(url_for("connexion"))
 
-        session["utilisateur_id"] = utilisateur["id"]
-        session["nom"] = utilisateur["nom"]
-        session["role"] = utilisateur["role"]
+        ouvrir_session(utilisateur)
 
         suivant = session.pop("suivant", None)
         if suivant:
@@ -573,6 +605,8 @@ def mon_profil():
             flash("Un lien pour confirmer ta nouvelle adresse e-mail vient de t'être envoyé.")
         connexion_bd.close()
         session["nom"] = nom
+        # Ce téléphone reste connecté ; les autres sessions s'arrêtent si le mot de passe a changé
+        session["version"] = version_session(mot_de_passe_a_enregistrer)
         flash("Profil mis à jour avec succès.")
         return redirect(url_for("mon_profil"))
 

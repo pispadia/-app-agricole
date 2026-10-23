@@ -44,6 +44,8 @@ def entetes_de_securite(reponse):
     reponse.headers.setdefault("X-Frame-Options", "DENY")
     reponse.headers.setdefault("X-Content-Type-Options", "nosniff")
     reponse.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    # Pas de plugins (Flash, Java…), pas de balise <base> injectée pour détourner les liens
+    reponse.headers.setdefault("Content-Security-Policy", "object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
     if UTILISE_POSTGRES:  # en ligne, toujours en HTTPS
         reponse.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
     return reponse
