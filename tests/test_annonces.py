@@ -1,4 +1,5 @@
 import base64
+from datetime import date, timedelta
 
 import pytest
 
@@ -6,6 +7,9 @@ import database
 from app import app
 
 LIEU = {"pays": "SN", "region": "Dakar", "departement": "Dakar", "commune": "Yoff"}  # adresse demandée à l'inscription
+
+# Date de récolte toujours dans le futur, pour que le test ne dépende pas du jour où il tourne
+A_VENIR = (date.today() + timedelta(days=30)).isoformat()
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 20
 
@@ -20,7 +24,7 @@ def client(tmp_path, monkeypatch):
     photo = "data:image/png;base64," + base64.b64encode(PNG).decode()
     connexion.execute(
         """INSERT INTO recoltes (agriculteur_id, nom, quantite, prix, date_disponibilite, localite, photo)
-           VALUES (1, 'Mil', '100 kg', '500 FCFA / kg', '2026-11-01', 'Thiès', ?)""", (photo,))
+           VALUES (1, 'Mil', '100 kg', '500 FCFA / kg', ?, 'Thiès', ?)""", (A_VENIR, photo))
     connexion.commit()
     connexion.close()
     return app.test_client()
@@ -31,7 +35,7 @@ def test_annonce_publique_sans_compte(client):
     assert "Mil" in page and "500 FCFA / kg" in page and "Fatou" in page
     assert 'property="og:title" content="Mil — 500 FCFA / kg (Thiès)"' in page
     assert 'property="og:image" content="http://localhost/annonce/1/photo"' in page
-    assert "Créer un compte pour réserver" in page  # récolte du 01/11/2026 : à venir
+    assert "Créer un compte pour réserver" in page  # récolte à venir
     assert "f@x.sn" not in page  # aucune coordonnée
 
 

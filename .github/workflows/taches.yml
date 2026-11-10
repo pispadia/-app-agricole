@@ -24,4 +24,4 @@ jobs:
           fi
           # Le site gratuit de Render peut dormir : on laisse le temps de se réveiller et on réessaie
           curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 30 \
-            -X POST -H "Authorization: Bearer $TACHES_TOKEN" "$APP_URL/taches/quotidiennes"
+            -X POST -H "Authorization: Bearer $TACHES_TOKEN" "${APP_URL%/}/taches/quotidiennes"
